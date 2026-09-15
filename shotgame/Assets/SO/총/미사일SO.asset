@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5df1e3ee35c41ab83ae8c94771becfc, type: 3}
+  m_Name: "\uBBF8\uC0AC\uC77CSO"
+  m_EditorClassIdentifier: 
+  "\uCD1D\uC54C\uD504\uB9AC\uD339": {fileID: 8393731948003835515, guid: d5406a0f430c1b847bacfc35ea568239, type: 3}
+  "\uCD1D\uC54C\uC2A4\uD504\uB77C\uC774\uD2B8": {fileID: 4984234110176085014, guid: 4869711e73d09c54aa82229d0b5f980b, type: 3}
+  "\uCD1D\uC54C\uAC2F\uC218": 5
+  "\uACF5\uACA9\uC18D\uB3C4": 1
+  "\uCD1D\uC54C\uBC1C\uC0AC\uC18D\uB3C4": 15
+  "\uB370\uBBF8\uC9C0": 0
+  "\uC7A5\uC804\uC18D\uB3C4": 1
+  "\uBC1C\uC0AC\uB5A8\uB9BC\uAC01\uB3C4": 20
+  "\uBC1C\uC0AC\uB5A8\uB9BC\uC2DC\uAC04": 0.2
+  "\uBC1C\uC0AC\uB5A8\uB9BC\uD69F\uC218": 4
+  "\uC7A5\uC804\uC560\uB2C8\uBA54\uC774\uC158\uD504\uB9AC\uD339": {fileID: 761920100100000001, guid: 30dbb6a18123424682e2ceb9b5f428a9, type: 3}
+  "\uD0C4\uD658\uD06C\uAE30": 0.45
+  "\uD0C4\uD658\uC2DC\uAC01\uC704\uCE58\uBCF4\uC815": {x: 0, y: 0}
+  "\uD0C4\uD658\uC815\uB82C\uC21C\uC11C": 5
+  "\uD654\uBA74\uBC16\uC0AD\uC81C\uC5EC\uC720": 0.1
+  "\uD0C4\uD658\uCD5C\uB300\uC0DD\uC874\uC2DC\uAC04": 5
+  "\uD53C\uACA9\uB300\uC0C1\uB808\uC774\uC5B4":
+    serializedVersion: 2
+    m_Bits: 1280
+  "\uD53C\uACA9\uC774\uD399\uD2B8\uD504\uB9AC\uD339": {fileID: 6814746253198027461, guid: 4640f701f7b546fb94802e7ce67b87b2, type: 3}
+  "\uD53C\uACA9\uC774\uD399\uD2B8\uD06C\uAE30": 2
+  "\uD53C\uACA9\uC774\uD399\uD2B8\uC9C0\uC18D\uC2DC\uAC04": 0.45
+  "\uD53C\uACA9\uC2DC\uCD1D\uC54C\uC0AD\uC81C": 1
+  "\uBC1C\uC0AC\uB85C\uC9C1":
+    rid: 1000000000000000004
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000000000000000004
+      type: {class: MissileExplosionFireLogic, ns: , asm: Assembly-CSharp}
+      data:
+        "\uD3ED\uBC1C\uC9C0\uC5F0\uC2DC\uAC04": 2
+        "\uD3ED\uBC1C\uBC18\uACBD": 4
+        "\uD3ED\uBC1C\uB300\uC0C1\uB808\uC774\uC5B4":
+          serializedVersion: 2
+          m_Bits: 1280
+        "\uD55C\uBC1C\uC529\uC7A5\uC804": 1
+        "\uC7A5\uC804\uC0AC\uC774\uB300\uAE30\uC2DC\uAC04": 0.15

@@ -1,0 +1,10 @@
+{
+  "name": "com.shotgame.korean-inspector",
+  "version": "1.0.0",
+  "displayName": "샷게임 한글 인스펙터",
+  "description": "직렬화 필드의 C# 변수명은 유지하면서 Unity Inspector 표시 이름만 한글로 보여줍니다.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Shotgame"
+  }
+}

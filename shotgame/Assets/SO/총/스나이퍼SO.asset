@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5df1e3ee35c41ab83ae8c94771becfc, type: 3}
+  m_Name: "\uC2A4\uB098\uC774\uD37CSO"
+  m_EditorClassIdentifier: 
+  "\uCD1D\uC54C\uD504\uB9AC\uD339": {fileID: 3626274407673130031, guid: af209f0114dbb024e939ae143fe6b641, type: 3}
+  "\uCD1D\uC54C\uC2A4\uD504\uB77C\uC774\uD2B8": {fileID: 2277120358570974017, guid: 64cbbc1698089c14ba4631cd700574c3, type: 3}
+  "\uCD1D\uC54C\uAC2F\uC218": 1
+  "\uACF5\uACA9\uC18D\uB3C4": 1
+  "\uCD1D\uC54C\uBC1C\uC0AC\uC18D\uB3C4": 0
+  "\uB370\uBBF8\uC9C0": 0
+  "\uC7A5\uC804\uC18D\uB3C4": 1
+  "\uC7A5\uC804\uC560\uB2C8\uBA54\uC774\uC158\uD504\uB9AC\uD339": {fileID: 761920100100000001, guid: 30dbb6a18123424682e2ceb9b5f428a9, type: 3}
+  "\uD0C4\uD658\uD06C\uAE30": 0.2
+  "\uD0C4\uD658\uC2DC\uAC01\uC704\uCE58\uBCF4\uC815": {x: 0, y: 0}
+  "\uD0C4\uD658\uC815\uB82C\uC21C\uC11C": 5
+  "\uD654\uBA74\uBC16\uC0AD\uC81C\uC5EC\uC720": 0.1
+  "\uD0C4\uD658\uCD5C\uB300\uC0DD\uC874\uC2DC\uAC04": 5
+  "\uBC1C\uC0AC\uB85C\uC9C1":
+    rid: 1000000000000000002
+  references:
+    version: 2
+    RefIds:
+    - rid: 1000000000000000002
+      type: {class: HitscanLineFireLogic, ns: , asm: Assembly-CSharp}
+      data:
+        "\uC0AC\uAC70\uB9AC": 30
+        "\uD45C\uC2DC\uC2DC\uAC04": 1
+        "\uD398\uC774\uB4DC\uC0AC\uC6A9": 1
+        "\uD398\uC774\uB4DC\uC778\uC2DC\uAC04": 0
+        "\uD398\uC774\uB4DC\uC544\uC6C3\uC2DC\uAC04": 1
+        "\uCDA9\uB3CC\uB808\uC774\uC5B4":
+          serializedVersion: 2
+          m_Bits: 0
