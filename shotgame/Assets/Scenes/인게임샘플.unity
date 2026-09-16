@@ -925,7 +925,7 @@ PrefabInstance:
     - target: {fileID: 7306290308491871456, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
       propertyPath: "\uC2A4\uD0AC\uB370\uC774\uD130"
       value: 
-      objectReference: {fileID: 11400000, guid: aead16928a587b744aa87bce8280935f, type: 2}
+      objectReference: {fileID: 11400000, guid: 3b1006538d864b77b0a8cdb26a82cb71, type: 2}
     - target: {fileID: 8088237261403433592, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
       propertyPath: fireShakeAngle
       value: 14

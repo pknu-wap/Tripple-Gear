@@ -20,6 +20,8 @@ public sealed class DashSkillLogic : SkillLogic
     [SerializeField, KoreanLabel("잔상 색")] private Color 잔상색 = new Color(0f, 1f, 0.45f, 0.35f);
     [SerializeField, KoreanLabel("잔상 정렬 순서 보정")] private int 잔상정렬순서보정 = -1;
 
+    public override bool RequiresAimDirection => true;
+
     public override IEnumerator Execute(SkillContext context)
     {
         if (context.Owner == null || context.AimDirection.sqrMagnitude <= 0.0001f)
