@@ -6,8 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/로비.unity
+    guid: 46cf6cb646f845de968dd2453150e983
+  - enabled: 1
     path: "Assets/Scenes/\uC544\uB9AC\uC0AC\uC6C0\uC9C1\uC784.unity"
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: "Assets/Scenes/\uC778\uAC8C\uC784\uC0D8\uD50C.unity"
+    guid: 20d5800a39fc46849a10dd0b9a9827a5
+  - enabled: 1
+    path: Assets/Scenes/테스트 배틀씬.unity
+    guid: 14016c08c82b4ac18055585b3ce537bf
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
