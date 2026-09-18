@@ -1,9 +1,72 @@
 using UnityEngine;
 
+public enum CameraAreaGizmoDrawMode
+{
+    FilledAndWire,
+    WireOnly,
+    FilledOnly,
+}
+
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(-100)]
 public sealed class CameraManager : MonoBehaviour
 {
+    [System.Serializable]
+    public sealed class CameraAreaPreset
+    {
+        [SerializeField] private string areaName = "기본 영역";
+        [SerializeField] private bool useArea = true;
+        [SerializeField] private Vector2 areaMin = new Vector2(-10f, -5f);
+        [SerializeField] private Vector2 areaMax = new Vector2(10f, 5f);
+        [SerializeField] private bool drawGizmo = true;
+        [SerializeField] private CameraAreaGizmoDrawMode gizmoDrawMode = CameraAreaGizmoDrawMode.FilledAndWire;
+        [SerializeField] private Color gizmoColor = new Color(0.15f, 0.7f, 1f, 0.25f);
+
+        public CameraAreaPreset()
+        {
+        }
+
+        public CameraAreaPreset(string areaName, Vector2 areaMin, Vector2 areaMax, Color gizmoColor)
+        {
+            this.areaName = areaName;
+            this.areaMin = areaMin;
+            this.areaMax = areaMax;
+            this.gizmoColor = gizmoColor;
+        }
+
+        public string AreaName => areaName;
+        public bool UseArea => useArea;
+        public Vector2 AreaMin => GetAreaMin();
+        public Vector2 AreaMax => GetAreaMax();
+        public bool DrawGizmo => drawGizmo;
+        public CameraAreaGizmoDrawMode GizmoDrawMode => gizmoDrawMode;
+        public Color GizmoColor => gizmoColor;
+
+        public void Normalize()
+        {
+            Vector2 min = GetAreaMin();
+            Vector2 max = GetAreaMax();
+            areaMin = min;
+            areaMax = max;
+        }
+
+        private Vector2 GetAreaMin()
+        {
+            return new Vector2(
+                Mathf.Min(areaMin.x, areaMax.x),
+                Mathf.Min(areaMin.y, areaMax.y)
+            );
+        }
+
+        private Vector2 GetAreaMax()
+        {
+            return new Vector2(
+                Mathf.Max(areaMin.x, areaMax.x),
+                Mathf.Max(areaMin.y, areaMax.y)
+            );
+        }
+    }
+
     [Header("카메라")]
     [SerializeField, KoreanLabel("관리할 카메라")] private Camera managedCamera;
     [SerializeField, KoreanLabel("직교 카메라 크기"), Min(0.1f)] private float orthographicSize = 5f;
@@ -18,9 +81,18 @@ public sealed class CameraManager : MonoBehaviour
     [SerializeField, KoreanLabel("영역 최소 좌표")] private Vector2 areaMin = new Vector2(-10f, -5f);
     [SerializeField, KoreanLabel("영역 최대 좌표")] private Vector2 areaMax = new Vector2(10f, 5f);
     [SerializeField, KoreanLabel("화면 전체를 영역 안에 유지")] private bool keepWholeViewInsideArea = true;
+    [SerializeField, KoreanLabel("시작 시 목록 영역 적용")] private bool applyAreaPresetOnAwake;
+    [SerializeField, KoreanLabel("시작 카메라 영역 번호"), Min(0)] private int startingCameraAreaIndex;
+    [SerializeField, KoreanLabel("현재 카메라 영역 번호"), Min(0)] private int activeCameraAreaIndex;
+    [SerializeField, KoreanLabel("카메라 영역 목록")] private CameraAreaPreset[] cameraAreas =
+    {
+        new CameraAreaPreset("기본 영역", new Vector2(-10f, -5f), new Vector2(10f, 5f), new Color(0.15f, 0.7f, 1f, 0.25f)),
+    };
 
     [Header("기즈모")]
     [SerializeField, KoreanLabel("영역 기즈모 표시")] private bool drawAreaGizmo = true;
+    [SerializeField, KoreanLabel("모든 목록 영역 표시")] private bool drawAllCameraAreaGizmos;
+    [SerializeField, KoreanLabel("현재 영역 기즈모 모양")] private CameraAreaGizmoDrawMode currentAreaGizmoDrawMode = CameraAreaGizmoDrawMode.FilledAndWire;
     [SerializeField, KoreanLabel("영역 기즈모 색상")] private Color areaGizmoColor = new Color(0.15f, 0.7f, 1f, 0.25f);
 
     private Vector3 followVelocity;
@@ -31,6 +103,8 @@ public sealed class CameraManager : MonoBehaviour
     public bool UseCameraArea => useCameraArea;
     public Vector2 AreaMin => GetAreaMin();
     public Vector2 AreaMax => GetAreaMax();
+    public int ActiveCameraAreaIndex => activeCameraAreaIndex;
+    public int CameraAreaCount => cameraAreas != null ? cameraAreas.Length : 0;
 
     private void Reset()
     {
@@ -42,6 +116,12 @@ public sealed class CameraManager : MonoBehaviour
         FindCamera();
         ApplyCameraSize();
         NormalizeArea();
+        NormalizeCameraAreas();
+
+        if (applyAreaPresetOnAwake)
+        {
+            SetCameraAreaByIndex(startingCameraAreaIndex);
+        }
     }
 
     private void OnValidate()
@@ -50,6 +130,7 @@ public sealed class CameraManager : MonoBehaviour
         ApplyCameraSize();
         smoothTime = Mathf.Max(0f, smoothTime);
         NormalizeArea();
+        NormalizeCameraAreas();
     }
 
     private void LateUpdate()
@@ -121,6 +202,66 @@ public sealed class CameraManager : MonoBehaviour
         Vector3 min = area.min;
         Vector3 max = area.max;
         SetCameraArea(new Vector2(min.x, min.y), new Vector2(max.x, max.y));
+    }
+
+    public bool SetCameraAreaByIndex(int areaIndex)
+    {
+        if (!TryGetCameraArea(areaIndex, out CameraAreaPreset cameraArea))
+        {
+            return false;
+        }
+
+        activeCameraAreaIndex = areaIndex;
+
+        if (!cameraArea.UseArea)
+        {
+            ClearCameraArea();
+            return true;
+        }
+
+        SetCameraArea(cameraArea.AreaMin, cameraArea.AreaMax);
+        return true;
+    }
+
+    public bool SetCameraAreaByName(string areaName)
+    {
+        if (string.IsNullOrWhiteSpace(areaName) || cameraAreas == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < cameraAreas.Length; i++)
+        {
+            CameraAreaPreset cameraArea = cameraAreas[i];
+            if (cameraArea == null)
+            {
+                continue;
+            }
+
+            if (string.Equals(cameraArea.AreaName, areaName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                return SetCameraAreaByIndex(i);
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetCameraAreaBounds(int areaIndex, out Bounds bounds)
+    {
+        bounds = default;
+
+        if (!TryGetCameraArea(areaIndex, out CameraAreaPreset cameraArea) || !cameraArea.UseArea)
+        {
+            return false;
+        }
+
+        Vector2 min = cameraArea.AreaMin;
+        Vector2 max = cameraArea.AreaMax;
+        Vector3 center = new Vector3((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, 0f);
+        Vector3 size = new Vector3(max.x - min.x, max.y - min.y, 0f);
+        bounds = new Bounds(center, size);
+        return true;
     }
 
     public void ClearCameraArea()
@@ -239,6 +380,40 @@ public sealed class CameraManager : MonoBehaviour
         areaMax = max;
     }
 
+    private void NormalizeCameraAreas()
+    {
+        if (cameraAreas == null || cameraAreas.Length == 0)
+        {
+            activeCameraAreaIndex = 0;
+            startingCameraAreaIndex = 0;
+            return;
+        }
+
+        activeCameraAreaIndex = Mathf.Clamp(activeCameraAreaIndex, 0, cameraAreas.Length - 1);
+        startingCameraAreaIndex = Mathf.Clamp(startingCameraAreaIndex, 0, cameraAreas.Length - 1);
+
+        for (int i = 0; i < cameraAreas.Length; i++)
+        {
+            if (cameraAreas[i] != null)
+            {
+                cameraAreas[i].Normalize();
+            }
+        }
+    }
+
+    private bool TryGetCameraArea(int areaIndex, out CameraAreaPreset cameraArea)
+    {
+        cameraArea = null;
+
+        if (cameraAreas == null || areaIndex < 0 || areaIndex >= cameraAreas.Length)
+        {
+            return false;
+        }
+
+        cameraArea = cameraAreas[areaIndex];
+        return cameraArea != null;
+    }
+
     private Vector2 GetAreaMin()
     {
         return new Vector2(
@@ -257,21 +432,67 @@ public sealed class CameraManager : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (!drawAreaGizmo || !useCameraArea)
+        if (!drawAreaGizmo)
+        {
+            return;
+        }
+
+        if (drawAllCameraAreaGizmos && DrawCameraAreaPresetGizmos())
+        {
+            return;
+        }
+
+        if (!useCameraArea)
         {
             return;
         }
 
         Vector2 min = GetAreaMin();
         Vector2 max = GetAreaMax();
+        DrawAreaGizmo(min, max, areaGizmoColor, currentAreaGizmoDrawMode);
+    }
+
+    private bool DrawCameraAreaPresetGizmos()
+    {
+        if (cameraAreas == null || cameraAreas.Length == 0)
+        {
+            return false;
+        }
+
+        bool drewAnyArea = false;
+        for (int i = 0; i < cameraAreas.Length; i++)
+        {
+            CameraAreaPreset cameraArea = cameraAreas[i];
+            if (cameraArea == null || !cameraArea.UseArea || !cameraArea.DrawGizmo)
+            {
+                continue;
+            }
+
+            DrawAreaGizmo(cameraArea.AreaMin, cameraArea.AreaMax, cameraArea.GizmoColor, cameraArea.GizmoDrawMode);
+            drewAnyArea = true;
+        }
+
+        return drewAnyArea;
+    }
+
+    private static void DrawAreaGizmo(Vector2 min, Vector2 max, Color gizmoColor, CameraAreaGizmoDrawMode drawMode)
+    {
         Vector3 center = new Vector3((min.x + max.x) * 0.5f, (min.y + max.y) * 0.5f, 0f);
         Vector3 size = new Vector3(max.x - min.x, max.y - min.y, 0f);
 
         Color previousColor = Gizmos.color;
-        Gizmos.color = areaGizmoColor;
-        Gizmos.DrawCube(center, size);
-        Gizmos.color = new Color(areaGizmoColor.r, areaGizmoColor.g, areaGizmoColor.b, 1f);
-        Gizmos.DrawWireCube(center, size);
+        if (drawMode == CameraAreaGizmoDrawMode.FilledAndWire || drawMode == CameraAreaGizmoDrawMode.FilledOnly)
+        {
+            Gizmos.color = gizmoColor;
+            Gizmos.DrawCube(center, size);
+        }
+
+        if (drawMode == CameraAreaGizmoDrawMode.FilledAndWire || drawMode == CameraAreaGizmoDrawMode.WireOnly)
+        {
+            Gizmos.color = new Color(gizmoColor.r, gizmoColor.g, gizmoColor.b, 1f);
+            Gizmos.DrawWireCube(center, size);
+        }
+
         Gizmos.color = previousColor;
     }
 }
