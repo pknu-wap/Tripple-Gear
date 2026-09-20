@@ -105,14 +105,19 @@ public sealed class ArisaSkillController : MonoBehaviour
         }
 
         Camera cameraToUse = GetCamera();
-        if (cameraToUse == null || !TryReadMouseScreenPosition(out Vector2 mouseScreenPosition))
+        Vector3 mouseWorldPosition = transform.position;
+        Vector2 direction = Vector2.zero;
+        Vector2 mouseScreenPosition = default;
+        bool hasMouseWorldPosition = cameraToUse != null
+            && TryReadMouseScreenPosition(out mouseScreenPosition);
+
+        if (hasMouseWorldPosition)
         {
-            return false;
+            mouseWorldPosition = GetMouseWorldPosition(cameraToUse, mouseScreenPosition, transform.position.z);
+            direction = mouseWorldPosition - transform.position;
         }
 
-        Vector3 mouseWorldPosition = GetMouseWorldPosition(cameraToUse, mouseScreenPosition, transform.position.z);
-        Vector2 direction = mouseWorldPosition - transform.position;
-        if (direction.sqrMagnitude <= MinDirectionSqrMagnitude)
+        if (스킬데이터.RequiresAimDirection && (!hasMouseWorldPosition || direction.sqrMagnitude <= MinDirectionSqrMagnitude))
         {
             return false;
         }
