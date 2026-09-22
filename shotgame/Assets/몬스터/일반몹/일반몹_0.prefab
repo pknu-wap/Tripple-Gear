@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7196022087487560290}
   - component: {fileID: 7999372167492481140}
   - component: {fileID: 2153591314860720816}
+  - component: {fileID: 8622938717200000001}
   m_Layer: 10
   m_Name: "\uC77C\uBC18\uBAB9_0"
   m_TagString: Untagged
@@ -82,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -825966786882192925, guid: 471c96b211be43d44a15ea7313c0f96b, type: 3}
+  m_Sprite: {fileID: -4569816562517377100, guid: ba5ed3334201ff6438527b6b609487a7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -102,7 +103,7 @@ Animator:
   m_GameObject: {fileID: 5907560553450958761}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
+  m_Controller: {fileID: 9100000, guid: 0b478619b9644b51ba9206b7caed484a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -114,3 +115,23 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &8622938717200000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5907560553450958761}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a1c9e02d3b14e4fb8c0c8f714e4f0aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 0}
+  logWhenEnteredCamera: 1
+  cameraEnteredLogMessage: "\uC77C\uBC18\uBAB9\uC774 Main Camera \uC601\uC5ED\uC5D0 \uB4E4\uC5B4\uC654\uC2B5\uB2C8\uB2E4."
+  followTarget: {fileID: 0}
+  moveSpeed: 2
+  followYAxis: 0
+  animator: {fileID: 2153591314860720816}
+  moveController: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
