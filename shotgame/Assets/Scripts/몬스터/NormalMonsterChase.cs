@@ -19,10 +19,14 @@ public sealed class NormalMonsterChase : MonoBehaviour
     [SerializeField, KoreanLabel("이동 컨트롤러")] private RuntimeAnimatorController moveController;
 
     private bool isChasing;
+    private bool isMovementPaused;
     private SpriteRenderer spriteRenderer;
     private Vector3 baseLocalScale;
     private bool baseSpriteFlipX;
     private bool baseFacesRight;
+
+    public bool IsChasing => isChasing;
+    public bool IsMovementPaused => isMovementPaused;
 
     private void Reset()
     {
@@ -59,7 +63,44 @@ public sealed class NormalMonsterChase : MonoBehaviour
             return;
         }
 
+        if (isMovementPaused)
+        {
+            return;
+        }
+
         ChaseTarget();
+    }
+
+    public void SetFollowTarget(Transform target)
+    {
+        if (target != null)
+        {
+            followTarget = target;
+        }
+    }
+
+    public void SetMovementPaused(bool paused)
+    {
+        if (isMovementPaused == paused)
+        {
+            return;
+        }
+
+        isMovementPaused = paused;
+        if (!isMovementPaused)
+        {
+            SetAnimationController(moveController);
+        }
+    }
+
+    public void FaceTarget(Transform target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        ApplyFacing(target.position.x - transform.position.x);
     }
 
     private void StartChasing()
@@ -71,9 +112,12 @@ public sealed class NormalMonsterChase : MonoBehaviour
             Debug.Log(cameraEnteredLogMessage, this);
         }
 
-        SetAnimationController(moveController);
         TryAssignFollowTarget();
-        ChaseTarget();
+        if (!isMovementPaused)
+        {
+            SetAnimationController(moveController);
+            ChaseTarget();
+        }
     }
 
     private void ChaseTarget()
