@@ -172,7 +172,20 @@ MonoBehaviour:
   areaMin: {x: -3.3, y: -4.66}
   areaMax: {x: 50.2, y: 13.4}
   keepWholeViewInsideArea: 1
+  applyAreaPresetOnAwake: 0
+  startingCameraAreaIndex: 0
+  activeCameraAreaIndex: 0
+  cameraAreas:
+  - areaName: "\uAE30\uBCF8 \uC601\uC5ED"
+    useArea: 1
+    areaMin: {x: -10, y: -5}
+    areaMax: {x: 10, y: 5}
+    drawGizmo: 1
+    gizmoDrawMode: 0
+    gizmoColor: {r: 0.15, g: 0.7, b: 1, a: 0.25}
   drawAreaGizmo: 1
+  drawAllCameraAreaGizmos: 0
+  currentAreaGizmoDrawMode: 0
   areaGizmoColor: {r: 0.15, g: 0.7, b: 1, a: 0.25}
 --- !u!1 &377301266
 GameObject:
@@ -184,6 +197,7 @@ GameObject:
   m_Component:
   - component: {fileID: 377301267}
   - component: {fileID: 377301268}
+  - component: {fileID: 377301269}
   m_Layer: 0
   m_Name: cutscenemanager
   m_TagString: Untagged
@@ -232,6 +246,23 @@ MonoBehaviour:
   onTimelineCompleted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!320 &377301269
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377301266}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 0}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
 --- !u!1 &591702665
 GameObject:
   m_ObjectHideFlags: 0
