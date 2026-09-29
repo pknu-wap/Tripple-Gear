@@ -239,7 +239,7 @@ RectTransform:
   m_GameObject: {fileID: 2000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2101}
@@ -939,7 +939,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1316,11 +1316,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c94ce7495a4ad3b0ffb7127a4adcf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  newGameSceneName: "\uD14C\uC2A4\uD2B8 \uBC30\uD2C0\uC52C"
-  newGameButton: {fileID: 0}
-  loadGameButton: {fileID: 0}
-  optionsButton: {fileID: 0}
-  quitButton: {fileID: 0}
+  newGameSceneName: "\uC2DC\uB124\uB9C8\uD2F1\uC0D8\uD50C"
+  newGameButton: {fileID: 2304}
+  loadGameButton: {fileID: 2404}
+  optionsButton: {fileID: 2504}
+  quitButton: {fileID: 2604}
 --- !u!1 &4000
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,11 +1,11 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class LobbyMenuController : MonoBehaviour
 {
-    [SerializeField] private string newGameSceneName = "테스트 배틀씬";
+    [SerializeField] private string newGameSceneName = "시네마틱샘플";
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button loadGameButton;
     [SerializeField] private Button optionsButton;

@@ -219,7 +219,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFlowController
   introTimeline: {fileID: 1748739689}
-  startButton: {fileID: 2000000014}
+  autoStartOnSceneLoad: 1
+  startButton: {fileID: 0}
   hideStartButtonOnPlay: 1
   completeWhenLastAnimationClipEnds: 1
   onlyCompleteWhenReachedEnd: 1
@@ -766,7 +767,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2000000002
 RectTransform:
   m_ObjectHideFlags: 0
