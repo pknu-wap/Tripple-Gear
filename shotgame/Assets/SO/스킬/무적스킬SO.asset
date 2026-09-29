@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14ab80fb5784be58dcf2b2c756df253, type: 3}
+  m_Name: "\uBB34\uC801\uC2A4\uD0ACSO"
+  m_EditorClassIdentifier: Assembly-CSharp::SkillSO
+  "\uC0AC\uC6A9\uAC00\uB2A5\uD69F\uC218": 1
+  "\uCFE8\uD0C0\uC784": 1
+  "\uC2A4\uD0AC\uC911\uBB34\uC801": 1
+  "\uC2A4\uD0AC\uB85C\uC9C1":
+    rid: 6595227308055330904
+  references:
+    version: 2
+    RefIds:
+    - rid: 6595227308055330904
+      type: {class: InvincibleSkillLogic, ns: , asm: Assembly-CSharp}
+      data:
+        "\uC9C0\uC18D\uC2DC\uAC04": 3
+        "\uD6A8\uACFC\uD504\uB9AC\uD339": {fileID: 4711838197355879232, guid: 6e6d9db3394aae945b11e98b9b9aab8c, type: 3}
+        "\uD504\uB9AC\uD339\uD06C\uAE30": 3

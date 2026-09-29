@@ -106,6 +106,20 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return hasMouseScreenPosition;
     }
 
+    public void TeleportTo(Vector3 position)
+    {
+        transform.position = position;
+        groundY = position.y;
+        currentHorizontalSpeed = 0f;
+        verticalSpeed = 0f;
+        isGrounded = true;
+        isCrouching = false;
+        isCoasting = false;
+        wasCoasting = false;
+        ApplyStanceCollider();
+        Physics2D.SyncTransforms();
+    }
+
     private void Reset()
     {
         FindReferences();
