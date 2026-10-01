@@ -10,6 +10,7 @@ public sealed class GameFlowController : MonoBehaviour
 {
     [Header("게임 시작")]
     [SerializeField, KoreanLabel("인트로 타임라인")] private PlayableDirector introTimeline;
+    [SerializeField, KoreanLabel("씬 시작 시 자동 재생")] private bool autoStartOnSceneLoad;
     [SerializeField, KoreanLabel("게임 시작 버튼")] private Button startButton;
     [SerializeField, KoreanLabel("재생하면 버튼 숨기기")] private bool hideStartButtonOnPlay = true;
 
@@ -54,6 +55,14 @@ public sealed class GameFlowController : MonoBehaviour
         if (startButton != null)
         {
             startButton.onClick.AddListener(StartGame);
+        }
+    }
+
+    private void Start()
+    {
+        if (autoStartOnSceneLoad)
+        {
+            StartGame();
         }
     }
 
@@ -362,7 +371,7 @@ public sealed class GameFlowController : MonoBehaviour
             introTimeline = FindTimelineInScene();
         }
 
-        if (startButton == null)
+        if (!autoStartOnSceneLoad && startButton == null)
         {
             startButton = GetComponentInChildren<Button>(true);
         }
