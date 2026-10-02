@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(Animator))]
 public sealed class NormalMonsterAttack : MonoBehaviour
 {
+    private const int DamagePerAttack = 1;
+
     [Header("연결")]
     [SerializeField, KoreanLabel("추적 컴포넌트")] private NormalMonsterChase chase;
     [SerializeField, KoreanLabel("애니메이터")] private Animator animator;
@@ -13,7 +15,6 @@ public sealed class NormalMonsterAttack : MonoBehaviour
     [SerializeField, KoreanLabel("공격 컨트롤러")] private RuntimeAnimatorController attackController;
     [SerializeField, KoreanLabel("첫 공격 지연"), Min(0f)] private float firstAttackDelay = 0.4f;
     [SerializeField, KoreanLabel("공격 간격"), Min(0.1f)] private float attackInterval = 2f;
-    [SerializeField, KoreanLabel("공격 데미지"), Min(0)] private int attackDamage = 1;
     [SerializeField, KoreanLabel("피격 로그 메시지")] private string playerHitLogMessage = "플레이어가 일반몹 공격에 맞았습니다.";
 
     private ArisaHealth touchingPlayerHealth;
@@ -38,7 +39,6 @@ public sealed class NormalMonsterAttack : MonoBehaviour
     {
         firstAttackDelay = Mathf.Max(0f, firstAttackDelay);
         attackInterval = Mathf.Max(0.1f, attackInterval);
-        attackDamage = Mathf.Max(0, attackDamage);
 
         if (!Application.isPlaying)
         {
@@ -134,11 +134,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
         }
 
         EnterAttackState();
-
-        if (attackDamage > 0)
-        {
-            touchingPlayerHealth.TakeDamage(attackDamage);
-        }
+        touchingPlayerHealth.TakeDamage(DamagePerAttack);
 
         Debug.Log(playerHitLogMessage, touchingPlayerHealth);
         nextAttackTime = Time.time + attackInterval;

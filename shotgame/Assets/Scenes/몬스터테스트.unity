@@ -172,7 +172,20 @@ MonoBehaviour:
   areaMin: {x: -3.3, y: -4.66}
   areaMax: {x: 50.2, y: 13.4}
   keepWholeViewInsideArea: 1
+  applyAreaPresetOnAwake: 0
+  startingCameraAreaIndex: 0
+  activeCameraAreaIndex: 0
+  cameraAreas:
+  - areaName: "\uAE30\uBCF8 \uC601\uC5ED"
+    useArea: 1
+    areaMin: {x: -10, y: -5}
+    areaMax: {x: 10, y: 5}
+    drawGizmo: 1
+    gizmoDrawMode: 0
+    gizmoColor: {r: 0.15, g: 0.7, b: 1, a: 0.25}
   drawAreaGizmo: 1
+  drawAllCameraAreaGizmos: 0
+  currentAreaGizmoDrawMode: 0
   areaGizmoColor: {r: 0.15, g: 0.7, b: 1, a: 0.25}
 --- !u!1 &591702665
 GameObject:
@@ -546,7 +559,7 @@ Transform:
   m_GameObject: {fileID: 1377373890}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.13, y: -1.04, z: 0.000000002006998}
+  m_LocalPosition: {x: 33.13, y: -1.13, z: 0.000000002006998}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -562,8 +575,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5a1c9e02d3b14e4fb8c0c8f714e4f0aa, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: ""
+  m_Name: 
+  m_EditorClassIdentifier: 
   targetCamera: {fileID: 591702667}
   logWhenEnteredCamera: 1
   cameraEnteredLogMessage: "\uC77C\uBC18\uBAB9\uC774 Main Camera \uC601\uC5ED\uC5D0
@@ -573,25 +586,6 @@ MonoBehaviour:
   followYAxis: 0
   animator: {fileID: 1377373891}
   moveController: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
---- !u!114 &1377373897
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1377373890}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9d7c3a7f5b94609a3d0b4a1c2e8f679, type: 3}
-  m_Name: ""
-  m_EditorClassIdentifier: ""
-  chase: {fileID: 1377373894}
-  animator: {fileID: 1377373891}
-  attackController: {fileID: 9100000, guid: d9614ad9ff604eb89f80973f136dcd86, type: 2}
-  firstAttackDelay: 0.4
-  attackInterval: 2
-  attackDamage: 1
-  playerHitLogMessage: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uBC18\uBAB9 \uACF5\uACA9\uC5D0 \uB9DE\uC558\uC2B5\uB2C8\uB2E4."
 --- !u!61 &1377373895
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -665,6 +659,25 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!114 &1377373897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377373890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9d7c3a7f5b94609a3d0b4a1c2e8f679, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chase: {fileID: 1377373894}
+  animator: {fileID: 1377373891}
+  attackController: {fileID: 9100000, guid: d9614ad9ff604eb89f80973f136dcd86, type: 2}
+  firstAttackDelay: 0.4
+  attackInterval: 2
+  playerHitLogMessage: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uBC18\uBAB9 \uACF5\uACA9\uC5D0
+    \uB9DE\uC558\uC2B5\uB2C8\uB2E4."
 --- !u!4 &1698246298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6907662365546511685, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
