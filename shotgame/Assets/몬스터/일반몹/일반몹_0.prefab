@@ -228,5 +228,4 @@ MonoBehaviour:
   attackController: {fileID: 9100000, guid: d9614ad9ff604eb89f80973f136dcd86, type: 2}
   firstAttackDelay: 0.4
   attackInterval: 2
-  attackDamage: 1
   playerHitLogMessage: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uBC18\uBAB9 \uACF5\uACA9\uC5D0 \uB9DE\uC558\uC2B5\uB2C8\uB2E4."
