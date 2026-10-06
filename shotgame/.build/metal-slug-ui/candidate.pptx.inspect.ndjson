@@ -1,0 +1,71 @@
+{"kind":"deck","id":"pr/9yocqe","name":"Deck"}
+{"kind":"layout","layoutId":"60b4dcd6-3e28-477b-b39e-cdc80f75820b","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"86f28a38-0ad6-4568-8f23-097a38a0cb40","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/vmvt4x","slide":1,"title":"게임 UI 기초 · 발표","textShapes":5}
+{"kind":"textbox","id":"sh/7u1s32x8","slide":1,"text":"게임 UI 기초 · 발표","textPreview":"게임 UI 기초 · 발표","textChars":13,"textLines":1,"bbox":[72,66,700,34]}
+{"kind":"textbox","id":"sh/sva9w7et","slide":1,"text":"메탈슬러그 2로 배우는\n게임 HUD와 상호작용","textPreview":"메탈슬러그 2로 배우는 | 게임 HUD와 상호작용","textChars":25,"textLines":2,"bbox":[72,152,770,178]}
+{"kind":"textbox","id":"sh/twja5cfe","slide":1,"text":"화면에 보이는 정보는\n게임 안에서 어떻게 바뀔까?","textPreview":"화면에 보이는 정보는 | 게임 안에서 어떻게 바뀔까?","textChars":27,"textLines":2,"bbox":[76,374,600,86]}
+{"kind":"shape","id":"sh/ipsrqxgr","slide":1,"bbox":[76,497,520,0]}
+{"kind":"textbox","id":"sh/jq1sz2xw","slide":1,"text":"HUD 읽기   →   정보 배치   →   값이 바뀌는 흐름   →   우리 프로젝트","textPreview":"HUD 읽기   →   정보 배치   →   값이 바뀌는 흐름   →   우리 프로젝트","textChars":48,"textLines":1,"bbox":[76,522,1050,46]}
+{"kind":"textbox","id":"sh/kra9s7eh","slide":1,"text":"초보자용 · 5장","textPreview":"초보자용 · 5장","textChars":9,"textLines":1,"bbox":[76,636,500,30]}
+{"kind":"notes","id":"nt/vmvt4x","slide":1,"text":"안녕하세요. 오늘은 메탈슬러그 2 화면을 예시로 게임 UI를 살펴보겠습니다. 게임 UI는 점수나 탄약처럼 정보를 보여주고, 입력을 받기도 합니다. 플레이 중 계속 보이는 정보 영역을 HUD라고 부릅니다. 오늘은 HUD를 읽고, 정보가 어떻게 바뀌는지 확인한 뒤 우리 프로젝트의 총알 UI와 연결해 보겠습니다.\n\n참고 영상: https://www.youtube.com/watch?v=-dpxG5J2CGg&t=1s"}
+{"kind":"slide","id":"sl/2967vv","slide":2,"title":"게임 UI 기초","textShapes":7}
+{"kind":"textbox","id":"sh/8ja5cbqt","slide":2,"text":"게임 UI 기초","textPreview":"게임 UI 기초","textChars":8,"textLines":1,"bbox":[64,32,540,28]}
+{"kind":"textbox","id":"sh/7i14j6p8","slide":2,"text":"메탈슬러그 2의 HUD 구성","textPreview":"메탈슬러그 2의 HUD 구성","textChars":15,"textLines":1,"bbox":[64,72,1152,62]}
+{"kind":"shape","id":"sh/6hsna18n","slide":2,"bbox":[64,147,1152,0]}
+{"kind":"textbox","id":"sh/h83mpg7a","slide":2,"text":"METAL SLUG 2  ·  02 / 05","textPreview":"METAL SLUG 2  ·  02 / 05","textChars":24,"textLines":1,"bbox":[64,675,1152,22]}
+{"kind":"textbox","id":"sh/vm14n6p4","slide":2,"text":"게임 화면의 정보","textPreview":"게임 화면의 정보","textChars":9,"textLines":1,"bbox":[822,178,392,32]}
+{"kind":"textbox","id":"sh/ulsnel8j","slide":2,"text":"1,106,961  점수\n1UP = 2  남은 목숨\nARMS 30  현재 무기 탄약\nBOMB 29  폭탄 수\n57  스테이지 타이머\nLEVEL-4 · CREDIT 0  진행·크레딧","textPreview":"1,106,961  점수 | 1UP = 2  남은 목숨 | ARMS 30  현재 무기 탄약 | BOMB 29  폭탄 수 | 57  스테이지 타이머 | LEVEL-4 · CREDIT 0  진행·크레딧","textChars":100,"textLines":6,"bbox":[822,222,400,238]}
+{"kind":"textbox","id":"sh/5c36t076","slide":2,"text":"화면 오른쪽의 웹캠·초록 시계와 아래 자막·재생 버튼은 영상 플레이어 요소입니다.","textPreview":"화면 오른쪽의 웹캠·초록 시계와 아래 자막·재생 버튼은 영상 플레이어 요소입니다.","textChars":45,"textLines":1,"bbox":[822,488,380,86]}
+{"kind":"textbox","id":"sh/4bu5kv6l","slide":2,"text":"숫자 57은 탄약이 아니라 시간입니다.","textPreview":"숫자 57은 탄약이 아니라 시간입니다.","textChars":21,"textLines":1,"bbox":[822,598,380,30]}
+{"kind":"image","id":"im/h8fupwbm","slide":2,"name":"","alt":"메탈슬러그 2 플레이 영상 화면과 HUD. 오른쪽은 영상의 웹캠과 오버레이.","bbox":[64,174,716,402]}
+{"kind":"notes","id":"nt/2967vv","slide":2,"text":"이미지 위쪽의 점수는 플레이 성과를 보여줍니다. 1UP 옆의 2는 남은 목숨 정보이고, ARMS 30은 현재 무기의 탄약, BOMB 29는 폭탄 수입니다. 크게 보이는 57은 탄약이 아니라 스테이지 타이머입니다. 아래 LEVEL-4와 CREDIT 0은 스테이지와 아케이드 크레딧 정보입니다. 오른쪽의 웹캠과 초록색 시계, 자막과 재생 버튼은 게임이 아니라 영상 플레이어에 속합니다.\n\n자료: SNK, Metal Slug 2 관련 자료 https://game.snk-corp.co.jp/press/pdf/130207_01.pdf"}
+{"kind":"slide","id":"sl/rhmdu5","slide":3,"title":"게임 UI 기초","textShapes":8}
+{"kind":"textbox","id":"sh/hgbupw3q","slide":3,"text":"게임 UI 기초","textPreview":"게임 UI 기초","textChars":8,"textLines":1,"bbox":[64,32,540,28]}
+{"kind":"textbox","id":"sh/ud0ve14f","slide":3,"text":"HUD는 빠르게 읽히도록 배치됩니다","textPreview":"HUD는 빠르게 읽히도록 배치됩니다","textChars":19,"textLines":1,"bbox":[64,72,1152,62]}
+{"kind":"shape","id":"sh/fe9cnml0","slide":3,"bbox":[64,147,1152,0]}
+{"kind":"textbox","id":"sh/4j2dkbmh","slide":3,"text":"METAL SLUG 2  ·  03 / 05","textPreview":"METAL SLUG 2  ·  03 / 05","textChars":24,"textLines":1,"bbox":[64,675,1152,22]}
+{"kind":"textbox","id":"sh/pkbutg32","slide":3,"text":"먼저 확인하는 정보","textPreview":"먼저 확인하는 정보","textChars":10,"textLines":1,"bbox":[86,198,440,40]}
+{"kind":"textbox","id":"sh/2hkvi14b","slide":3,"text":"점수 · 목숨 · 탄약 · 폭탄\n\n전투 중 자주 확인하는 값은\n화면 위쪽에 모여 있습니다.","textPreview":"점수 · 목숨 · 탄약 · 폭탄 |  | 전투 중 자주 확인하는 값은 | 화면 위쪽에 모여 있습니다.","textChars":50,"textLines":4,"bbox":[86,264,470,188]}
+{"kind":"shape","id":"sh/3itcr6lw","slide":3,"bbox":[622,196,0,340]}
+{"kind":"textbox","id":"sh/c72dobmd","slide":3,"text":"쉽게 구분하는 방법","textPreview":"쉽게 구분하는 방법","textChars":10,"textLines":1,"bbox":[690,198,480,40]}
+{"kind":"textbox","id":"sh/d8vexg3y","slide":3,"text":"짧은 이름 + 숫자\n\n밝은 글자와 테두리로\n배경과 구별합니다.\n\n전투 장면은 가리지 않게 둡니다.","textPreview":"짧은 이름 + 숫자 |  | 밝은 글자와 테두리로 | 배경과 구별합니다. |  | 전투 장면은 가리지 않게 둡니다.","textChars":54,"textLines":6,"bbox":[690,264,500,246]}
+{"kind":"textbox","id":"sh/9wv2hkv2","slide":3,"text":"UI를 볼 때: 무엇을 보여 주나? 어디에 놓였나? 한눈에 읽히나?","textPreview":"UI를 볼 때: 무엇을 보여 주나? 어디에 놓였나? 한눈에 읽히나?","textChars":37,"textLines":1,"bbox":[86,586,1100,44]}
+{"kind":"notes","id":"nt/rhmdu5","slide":3,"text":"전투 중에는 화면을 계속 읽을 시간이 많지 않기 때문에 중요한 정보가 빨리 보여야 합니다. 메탈슬러그 2에서는 점수와 목숨, 탄약처럼 자주 확인하는 항목이 화면 위쪽에 모여 있습니다. 짧은 이름과 숫자를 쓰고, 밝은 글자와 테두리로 복잡한 배경에서도 알아보기 쉽게 합니다. 화면을 읽을 때는 무엇을 보여주는지, 어디에 있는지, 한눈에 구별되는지를 생각하면 됩니다.\n\n참고: Unity Canvas Scaler 문서 https://docs.unity3d.com/cn/2018.3/Manual/script-CanvasScaler.html"}
+{"kind":"slide","id":"sl/8v0dzw","slide":4,"title":"게임 UI 기초","textShapes":17}
+{"kind":"textbox","id":"sh/h47m9sne","slide":4,"text":"게임 UI 기초","textPreview":"게임 UI 기초","textChars":8,"textLines":1,"bbox":[64,32,540,28]}
+{"kind":"textbox","id":"sh/u1g3ed43","slide":4,"text":"게임 상태가 바뀌면 HUD도 바뀝니다","textPreview":"게임 상태가 바뀌면 HUD도 바뀝니다","textChars":20,"textLines":1,"bbox":[64,72,1152,62]}
+{"kind":"shape","id":"sh/f2pk7i5o","slide":4,"bbox":[64,147,1152,0]}
+{"kind":"textbox","id":"sh/szylc3mx","slide":4,"text":"METAL SLUG 2  ·  04 / 05","textPreview":"METAL SLUG 2  ·  04 / 05","textChars":24,"textLines":1,"bbox":[64,675,1152,22]}
+{"kind":"textbox","id":"sh/t07258ni","slide":4,"text":"총 발사","textPreview":"총 발사","textChars":4,"textLines":1,"bbox":[70,262,226,46]}
+{"kind":"textbox","id":"sh/6xw3at4r","slide":4,"text":"플레이어 입력","textPreview":"플레이어 입력","textChars":7,"textLines":1,"bbox":[70,314,226,35]}
+{"kind":"textbox","id":"sh/7ypk3y5c","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[314,269,48,44]}
+{"kind":"textbox","id":"sh/kbel8361","slide":4,"text":"탄약 감소","textPreview":"탄약 감소","textChars":5,"textLines":1,"bbox":[374,262,226,46]}
+{"kind":"textbox","id":"sh/5cn218nm","slide":4,"text":"게임 값 변경","textPreview":"게임 값 변경","textChars":7,"textLines":1,"bbox":[374,314,226,35]}
+{"kind":"textbox","id":"sh/9svi9wvm","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[618,269,48,44]}
+{"kind":"textbox","id":"sh/8rmhgbu1","slide":4,"text":"UI가 값 읽기","textPreview":"UI가 값 읽기","textChars":8,"textLines":1,"bbox":[678,262,226,46]}
+{"kind":"textbox","id":"sh/nqd076dg","slide":4,"text":"현재 값 확인","textPreview":"현재 값 확인","textChars":7,"textLines":1,"bbox":[678,314,226,35]}
+{"kind":"textbox","id":"sh/mp4ze1cv","slide":4,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[922,269,48,44]}
+{"kind":"textbox","id":"sh/lovi5wvq","slide":4,"text":"숫자 갱신","textPreview":"숫자 갱신","textChars":5,"textLines":1,"bbox":[982,262,226,46]}
+{"kind":"textbox","id":"sh/03mhcru5","slide":4,"text":"화면에 표시","textPreview":"화면에 표시","textChars":6,"textLines":1,"bbox":[982,314,226,35]}
+{"kind":"shape","id":"sh/z2d03mdk","slide":4,"bbox":[82,390,1116,0]}
+{"kind":"textbox","id":"sh/y1kzahcz","slide":4,"text":"장전 완료 · 탄약 아이템 획득","textPreview":"장전 완료 · 탄약 아이템 획득","textChars":17,"textLines":1,"bbox":[82,432,500,42]}
+{"kind":"textbox","id":"sh/d0bi1cve","slide":4,"text":"새 게임 값이 만들어지면 HUD가 그 값을 다시 보여 줍니다.","textPreview":"새 게임 값이 만들어지면 HUD가 그 값을 다시 보여 줍니다.","textChars":34,"textLines":1,"bbox":[82,486,1100,44]}
+{"kind":"textbox","id":"sh/cz2h8ret","slide":4,"text":"상호작용은 버튼 클릭뿐 아니라 입력과 게임 상태 변화가 화면에 반영되는 과정도 포함합니다.","textPreview":"상호작용은 버튼 클릭뿐 아니라 입력과 게임 상태 변화가 화면에 반영되는 과정도 포함합니다.","textChars":50,"textLines":1,"bbox":[82,576,1090,48]}
+{"kind":"notes","id":"nt/8v0dzw","slide":4,"text":"UI의 상호작용은 버튼을 누르는 것만 뜻하지 않습니다. 게임에서 어떤 일이 생겨 값이 바뀌고, 그 결과를 화면에 표시하는 과정도 상호작용입니다. 총을 한 발 쏘면 현재 탄약이 줄고, HUD는 바뀐 값을 읽어 숫자를 새로 보여줍니다. 장전이 끝나거나 탄약 아이템을 얻으면 게임 값이 변하고 UI 숫자도 그에 맞춰 바뀝니다."}
+{"kind":"slide","id":"sl/pfy3pc","slide":5,"title":"게임 UI 기초","textShapes":12}
+{"kind":"textbox","id":"sh/jyxwj21o","slide":5,"text":"게임 UI 기초","textPreview":"게임 UI 기초","textChars":8,"textLines":1,"bbox":[64,32,540,28]}
+{"kind":"textbox","id":"sh/kz6ds729","slide":5,"text":"우리 프로젝트의 총알 UI","textPreview":"우리 프로젝트의 총알 UI","textChars":14,"textLines":1,"bbox":[64,72,1152,62]}
+{"kind":"shape","id":"sh/50felcju","slide":5,"bbox":[64,147,1152,0]}
+{"kind":"textbox","id":"sh/a94vmdk7","slide":5,"text":"METAL SLUG 2  ·  05 / 05","textPreview":"METAL SLUG 2  ·  05 / 05","textChars":24,"textLines":1,"bbox":[64,675,1152,22]}
+{"kind":"textbox","id":"sh/vadwfi1s","slide":5,"text":"SubmachineGunFire","textPreview":"SubmachineGunFire","textChars":17,"textLines":1,"bbox":[82,196,420,48]}
+{"kind":"textbox","id":"sh/wbmdon2d","slide":5,"text":"현재 탄약과 최대 탄약을 관리","textPreview":"현재 탄약과 최대 탄약을 관리","textChars":16,"textLines":1,"bbox":[82,250,500,46]}
+{"kind":"textbox","id":"sh/xcfehsjy","slide":5,"text":"BulletUIController","textPreview":"BulletUIController","textChars":18,"textLines":1,"bbox":[82,346,420,48]}
+{"kind":"textbox","id":"sh/u58fyhkb","slide":5,"text":"총의 값을 읽어 TextMeshPro 갱신","textPreview":"총의 값을 읽어 TextMeshPro 갱신","textChars":23,"textLines":1,"bbox":[82,400,510,46]}
+{"kind":"shape","id":"sh/f6hwrm1w","slide":5,"bbox":[650,204,0,268]}
+{"kind":"textbox","id":"sh/fyh0fetw","slide":5,"text":"표시 예시","textPreview":"표시 예시","textChars":5,"textLines":1,"bbox":[720,226,400,36]}
+{"kind":"textbox","id":"sh/ex8zm9sb","slide":5,"text":"29 / 30","textPreview":"29 / 30","textChars":7,"textLines":1,"bbox":[720,286,434,100]}
+{"kind":"textbox","id":"sh/10zihob2","slide":5,"text":"현재 / 최대","textPreview":"현재 / 최대","textChars":7,"textLines":1,"bbox":[720,392,400,34]}
+{"kind":"textbox","id":"sh/0zqhojah","slide":5,"text":"총이 실제로 쓰는 탄약 값을 UI가 그대로 보여 줍니다.","textPreview":"총이 실제로 쓰는 탄약 값을 UI가 그대로 보여 줍니다.","textChars":31,"textLines":1,"bbox":[82,514,1100,44]}
+{"kind":"textbox","id":"sh/n210jet8","slide":5,"text":"무엇을 보여 주나?  ·  언제 바뀌나?  ·  쉽게 읽히나?","textPreview":"무엇을 보여 주나?  ·  언제 바뀌나?  ·  쉽게 읽히나?","textChars":34,"textLines":1,"bbox":[82,586,1090,38]}
+{"kind":"notes","id":"nt/pfy3pc","slide":5,"text":"우리 프로젝트도 같은 원리로 연결할 수 있습니다. SubmachineGunFire가 총의 현재 탄약과 최대 탄약을 관리하고, BulletUIController가 그 값을 읽어 TextMeshPro에 표시합니다. 현재 탄약이 29발이고 최대가 30발이면 화면에 29 / 30이라고 보입니다. 총이 실제로 사용하는 값을 표시하면 UI 숫자와 게임 상태를 따로 관리할 필요가 없습니다. 오늘 내용을 정리하면 무엇을 보여주는지, 어떤 상황에서 바뀌는지, 화면에서 쉽게 읽히는지 세 가지를 확인하면 됩니다. 감사합니다."}
