@@ -10,7 +10,7 @@ public sealed class GameFlowController : MonoBehaviour
 {
     [Header("게임 시작")]
     [SerializeField, KoreanLabel("인트로 타임라인")] private PlayableDirector introTimeline;
-    [SerializeField, KoreanLabel("씬 시작 시 자동 재생")] private bool autoStartOnSceneLoad;
+    [SerializeField, KoreanLabel("컷신 시작 신호 씬")] private string cutsceneSignalSourceSceneName = "로비";
     [SerializeField, KoreanLabel("게임 시작 버튼")] private Button startButton;
     [SerializeField, KoreanLabel("재생하면 버튼 숨기기")] private bool hideStartButtonOnPlay = true;
 
@@ -28,6 +28,7 @@ public sealed class GameFlowController : MonoBehaviour
     private readonly List<Animator> animatorsToFreeze = new List<Animator>();
 
     private double completionTime = -1d;
+    private bool hasCutsceneStartSignal;
     private bool isTimelinePlaying;
     private bool isTimelineCompleted;
 
@@ -60,8 +61,10 @@ public sealed class GameFlowController : MonoBehaviour
 
     private void Start()
     {
-        if (autoStartOnSceneLoad)
+        string currentSceneName = gameObject.scene.name;
+        if (SceneTransitionSignalReceiver.TryConsumeSceneTransition(cutsceneSignalSourceSceneName, currentSceneName))
         {
+            hasCutsceneStartSignal = true;
             StartGame();
         }
     }
@@ -91,6 +94,12 @@ public sealed class GameFlowController : MonoBehaviour
 
     public void StartGame()
     {
+        if (!hasCutsceneStartSignal)
+        {
+            Debug.Log("로비의 새게임 신호가 없어 컷신을 재생하지 않습니다.", this);
+            return;
+        }
+
         if (isTimelinePlaying)
         {
             return;
@@ -104,6 +113,7 @@ public sealed class GameFlowController : MonoBehaviour
             return;
         }
 
+        hasCutsceneStartSignal = false;
         CacheAnimatorsToFreeze();
         SetAnimatorsEnabled(true);
         completionTime = GetCompletionTime();
@@ -371,7 +381,7 @@ public sealed class GameFlowController : MonoBehaviour
             introTimeline = FindTimelineInScene();
         }
 
-        if (!autoStartOnSceneLoad && startButton == null)
+        if (startButton == null)
         {
             startButton = GetComponentInChildren<Button>(true);
         }
