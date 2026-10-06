@@ -197,7 +197,6 @@ GameObject:
   m_Component:
   - component: {fileID: 377301267}
   - component: {fileID: 377301268}
-  - component: {fileID: 377301269}
   m_Layer: 0
   m_Name: cutscenemanager
   m_TagString: Untagged
@@ -233,7 +232,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameFlowController
   introTimeline: {fileID: 1748739689}
-  autoStartOnSceneLoad: 1
+  cutsceneSignalSourceSceneName: "\uB85C\uBE44"
   startButton: {fileID: 0}
   hideStartButtonOnPlay: 1
   completeWhenLastAnimationClipEnds: 1
@@ -246,29 +245,6 @@ MonoBehaviour:
   onTimelineCompleted:
     m_PersistentCalls:
       m_Calls: []
---- !u!320 &377301269
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 377301266}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: cf0fd40a8df86a343bd39697d03aa728, type: 2}
-  m_InitialState: 1
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: -1558189952636261648, guid: cf0fd40a8df86a343bd39697d03aa728, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: -6025458375032136532, guid: cf0fd40a8df86a343bd39697d03aa728, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: 1935437470600470699, guid: cf0fd40a8df86a343bd39697d03aa728, type: 2}
-    value: {fileID: 0}
-  m_ExposedReferences:
-    m_References: []
 --- !u!1 &591702665
 GameObject:
   m_ObjectHideFlags: 0
