@@ -44,15 +44,7 @@ public sealed class SceneTransitionSignalReceiver : MonoBehaviour
 
     public static void NotifySceneTransition(string fromSceneName, string toSceneName)
     {
-        SceneTransitionSignalReceiver receiver = Instance;
-        if (receiver == null)
-        {
-#if UNITY_2023_1_OR_NEWER || UNITY_6000_0_OR_NEWER
-            receiver = FindFirstObjectByType<SceneTransitionSignalReceiver>();
-#else
-            receiver = FindObjectOfType<SceneTransitionSignalReceiver>();
-#endif
-        }
+        SceneTransitionSignalReceiver receiver = FindReceiver();
 
         if (receiver == null)
         {
@@ -63,6 +55,28 @@ public sealed class SceneTransitionSignalReceiver : MonoBehaviour
         receiver.ReceiveSceneTransition(fromSceneName, toSceneName);
     }
 
+    public static bool TryConsumeSceneTransition(string expectedFromSceneName, string expectedToSceneName)
+    {
+        SceneTransitionSignalReceiver receiver = FindReceiver();
+        if (receiver == null || !receiver.HasReceivedTransitionSignal)
+        {
+            return false;
+        }
+
+        bool matches = string.Equals(receiver.LastFromSceneName, expectedFromSceneName, System.StringComparison.Ordinal)
+            && string.Equals(receiver.LastToSceneName, expectedToSceneName, System.StringComparison.Ordinal);
+
+        if (!matches)
+        {
+            return false;
+        }
+
+        receiver.HasReceivedTransitionSignal = false;
+        receiver.LastFromSceneName = null;
+        receiver.LastToSceneName = null;
+        return true;
+    }
+
     public void ReceiveSceneTransition(string fromSceneName, string toSceneName)
     {
         LastFromSceneName = fromSceneName;
@@ -71,5 +85,19 @@ public sealed class SceneTransitionSignalReceiver : MonoBehaviour
 
         Debug.Log($"씬 전환 신호 수신: {fromSceneName} -> {toSceneName}", this);
         sceneTransitioned?.Invoke(fromSceneName, toSceneName);
+    }
+
+    private static SceneTransitionSignalReceiver FindReceiver()
+    {
+        if (Instance != null)
+        {
+            return Instance;
+        }
+
+#if UNITY_2023_1_OR_NEWER || UNITY_6000_0_OR_NEWER
+        return FindFirstObjectByType<SceneTransitionSignalReceiver>();
+#else
+        return FindObjectOfType<SceneTransitionSignalReceiver>();
+#endif
     }
 }
