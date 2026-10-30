@@ -2,6 +2,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(MonsterHealth))]
 public sealed class NormalMonsterChase : MonoBehaviour
 {
     [Header("감지")]
@@ -11,8 +12,6 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     [Header("추적")]
     [SerializeField, KoreanLabel("플레이어")] private Transform followTarget;
-    [SerializeField, KoreanLabel("이동 속도"), Min(0f)] private float moveSpeed = 2f;
-    [SerializeField, KoreanLabel("Y축 추적")] private bool followYAxis;
 
     [Header("그래픽")]
     [SerializeField, KoreanLabel("애니메이터")] private Animator animator;
@@ -24,6 +23,9 @@ public sealed class NormalMonsterChase : MonoBehaviour
     private Vector3 baseLocalScale;
     private bool baseSpriteFlipX;
     private bool baseFacesRight;
+    private MonsterHealth health;
+
+    private MonsterSO MonsterData => health != null ? health.Data : null;
 
     public bool IsChasing => isChasing;
     public bool IsMovementPaused => isMovementPaused;
@@ -43,8 +45,6 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void OnValidate()
     {
-        moveSpeed = Mathf.Max(0f, moveSpeed);
-
         if (!Application.isPlaying)
         {
             FindReferences();
@@ -53,6 +53,11 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void Update()
     {
+        if (MonsterData == null || health.IsDead)
+        {
+            return;
+        }
+
         if (!isChasing)
         {
             if (IsInsideCameraView())
@@ -129,7 +134,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
         Vector3 currentPosition = transform.position;
         Vector3 targetPosition = followTarget.position;
-        if (!followYAxis)
+        if (!MonsterData.FollowYAxis)
         {
             targetPosition.y = currentPosition.y;
         }
@@ -141,12 +146,17 @@ public sealed class NormalMonsterChase : MonoBehaviour
         transform.position = Vector3.MoveTowards(
             currentPosition,
             targetPosition,
-            moveSpeed * Time.deltaTime
+            MonsterData.MoveSpeed * Time.deltaTime
         );
     }
 
     private void FindReferences()
     {
+        if (health == null)
+        {
+            health = GetComponent<MonsterHealth>();
+        }
+
         if (animator == null)
         {
             animator = GetComponent<Animator>();

@@ -3,18 +3,15 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(MonsterHealth))]
 public sealed class NormalMonsterAttack : MonoBehaviour
 {
-    private const int DamagePerAttack = 1;
-
     [Header("연결")]
     [SerializeField, KoreanLabel("추적 컴포넌트")] private NormalMonsterChase chase;
     [SerializeField, KoreanLabel("애니메이터")] private Animator animator;
 
     [Header("공격")]
     [SerializeField, KoreanLabel("공격 컨트롤러")] private RuntimeAnimatorController attackController;
-    [SerializeField, KoreanLabel("첫 공격 지연"), Min(0f)] private float firstAttackDelay = 0.4f;
-    [SerializeField, KoreanLabel("공격 간격"), Min(0.1f)] private float attackInterval = 2f;
     [SerializeField, KoreanLabel("피격 로그 메시지")] private string playerHitLogMessage = "플레이어가 일반몹 공격에 맞았습니다.";
 
     private ArisaHealth touchingPlayerHealth;
@@ -24,6 +21,9 @@ public sealed class NormalMonsterAttack : MonoBehaviour
     private bool wasOverlappingPlayer;
     private Collider2D[] ownColliders;
     private readonly List<Collider2D> touchingPlayerColliders = new List<Collider2D>();
+    private MonsterHealth health;
+
+    private MonsterSO MonsterData => health != null ? health.Data : null;
 
     private void Reset()
     {
@@ -37,9 +37,6 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void OnValidate()
     {
-        firstAttackDelay = Mathf.Max(0f, firstAttackDelay);
-        attackInterval = Mathf.Max(0.1f, attackInterval);
-
         if (!Application.isPlaying)
         {
             FindReferences();
@@ -53,6 +50,12 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void Update()
     {
+        if (MonsterData == null || health.IsDead)
+        {
+            ClearPlayerContact();
+            return;
+        }
+
         bool hadActiveContact = wasOverlappingPlayer;
         ArisaHealth overlappingPlayerHealth;
         if (!TryFindOverlappingPlayer(out overlappingPlayerHealth))
@@ -73,7 +76,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
         if (isNewContact)
         {
-            nextAttackTime = Time.time + firstAttackDelay;
+            nextAttackTime = Time.time + MonsterData.FirstAttackDelay;
         }
 
         AttackTouchingPlayer();
@@ -134,15 +137,20 @@ public sealed class NormalMonsterAttack : MonoBehaviour
         }
 
         EnterAttackState();
-        touchingPlayerHealth.TakeDamage(DamagePerAttack);
+        touchingPlayerHealth.TakeDamage(MonsterData.AttackDamage);
 
         Debug.Log(playerHitLogMessage, touchingPlayerHealth);
-        nextAttackTime = Time.time + attackInterval;
+        nextAttackTime = Time.time + MonsterData.AttackInterval;
         RestartCurrentAnimation();
     }
 
     private void TryStartPlayerContact(Collider2D other)
     {
+        if (MonsterData == null || health.IsDead)
+        {
+            return;
+        }
+
         ArisaHealth playerHealth = FindPlayerHealth(other);
         if (playerHealth == null)
         {
@@ -163,7 +171,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
         if (!hadActiveContact)
         {
-            nextAttackTime = Time.time + firstAttackDelay;
+            nextAttackTime = Time.time + MonsterData.FirstAttackDelay;
         }
     }
 
@@ -227,6 +235,11 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void FindReferences()
     {
+        if (health == null)
+        {
+            health = GetComponent<MonsterHealth>();
+        }
+
         if (chase == null)
         {
             chase = GetComponent<NormalMonsterChase>();
