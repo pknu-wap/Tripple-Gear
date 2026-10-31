@@ -462,6 +462,7 @@ GameObject:
   - component: {fileID: 1377373895}
   - component: {fileID: 1377373896}
   - component: {fileID: 1377373897}
+  - component: {fileID: 1377373898}
   m_Layer: 10
   m_Name: "\uC77C\uBC18\uBAB9idle"
   m_TagString: Untagged
@@ -582,8 +583,6 @@ MonoBehaviour:
   cameraEnteredLogMessage: "\uC77C\uBC18\uBAB9\uC774 Main Camera \uC601\uC5ED\uC5D0
     \uB4E4\uC5B4\uC654\uC2B5\uB2C8\uB2E4."
   followTarget: {fileID: 1698246298}
-  moveSpeed: 2
-  followYAxis: 0
   animator: {fileID: 1377373891}
   moveController: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
 --- !u!61 &1377373895
@@ -674,10 +673,27 @@ MonoBehaviour:
   chase: {fileID: 1377373894}
   animator: {fileID: 1377373891}
   attackController: {fileID: 9100000, guid: d9614ad9ff604eb89f80973f136dcd86, type: 2}
-  firstAttackDelay: 0.4
-  attackInterval: 2
   playerHitLogMessage: "\uD50C\uB808\uC774\uC5B4\uAC00 \uC77C\uBC18\uBAB9 \uACF5\uACA9\uC5D0
     \uB9DE\uC558\uC2B5\uB2C8\uB2E4."
+--- !u!114 &1377373898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1377373890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  monsterData: {fileID: 11400000, guid: fcb3ef450734489d92ba93d7bab09554, type: 2}
+  hpChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  defeated:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &1698246298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6907662365546511685, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
