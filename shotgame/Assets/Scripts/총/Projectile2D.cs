@@ -21,10 +21,12 @@ public sealed class Projectile2D : MonoBehaviour
     private float spawnedAtTime;
     private bool hasHit;
     private Action<Vector2> hitCallback;
+    private float hitDamage;
+    private bool damageEnemyOnHit;
 
     public bool HasHit => hasHit;
 
-    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null)
+    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null, bool damageEnemyOnHit = true)
     {
         if (gunData == null)
         {
@@ -37,6 +39,8 @@ public sealed class Projectile2D : MonoBehaviour
         hitEffectLifetime = gunData.HitEffectLifetime;
         destroyOnHit = gunData.DestroyProjectileOnHit;
         hitCallback = onHit;
+        hitDamage = gunData.Damage;
+        this.damageEnemyOnHit = damageEnemyOnHit;
         ApplyDefaultHitTargetLayerIfEmpty();
     }
 
@@ -129,7 +133,7 @@ public sealed class Projectile2D : MonoBehaviour
             return;
         }
 
-        HandleHit(other.gameObject, other.ClosestPoint(transform.position));
+        HandleHit(other, other.ClosestPoint(transform.position));
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -142,7 +146,7 @@ public sealed class Projectile2D : MonoBehaviour
         Vector2 hitPosition = collision.contactCount > 0
             ? collision.GetContact(0).point
             : collision.collider.ClosestPoint(transform.position);
-        HandleHit(collision.collider.gameObject, hitPosition);
+        HandleHit(collision.collider, hitPosition);
     }
 
     private bool TryHitTargetOnMove(Vector2 startPosition, Vector2 movement, float positionZ)
@@ -165,15 +169,20 @@ public sealed class Projectile2D : MonoBehaviour
         }
 
         transform.position = new Vector3(hit.point.x, hit.point.y, positionZ);
-        HandleHit(hit.collider.gameObject, hit.point);
+        HandleHit(hit.collider, hit.point);
         return true;
     }
 
-    private void HandleHit(GameObject hitObject, Vector2 hitPosition)
+    private void HandleHit(Collider2D hitCollider, Vector2 hitPosition)
     {
-        if (hasHit || hitObject == null || !IsInLayerMask(hitObject.layer, hitTargetLayers))
+        if (hasHit || hitCollider == null || !IsInLayerMask(hitCollider.gameObject.layer, hitTargetLayers))
         {
             return;
+        }
+
+        if (damageEnemyOnHit)
+        {
+            GunDamage.ApplyToEnemy(hitCollider, hitDamage);
         }
 
         ResolveHit(hitPosition);

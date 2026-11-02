@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -46,7 +47,7 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
             projectile = projectileObject.AddComponent<Projectile2D>();
         }
 
-        projectile.ConfigureHitSettings(gunData, hitPosition => Explode(gunData, hitPosition));
+        projectile.ConfigureHitSettings(gunData, hitPosition => Explode(gunData, hitPosition), false);
         projectile.Launch(
             fireDirection,
             gunData.BulletFireSpeed,
@@ -100,6 +101,8 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
             ExplosionRadius,
             ExplosionTargetLayers
         );
+        HashSet<MonsterHealth> damagedMonsters = new HashSet<MonsterHealth>();
+        HashSet<GameObject> damagedObjects = new HashSet<GameObject>();
 
         for (int i = 0; i < hits.Length; i++)
         {
@@ -108,9 +111,30 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
                 continue;
             }
 
+            MonsterHealth health = GunDamage.GetEnemyHealth(hits[i]);
+            if (health != null)
+            {
+                if (damagedMonsters.Add(health))
+                {
+                    health.TakeDamage(gunData.Damage);
+                }
+                continue;
+            }
+
+            // Other colliders on the same monster must not bypass the Enemy-layer check.
+            if (hits[i].GetComponentInParent<MonsterHealth>() != null)
+            {
+                continue;
+            }
+
             GameObject hitObject = hits[i].attachedRigidbody != null
                 ? hits[i].attachedRigidbody.gameObject
                 : hits[i].gameObject;
+            if (!damagedObjects.Add(hitObject))
+            {
+                continue;
+            }
+
             hitObject.SendMessage("TakeDamage", gunData.Damage, SendMessageOptions.DontRequireReceiver);
         }
     }

@@ -28,6 +28,11 @@ public sealed class HitscanLineFireLogic : GunFireLogic
         RaycastHit2D hit = Physics2D.Raycast(context.MuzzlePosition, fireDirection, Range, gunData.HitTargetLayers);
         float shotDistance = hit.collider != null ? hit.distance : Range;
 
+        if (hit.collider != null)
+        {
+            GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+        }
+
         CreateInstantShotVisual(gunData, context.MuzzlePosition, fireDirection, shotDistance, context.CoroutineRunner);
     }
 

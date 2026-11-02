@@ -11,10 +11,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b8ad46f4326475ca70a01e32995ae42, type: 3}
   m_Name: "\uC77C\uBC18\uBAB9SO"
-  m_EditorClassIdentifier:
-  maxHp: 5
+  m_EditorClassIdentifier: 
+  maxHp: 20
   moveSpeed: 2
   followYAxis: 0
   attackDamage: 1
-  firstAttackDelay: 0.4
+  firstAttackDelay: 0.6
   attackInterval: 2
