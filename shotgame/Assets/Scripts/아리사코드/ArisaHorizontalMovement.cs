@@ -53,6 +53,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private bool hasMouseScreenPosition;
     private Vector2 mouseScreenPosition;
     private float currentHorizontalSpeed;
+    private float hitReactionEndTime;
+    private float hitKnockbackSpeed;
     private float verticalSpeed;
     private float groundY;
     private bool isGrounded = true;
@@ -111,6 +113,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         transform.position = position;
         groundY = position.y;
         currentHorizontalSpeed = 0f;
+        hitReactionEndTime = 0f;
+        hitKnockbackSpeed = 0f;
         verticalSpeed = 0f;
         isGrounded = true;
         isCrouching = false;
@@ -118,6 +122,26 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         wasCoasting = false;
         ApplyStanceCollider();
         Physics2D.SyncTransforms();
+    }
+
+    public void StartHitReaction(float horizontalDirection, float duration, float distance, float upwardSpeed)
+    {
+        if (duration <= 0f)
+        {
+            return;
+        }
+
+        hitReactionEndTime = Time.time + duration;
+        hitKnockbackSpeed = Mathf.Sign(horizontalDirection) * Mathf.Max(0f, distance) / duration;
+        currentHorizontalSpeed = 0f;
+        if (upwardSpeed > 0f)
+        {
+            verticalSpeed = Mathf.Max(verticalSpeed, upwardSpeed);
+            isGrounded = false;
+        }
+
+        isCoasting = false;
+        wasCoasting = false;
     }
 
     private void Reset()
@@ -252,6 +276,13 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private void Update()
     {
         SampleInput();
+        bool isHitReacting = Time.time < hitReactionEndTime;
+        if (isHitReacting)
+        {
+            horizontalInput = 0f;
+            jumpPressed = false;
+        }
+
         UpdateCrouchState();
         ApplyStanceCollider();
         RefreshGroundedState();
@@ -259,7 +290,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         bool hasMovementInput = !isCrouching && !Mathf.Approximately(horizontalInput, 0f);
         float targetHorizontalSpeed = horizontalInput * moveSpeed;
-        if (isCrouching)
+        if (isHitReacting || isCrouching)
         {
             currentHorizontalSpeed = 0f;
         }
@@ -279,7 +310,10 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         bool hasMovementSpeed = Mathf.Abs(currentHorizontalSpeed) > 0f;
-        Vector3 movement = new Vector3(currentHorizontalSpeed, verticalSpeed, 0f) * Time.deltaTime;
+        float horizontalMovement = isHitReacting
+            ? hitKnockbackSpeed * Mathf.Min(Time.deltaTime, hitReactionEndTime - Time.time)
+            : currentHorizontalSpeed * Time.deltaTime;
+        Vector3 movement = new Vector3(horizontalMovement, verticalSpeed * Time.deltaTime, 0f);
         MoveWithCollisions(movement);
 
         bool isGunReloading = gunFire != null && gunFire.IsReloading;

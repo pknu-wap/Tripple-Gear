@@ -137,7 +137,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
         }
 
         EnterAttackState();
-        touchingPlayerHealth.TakeDamage(MonsterData.AttackDamage);
+        touchingPlayerHealth.TakeDamage(MonsterData.AttackDamage, transform.position);
 
         Debug.Log(playerHitLogMessage, touchingPlayerHealth);
         nextAttackTime = Time.time + MonsterData.AttackInterval;

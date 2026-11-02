@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHp: 20
   moveSpeed: 2
-  followYAxis: 0
   attackDamage: 1
   firstAttackDelay: 0.6
   attackInterval: 2

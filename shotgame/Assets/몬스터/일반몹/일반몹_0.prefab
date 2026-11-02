@@ -209,6 +209,10 @@ MonoBehaviour:
   logWhenEnteredCamera: 1
   cameraEnteredLogMessage: "\uC77C\uBC18\uBAB9\uC774 Main Camera \uC601\uC5ED\uC5D0 \uB4E4\uC5B4\uC654\uC2B5\uB2C8\uB2E4."
   followTarget: {fileID: 0}
+  jumpOverObstacles: 1
+  jumpHeight: 3.5
+  jumpDuration: 2.2
+  jumpMoveSpeedMultiplier: 2.2
   animator: {fileID: 2153591314860720816}
   moveController: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
 --- !u!114 &8622938717200000004
