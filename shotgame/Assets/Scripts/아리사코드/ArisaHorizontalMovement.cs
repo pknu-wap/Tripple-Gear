@@ -12,6 +12,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private static readonly int IsMovingParameter = Animator.StringToHash("IsMoving");
     private const string InertiaStateName = "Inertia";
     private const string DustStateName = "Dust";
+    private const string WaveBoundaryLayerName = "WaveBoundary";
     private const float StopThreshold = 0.03f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
@@ -567,7 +568,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         float directionSign = Mathf.Sign(horizontalMovement);
         Vector2 direction = directionSign > 0f ? Vector2.right : Vector2.left;
         float moveDistance = Mathf.Abs(horizontalMovement);
-        int hitCount = CastMovementCollider(direction, moveDistance + GetSkinWidth(), horizontalCollisionLayers);
+        int hitCount = CastMovementCollider(direction, moveDistance + GetSkinWidth(), GetHorizontalCollisionLayers());
         float allowedDistance = moveDistance;
 
         for (int i = 0; i < hitCount; i++)
@@ -588,7 +589,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     {
         hitCeiling = false;
         float moveDistance = Mathf.Abs(upwardMovement);
-        int hitCount = CastMovementCollider(Vector2.up, moveDistance + GetSkinWidth(), solidPlatformLayers);
+        int hitCount = CastMovementCollider(Vector2.up, moveDistance + GetSkinWidth(), GetSolidPlatformLayers());
         float allowedDistance = moveDistance;
 
         for (int i = 0; i < hitCount; i++)
@@ -697,7 +698,17 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private LayerMask GetGroundLayers()
     {
-        return solidPlatformLayers | oneWayPlatformLayers;
+        return GetSolidPlatformLayers() | oneWayPlatformLayers;
+    }
+
+    private LayerMask GetHorizontalCollisionLayers()
+    {
+        return horizontalCollisionLayers | LayerMask.GetMask(WaveBoundaryLayerName);
+    }
+
+    private LayerMask GetSolidPlatformLayers()
+    {
+        return solidPlatformLayers | LayerMask.GetMask(WaveBoundaryLayerName);
     }
 
     private bool IsBlockingHorizontalHit(RaycastHit2D hit, Vector2 direction)
@@ -740,7 +751,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return false;
         }
 
-        if (!IsInLayerMask(hit.collider.gameObject.layer, solidPlatformLayers))
+        if (!IsInLayerMask(hit.collider.gameObject.layer, GetSolidPlatformLayers()))
         {
             return false;
         }

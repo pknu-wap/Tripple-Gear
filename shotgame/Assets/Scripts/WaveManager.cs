@@ -6,6 +6,9 @@ using UnityEngine.Events;
 [DefaultExecutionOrder(1000)]
 public sealed class WaveManager : MonoBehaviour
 {
+    private const string CameraBoundaryLayerName = "WaveBoundary";
+    private const float CameraBoundaryThickness = 1f;
+
     public enum WaveState { Ready, Running, Completed, Cancelled }
 
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
@@ -25,6 +28,7 @@ public sealed class WaveManager : MonoBehaviour
     private Vector3 lockedPosition;
     private bool cameraWasEnabled;
     private bool reportedInvalidSetup;
+    private readonly BoxCollider2D[] cameraBoundaries = new BoxCollider2D[4];
 
     public bool TryStartWave()
     {
@@ -37,7 +41,7 @@ public sealed class WaveManager : MonoBehaviour
         {
             if (!reportedInvalidSetup)
             {
-                Debug.LogWarning("WaveManager: 카메라와 씬의 몬스터를 등록하고 몬스터의 부모를 활성화해 주세요.", this);
+                Debug.LogWarning("WaveManager: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
                 reportedInvalidSetup = true;
             }
             return false;
@@ -55,6 +59,7 @@ public sealed class WaveManager : MonoBehaviour
         cameraWasEnabled = lockedManager.enabled;
         State = WaveState.Running;
         lockedManager.enabled = false;
+        CreateCameraBoundaries();
 
         for (int i = 0; i < waveMonsters.Count; i++)
         {
@@ -79,7 +84,9 @@ public sealed class WaveManager : MonoBehaviour
     private bool PrepareWave()
     {
         waveMonsters.Clear();
-        if (cameraManager == null || cameraManager.ManagedCamera == null || monsters == null)
+        if (cameraManager == null || cameraManager.ManagedCamera == null
+            || !cameraManager.ManagedCamera.orthographic
+            || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0 || monsters == null)
         {
             return false;
         }
@@ -115,6 +122,7 @@ public sealed class WaveManager : MonoBehaviour
         }
 
         lockedCamera.transform.position = lockedPosition;
+        UpdateCameraBoundaries();
         foreach (GameObject monster in waveMonsters)
         {
             if (monster != null && monster.activeInHierarchy)
@@ -140,6 +148,7 @@ public sealed class WaveManager : MonoBehaviour
 
     private void RestoreCamera()
     {
+        RemoveCameraBoundaries();
         if (lockedManager != null)
         {
             lockedManager.enabled = cameraWasEnabled;
@@ -147,6 +156,64 @@ public sealed class WaveManager : MonoBehaviour
         lockedManager = null;
         lockedCamera = null;
         waveMonsters.Clear();
+    }
+
+    private void CreateCameraBoundaries()
+    {
+        int boundaryLayer = LayerMask.NameToLayer(CameraBoundaryLayerName);
+        string[] names = { "Left", "Right", "Bottom", "Top" };
+
+        for (int i = 0; i < cameraBoundaries.Length; i++)
+        {
+            GameObject boundary = new GameObject("Wave Camera Boundary " + names[i]);
+            boundary.layer = boundaryLayer;
+            cameraBoundaries[i] = boundary.AddComponent<BoxCollider2D>();
+        }
+
+        UpdateCameraBoundaries();
+    }
+
+    private void UpdateCameraBoundaries()
+    {
+        if (lockedCamera == null)
+        {
+            return;
+        }
+
+        Vector3 center = lockedCamera.transform.position;
+        float halfHeight = lockedCamera.orthographicSize;
+        float halfWidth = halfHeight * lockedCamera.aspect;
+        float thickness = CameraBoundaryThickness;
+        float halfThickness = thickness * 0.5f;
+
+        SetCameraBoundary(0, center.x - halfWidth - halfThickness, center.y, thickness, halfHeight * 2f + thickness * 2f);
+        SetCameraBoundary(1, center.x + halfWidth + halfThickness, center.y, thickness, halfHeight * 2f + thickness * 2f);
+        SetCameraBoundary(2, center.x, center.y - halfHeight - halfThickness, halfWidth * 2f + thickness * 2f, thickness);
+        SetCameraBoundary(3, center.x, center.y + halfHeight + halfThickness, halfWidth * 2f + thickness * 2f, thickness);
+        Physics2D.SyncTransforms();
+    }
+
+    private void SetCameraBoundary(int index, float x, float y, float width, float height)
+    {
+        BoxCollider2D boundary = cameraBoundaries[index];
+        boundary.transform.position = new Vector3(x, y, 0f);
+        boundary.size = new Vector2(width, height);
+    }
+
+    private void RemoveCameraBoundaries()
+    {
+        for (int i = 0; i < cameraBoundaries.Length; i++)
+        {
+            BoxCollider2D boundary = cameraBoundaries[i];
+            if (boundary == null)
+            {
+                continue;
+            }
+
+            boundary.gameObject.SetActive(false);
+            Destroy(boundary.gameObject);
+            cameraBoundaries[i] = null;
+        }
     }
 
     private void OnDisable()
