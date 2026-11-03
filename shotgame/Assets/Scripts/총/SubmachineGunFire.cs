@@ -48,6 +48,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private bool hasSpriteBeforeArisaReload;
     private bool hasAppliedArisaReloadPositionOffset;
     private ArisaMouseAim arisaAim;
+    private AudioSource fireAudioSource;
 #if ENABLE_INPUT_SYSTEM
     private InputAction fireAction;
     private InputAction pointerPositionAction;
@@ -261,7 +262,25 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this));
+        PlayFireSound();
         arisaAim?.PlayFireShake(gunData.FireShakeAngle, gunData.FireShakeDuration, gunData.FireShakeCycles);
+    }
+
+    private void PlayFireSound()
+    {
+        if (gunData.FireSound == null)
+        {
+            return;
+        }
+
+        if (fireAudioSource == null)
+        {
+            fireAudioSource = gameObject.AddComponent<AudioSource>();
+            fireAudioSource.playOnAwake = false;
+            fireAudioSource.spatialBlend = 0f;
+        }
+
+        fireAudioSource.PlayOneShot(gunData.FireSound, gunData.FireSoundVolume);
     }
 
     private float GetShotInterval()
