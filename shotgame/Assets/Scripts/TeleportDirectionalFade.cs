@@ -12,6 +12,7 @@ public sealed class TeleportDirectionalFade : MonoBehaviour
 
     private Canvas canvas;
     private Image fadeImage;
+    private RectTransform fadeRectTransform;
 
     public bool IsFading { get; private set; }
 
@@ -30,7 +31,7 @@ public sealed class TeleportDirectionalFade : MonoBehaviour
     private void Awake()
     {
         EnsureReferences();
-        SetFadeAmount(0f);
+        SetSlideInAmount(0f);
         SetVisible(false);
     }
 
@@ -63,35 +64,33 @@ public sealed class TeleportDirectionalFade : MonoBehaviour
         IsFading = true;
         EnsureReferences();
         SetVisible(true);
-        fadeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
-        yield return AnimateFill(0f, 1f, speed);
+        yield return AnimateSlide(0f, 1f, false, speed);
     }
 
     public IEnumerator FadeOut(float speed)
     {
         EnsureReferences();
         SetVisible(true);
-        fadeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
-        yield return AnimateFill(1f, 0f, speed);
+        yield return AnimateSlide(0f, 1f, true, speed);
         SetVisible(false);
         IsFading = false;
     }
 
-    private IEnumerator AnimateFill(float startAmount, float endAmount, float speed)
+    private IEnumerator AnimateSlide(float startAmount, float endAmount, bool slideOut, float speed)
     {
         float amount = Mathf.Clamp01(startAmount);
         speed = Mathf.Max(0.01f, speed);
-        SetFadeAmount(amount);
+        SetSlideAmount(amount, slideOut);
 
         while (!Mathf.Approximately(amount, endAmount))
         {
             float deltaTime = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
             amount = Mathf.MoveTowards(amount, endAmount, speed * deltaTime);
-            SetFadeAmount(amount);
+            SetSlideAmount(amount, slideOut);
             yield return null;
         }
 
-        SetFadeAmount(endAmount);
+        SetSlideAmount(endAmount, slideOut);
     }
 
     private void EnsureReferences()
@@ -106,13 +105,17 @@ public sealed class TeleportDirectionalFade : MonoBehaviour
             fadeImage = GetComponentInChildren<Image>(true);
         }
 
+        if (fadeRectTransform == null && fadeImage != null)
+        {
+            fadeRectTransform = fadeImage.rectTransform;
+        }
+
         if (canvas != null && fadeImage != null)
         {
             canvas.sortingOrder = sortingOrder;
             fadeImage.color = fadeColor;
-            fadeImage.type = Image.Type.Filled;
-            fadeImage.fillMethod = Image.FillMethod.Horizontal;
-            fadeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+            fadeImage.type = Image.Type.Simple;
+            fadeImage.raycastTarget = false;
             return;
         }
 
@@ -136,24 +139,49 @@ public sealed class TeleportDirectionalFade : MonoBehaviour
         GameObject imageObject = new GameObject("BlackWipe", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         imageObject.transform.SetParent(canvasObject.transform, false);
 
-        RectTransform imageTransform = imageObject.GetComponent<RectTransform>();
-        imageTransform.anchorMin = Vector2.zero;
-        imageTransform.anchorMax = Vector2.one;
-        imageTransform.offsetMin = Vector2.zero;
-        imageTransform.offsetMax = Vector2.zero;
+        fadeRectTransform = imageObject.GetComponent<RectTransform>();
+        fadeRectTransform.anchorMin = Vector2.zero;
+        fadeRectTransform.anchorMax = Vector2.one;
+        fadeRectTransform.offsetMin = Vector2.zero;
+        fadeRectTransform.offsetMax = Vector2.zero;
 
         fadeImage = imageObject.GetComponent<Image>();
         fadeImage.color = fadeColor;
         fadeImage.raycastTarget = false;
-        fadeImage.type = Image.Type.Filled;
-        fadeImage.fillMethod = Image.FillMethod.Horizontal;
-        fadeImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+        fadeImage.type = Image.Type.Simple;
     }
 
-    private void SetFadeAmount(float amount)
+    private void SetSlideAmount(float amount, bool slideOut)
+    {
+        if (slideOut)
+        {
+            SetSlideOutAmount(amount);
+            return;
+        }
+
+        SetSlideInAmount(amount);
+    }
+
+    private void SetSlideInAmount(float amount)
     {
         EnsureReferences();
-        fadeImage.fillAmount = Mathf.Clamp01(amount);
+        amount = Mathf.Clamp01(amount);
+        SetPanelAnchors(amount - 1f, amount);
+    }
+
+    private void SetSlideOutAmount(float amount)
+    {
+        EnsureReferences();
+        amount = Mathf.Clamp01(amount);
+        SetPanelAnchors(amount, amount + 1f);
+    }
+
+    private void SetPanelAnchors(float minX, float maxX)
+    {
+        fadeRectTransform.anchorMin = new Vector2(minX, 0f);
+        fadeRectTransform.anchorMax = new Vector2(maxX, 1f);
+        fadeRectTransform.offsetMin = Vector2.zero;
+        fadeRectTransform.offsetMax = Vector2.zero;
     }
 
     private void SetVisible(bool visible)

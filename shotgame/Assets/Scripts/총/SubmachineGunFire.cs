@@ -55,6 +55,8 @@ public sealed class SubmachineGunFire : MonoBehaviour
 #endif
 
     public bool IsReloading => isReloading;
+    public int CurrentBulletCount => currentBulletCount;
+    public int MaxBulletCount => GetMaxBulletCount();
 
     private void Reset()
     {

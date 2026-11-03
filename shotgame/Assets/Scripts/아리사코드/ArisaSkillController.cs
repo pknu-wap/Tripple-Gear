@@ -38,6 +38,25 @@ public sealed class ArisaSkillController : MonoBehaviour
     public float CooldownRemaining => IsCoolingDown ? Mathf.Max(0f, cooldownCompleteTime - Time.time) : 0f;
     public bool IsCoolingDown => 스킬데이터 != null && Time.time < cooldownCompleteTime;
 
+    public bool TryAcquireSkill(SkillSO skillData)
+    {
+        if (skillData == null)
+        {
+            return false;
+        }
+
+        runtime?.StopPlaying();
+        스킬데이터 = skillData;
+        currentSkillData = null;
+        remainingUseCount = 0;
+        cooldownCompleteTime = 0f;
+        skillConsumed = false;
+
+        FindReferences();
+        RefreshSkillState();
+        return true;
+    }
+
     private void Reset()
     {
         FindReferences();

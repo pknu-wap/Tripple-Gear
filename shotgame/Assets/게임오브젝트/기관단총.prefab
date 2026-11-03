@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6495811249631490871}
@@ -45,13 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f17b7a64f6e4f7aa27b2268ba6e493d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitTargetLayers:
-    serializedVersion: 2
-    m_Bits: 1280
-  hitEffectPrefab: {fileID: 7690319464749911681, guid: a24f2fed7fd1edc47af1e732afee58c1, type: 3}
-  hitEffectScale: 0.4
-  hitEffectLifetime: 0.6
-  destroyOnHit: 1
 --- !u!1 &4902051926473038855
 GameObject:
   m_ObjectHideFlags: 0
