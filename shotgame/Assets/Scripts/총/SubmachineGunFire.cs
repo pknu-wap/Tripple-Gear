@@ -58,6 +58,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     public bool IsReloading => isReloading;
     public int CurrentBulletCount => currentBulletCount;
     public int MaxBulletCount => GetMaxBulletCount();
+    public event System.Action<int, int> AmmoChanged;
 
     private void Reset()
     {
@@ -326,6 +327,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private void ConsumeBullet()
     {
         currentBulletCount = Mathf.Max(0, currentBulletCount - 1);
+        NotifyAmmoChanged();
 
         if (currentBulletCount <= 0)
         {
@@ -381,6 +383,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     {
         currentBulletCount = GetMaxBulletCount();
         EndReload();
+        NotifyAmmoChanged();
     }
 
     private void CompleteReloadStep()
@@ -392,6 +395,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         currentBulletCount = Mathf.Min(GetMaxBulletCount(), currentBulletCount + 1);
+        NotifyAmmoChanged();
         if (currentBulletCount >= GetMaxBulletCount())
         {
             EndReload();
@@ -399,6 +403,11 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         BeginReloadWaitOrNextStep();
+    }
+
+    private void NotifyAmmoChanged()
+    {
+        AmmoChanged?.Invoke(currentBulletCount, GetMaxBulletCount());
     }
 
     private void BeginReloadWaitOrNextStep()
