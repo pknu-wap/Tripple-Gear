@@ -171,4 +171,4 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   blockingLayers:
     serializedVersion: 2
-    m_Bits: 768
+    m_Bits: 256

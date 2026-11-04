@@ -33,7 +33,7 @@ public sealed class FlyingMonsterProjectile : MonoBehaviour
 
     private void Reset()
     {
-        blockingLayers = LayerMask.GetMask("Box", "Stair");
+        blockingLayers = LayerMask.GetMask("Box");
         GetComponent<CircleCollider2D>().isTrigger = true;
         Rigidbody2D body = GetComponent<Rigidbody2D>();
         body.bodyType = RigidbodyType2D.Kinematic;

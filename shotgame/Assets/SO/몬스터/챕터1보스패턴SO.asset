@@ -24,6 +24,7 @@ MonoBehaviour:
   missileDamage: 1
   explosionRadius: 0.9
   explosionLifetime: 1.5
+  explosionScale: 0.6
   missileInterval: 0.45
   rainMinCount: 4
   rainMaxCount: 7
@@ -36,5 +37,5 @@ MonoBehaviour:
   laserWidth: 0.22
   laserDamage: 1
   laserHitInterval: 0.45
-  rangedMonsterPrefab: {fileID: 7300340823662569411, guid: 44f061c02edcb734cb10d96b339918c1, type: 3}
+  rangedMonsterPrefab: {fileID: 4475872360796116817, guid: d909d9a738aef2f48a573ad63132f2a6, type: 3}
   summonCount: 2

@@ -23,7 +23,7 @@ MonoBehaviour:
     - rid: 6595227308055330903
       type: {class: DashSkillLogic, ns: , asm: Assembly-CSharp}
       data:
-        "\uB300\uC26C\uAC70\uB9AC": 3
+        "\uB300\uC26C\uAC70\uB9AC": 5
         "\uB300\uC26C\uC18D\uB3C4": 30
         "\uBC30\uACBD\uBCC0\uACBD\uC0C9": {r: 0, g: 1, b: 0, a: 1}
         "\uBC30\uACBD\uB808\uC774\uC5B4\uC774\uB984": background

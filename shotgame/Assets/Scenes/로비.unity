@@ -1316,7 +1316,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7c94ce7495a4ad3b0ffb7127a4adcf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  newGameSceneName: "\uC2DC\uB124\uB9C8\uD2F1\uC0D8\uD50C"
+  newGameSceneName: "\uC778\uAC8C\uC784\uC0D8\uD50C"
   newGameButton: {fileID: 2304}
   loadGameButton: {fileID: 2404}
   optionsButton: {fileID: 2504}

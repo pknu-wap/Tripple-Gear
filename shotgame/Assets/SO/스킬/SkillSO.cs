@@ -43,12 +43,18 @@ public sealed class SkillSO : ScriptableObject
     public float Cooldown => Mathf.Max(0f, 쿨타임);
     public bool IsInvincibleWhileActive => 스킬중무적;
     public bool HasLogic => 스킬로직 != null;
+    public bool ActivatesOnPickup => 스킬로직 != null && 스킬로직.ActivatesOnPickup;
     public bool RequiresAimDirection => 스킬로직 != null && 스킬로직.RequiresAimDirection;
     public SkillLogic Logic => 스킬로직;
 
     public IEnumerator Execute(SkillContext context)
     {
         return 스킬로직 != null ? 스킬로직.Execute(context) : null;
+    }
+
+    public bool TryApplyOnPickup(ArisaHealth health)
+    {
+        return 스킬로직 != null && 스킬로직.TryApplyOnPickup(health);
     }
 
     private void OnValidate()

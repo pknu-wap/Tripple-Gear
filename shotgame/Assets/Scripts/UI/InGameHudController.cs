@@ -53,7 +53,7 @@ public sealed class InGameHudController : MonoBehaviour
 
     private void UpdateHp(int current, int maximum)
     {
-        if (hpText != null) hpText.text = $"HP : {current}";
+        if (hpText != null) hpText.text = $": {current}";
     }
 
     private void UpdateSkill(int remaining)
@@ -63,6 +63,6 @@ public sealed class InGameHudController : MonoBehaviour
 
     private void UpdateAmmo(int current, int maximum)
     {
-        if (ammoText != null) ammoText.text = $"총알 : {maximum}/{current}";
+        if (ammoText != null) ammoText.text = $": {maximum}/{current}";
     }
 }
