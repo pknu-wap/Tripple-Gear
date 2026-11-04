@@ -80,6 +80,8 @@ public sealed class ArisaHealth : MonoBehaviour
             return;
         }
 
+        // 스킬 컴포넌트가 Awake 이후에 무적 컴포넌트를 추가할 수도 있다.
+        FindReferences();
         if (invincibility != null && invincibility.IsInvincible)
         {
             return;

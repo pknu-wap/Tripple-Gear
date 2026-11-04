@@ -21,6 +21,7 @@ public sealed class Projectile2D : MonoBehaviour
     private float spawnedAtTime;
     private bool hasHit;
     private Action<Vector2> hitCallback;
+    private float damage;
 
     public bool HasHit => hasHit;
 
@@ -37,6 +38,8 @@ public sealed class Projectile2D : MonoBehaviour
         hitEffectLifetime = gunData.HitEffectLifetime;
         destroyOnHit = gunData.DestroyProjectileOnHit;
         hitCallback = onHit;
+        // 미사일은 콜백에서 폭발 피해를 적용하므로 직격 피해를 더하지 않는다.
+        damage = onHit == null ? gunData.Damage : 0f;
         ApplyDefaultHitTargetLayerIfEmpty();
     }
 
@@ -176,6 +179,8 @@ public sealed class Projectile2D : MonoBehaviour
             return;
         }
 
+        MonsterHealth target = hitObject.GetComponentInParent<MonsterHealth>();
+        if (target != null) target.TakeDamage(damage);
         ResolveHit(hitPosition);
     }
 
