@@ -40,6 +40,13 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
         Vector2 fireDirection = context.Direction.normalized;
         Quaternion rotation = GetRotation(fireDirection);
         Vector3 hitboxCenter = GetHitboxCenter(context.MuzzlePosition, fireDirection);
+        var damaged = new System.Collections.Generic.HashSet<MonsterHealth>();
+        float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+        foreach (Collider2D targetCollider in Physics2D.OverlapBoxAll(hitboxCenter, HitboxSize, angle, gunData.HitTargetLayers))
+        {
+            MonsterHealth target = targetCollider.GetComponentInParent<MonsterHealth>();
+            if (target != null && damaged.Add(target)) target.TakeDamage(gunData.Damage);
+        }
 
         GameObject hitboxObject = new GameObject(gunData.name + " Shotgun Hitbox");
         hitboxObject.transform.SetPositionAndRotation(

@@ -21,12 +21,11 @@ public sealed class Projectile2D : MonoBehaviour
     private float spawnedAtTime;
     private bool hasHit;
     private Action<Vector2> hitCallback;
-    private float hitDamage;
-    private bool damageEnemyOnHit;
+    private float damage;
 
     public bool HasHit => hasHit;
 
-    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null, bool damageEnemyOnHit = true)
+    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null)
     {
         if (gunData == null)
         {
@@ -39,8 +38,8 @@ public sealed class Projectile2D : MonoBehaviour
         hitEffectLifetime = gunData.HitEffectLifetime;
         destroyOnHit = gunData.DestroyProjectileOnHit;
         hitCallback = onHit;
-        hitDamage = gunData.Damage;
-        this.damageEnemyOnHit = damageEnemyOnHit;
+        // 미사일은 콜백에서 폭발 피해를 적용하므로 직격 피해를 더하지 않는다.
+        damage = onHit == null ? gunData.Damage : 0f;
         ApplyDefaultHitTargetLayerIfEmpty();
     }
 
@@ -133,7 +132,7 @@ public sealed class Projectile2D : MonoBehaviour
             return;
         }
 
-        HandleHit(other, other.ClosestPoint(transform.position));
+        HandleHit(other.gameObject, other.ClosestPoint(transform.position));
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -146,7 +145,7 @@ public sealed class Projectile2D : MonoBehaviour
         Vector2 hitPosition = collision.contactCount > 0
             ? collision.GetContact(0).point
             : collision.collider.ClosestPoint(transform.position);
-        HandleHit(collision.collider, hitPosition);
+        HandleHit(collision.collider.gameObject, hitPosition);
     }
 
     private bool TryHitTargetOnMove(Vector2 startPosition, Vector2 movement, float positionZ)
@@ -169,22 +168,19 @@ public sealed class Projectile2D : MonoBehaviour
         }
 
         transform.position = new Vector3(hit.point.x, hit.point.y, positionZ);
-        HandleHit(hit.collider, hit.point);
+        HandleHit(hit.collider.gameObject, hit.point);
         return true;
     }
 
-    private void HandleHit(Collider2D hitCollider, Vector2 hitPosition)
+    private void HandleHit(GameObject hitObject, Vector2 hitPosition)
     {
-        if (hasHit || hitCollider == null || !IsInLayerMask(hitCollider.gameObject.layer, hitTargetLayers))
+        if (hasHit || hitObject == null || !IsInLayerMask(hitObject.layer, hitTargetLayers))
         {
             return;
         }
 
-        if (damageEnemyOnHit)
-        {
-            GunDamage.ApplyToEnemy(hitCollider, hitDamage);
-        }
-
+        MonsterHealth target = hitObject.GetComponentInParent<MonsterHealth>();
+        if (target != null) target.TakeDamage(damage);
         ResolveHit(hitPosition);
     }
 
