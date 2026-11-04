@@ -59,6 +59,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     public int CurrentBulletCount => currentBulletCount;
     public int MaxBulletCount => GetMaxBulletCount();
     public event System.Action<int, int> AmmoChanged;
+    public event System.Action ShotFired;
 
     private void Reset()
     {
@@ -162,6 +163,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         FireProjectile(spawnPosition, direction.normalized, cameraToUse);
         ConsumeBullet();
         nextShotTime = Time.time + GetShotInterval();
+        ShotFired?.Invoke();
     }
 
     private void FindReferences()
