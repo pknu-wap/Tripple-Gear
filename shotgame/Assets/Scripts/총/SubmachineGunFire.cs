@@ -48,6 +48,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private bool hasSpriteBeforeArisaReload;
     private bool hasAppliedArisaReloadPositionOffset;
     private ArisaMouseAim arisaAim;
+    private AudioSource fireAudioSource;
 #if ENABLE_INPUT_SYSTEM
     private InputAction fireAction;
     private InputAction pointerPositionAction;
@@ -57,6 +58,8 @@ public sealed class SubmachineGunFire : MonoBehaviour
     public bool IsReloading => isReloading;
     public int CurrentBulletCount => currentBulletCount;
     public int MaxBulletCount => GetMaxBulletCount();
+    public event System.Action<int, int> AmmoChanged;
+    public event System.Action ShotFired;
 
     private void Reset()
     {
@@ -160,6 +163,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         FireProjectile(spawnPosition, direction.normalized, cameraToUse);
         ConsumeBullet();
         nextShotTime = Time.time + GetShotInterval();
+        ShotFired?.Invoke();
     }
 
     private void FindReferences()
@@ -261,7 +265,25 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this));
+        PlayFireSound();
         arisaAim?.PlayFireShake(gunData.FireShakeAngle, gunData.FireShakeDuration, gunData.FireShakeCycles);
+    }
+
+    private void PlayFireSound()
+    {
+        if (gunData.FireSound == null)
+        {
+            return;
+        }
+
+        if (fireAudioSource == null)
+        {
+            fireAudioSource = gameObject.AddComponent<AudioSource>();
+            fireAudioSource.playOnAwake = false;
+            fireAudioSource.spatialBlend = 0f;
+        }
+
+        fireAudioSource.PlayOneShot(gunData.FireSound, gunData.FireSoundVolume);
     }
 
     private float GetShotInterval()
@@ -307,6 +329,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private void ConsumeBullet()
     {
         currentBulletCount = Mathf.Max(0, currentBulletCount - 1);
+        NotifyAmmoChanged();
 
         if (currentBulletCount <= 0)
         {
@@ -362,6 +385,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     {
         currentBulletCount = GetMaxBulletCount();
         EndReload();
+        NotifyAmmoChanged();
     }
 
     private void CompleteReloadStep()
@@ -373,6 +397,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         currentBulletCount = Mathf.Min(GetMaxBulletCount(), currentBulletCount + 1);
+        NotifyAmmoChanged();
         if (currentBulletCount >= GetMaxBulletCount())
         {
             EndReload();
@@ -380,6 +405,11 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         BeginReloadWaitOrNextStep();
+    }
+
+    private void NotifyAmmoChanged()
+    {
+        AmmoChanged?.Invoke(currentBulletCount, GetMaxBulletCount());
     }
 
     private void BeginReloadWaitOrNextStep()

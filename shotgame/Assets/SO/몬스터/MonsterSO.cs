@@ -8,7 +8,6 @@ public sealed class MonsterSO : ScriptableObject
 
     [Header("이동")]
     [SerializeField, KoreanLabel("이동 속도"), Min(0f)] private float moveSpeed = 2f;
-    [SerializeField, KoreanLabel("Y축 추적")] private bool followYAxis;
 
     [Header("공격")]
     [SerializeField, KoreanLabel("공격력"), Min(0)] private int attackDamage = 1;
@@ -17,7 +16,6 @@ public sealed class MonsterSO : ScriptableObject
 
     public int MaxHp => Mathf.Max(1, maxHp);
     public float MoveSpeed => Mathf.Max(0f, moveSpeed);
-    public bool FollowYAxis => followYAxis;
     public int AttackDamage => Mathf.Max(0, attackDamage);
     public float FirstAttackDelay => Mathf.Max(0f, firstAttackDelay);
     public float AttackInterval => Mathf.Max(0.1f, attackInterval);

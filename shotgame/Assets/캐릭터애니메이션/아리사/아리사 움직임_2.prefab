@@ -114,6 +114,120 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &920000000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 920000000000000002}
+  - component: {fileID: 920000000000000003}
+  - component: {fileID: 920000000000000004}
+  m_Layer: 0
+  m_Name: HitSprite
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &920000000000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.945, y: -2.404, z: 0}
+  m_LocalScale: {x: 0.43, y: 0.43, z: 0.43}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6907662365546511685}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &920000000000000003
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000001}
+  m_Enabled: 0
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 20
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -3567489767923852503, guid: 3203d694060c23a45973550730228128, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 4.98, y: 6.7}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!95 &920000000000000004
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 920000000000000001}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 170b82105fa74bc59e1b2407b6019add, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &998766917757465649
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,6 +274,7 @@ Transform:
   - {fileID: 6145685957078924377}
   - {fileID: 4335601002625367716}
   - {fileID: 2739241782845582534}
+  - {fileID: 920000000000000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &7800368944704007600
@@ -178,7 +293,7 @@ BoxCollider2D:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1536
   m_LayerOverridePriority: 0
   m_ForceSendLayers:
     serializedVersion: 2
@@ -216,7 +331,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 998766917757465649}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -231,7 +346,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -323,9 +438,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1f4a1d0b6c14979a4ea4fe520b7a5b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 6
-  acceleration: 30
-  deceleration: 12
+  moveSpeed: 7
+  acceleration: 15
+  deceleration: 7
   jumpSpeed: 10
   gravity: 18
   inertiaFrameRate: 12
@@ -351,9 +466,6 @@ MonoBehaviour:
   movementCollider: {fileID: 7800368944704007600}
   stanceCollider: {fileID: 7800368944704007601}
   gunFire: {fileID: 4753550355424884465}
-  horizontalCollisionLayers:
-    serializedVersion: 2
-    m_Bits: 256
   solidPlatformLayers:
     serializedVersion: 2
     m_Bits: 256
@@ -389,7 +501,7 @@ MonoBehaviour:
   reloadAnimationLocalOffset: {x: 0, y: 0}
   reloadAnimationRiseHeight: 1
   arisaReloadSpriteRenderer: {fileID: 1949585202604632812}
-  arisaReloadLocalOffset: {x: 0, y: 0}
+  arisaReloadLocalOffset: {x: 0.15, y: 0.16}
   arisaReloadSprites:
   - {fileID: -7024135267521389434, guid: 99b9ae382d545404ab87d252c0afd00d, type: 3}
   - {fileID: -3840047012194590862, guid: 99b9ae382d545404ab87d252c0afd00d, type: 3}
@@ -406,7 +518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e41e3a7cf344e508df44c63b0fb6a97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  "\uC2A4\uD0AC\uB370\uC774\uD130": {fileID: 11400000, guid: aead16928a587b744aa87bce8280935f, type: 2}
+  "\uC2A4\uD0AC\uB370\uC774\uD130": {fileID: 11400000, guid: 3b1006538d864b77b0a8cdb26a82cb71, type: 2}
   "\uB300\uC0C1\uCE74\uBA54\uB77C": {fileID: 0}
   "\uC774\uB3D9\uCEF4\uD3EC\uB10C\uD2B8": {fileID: 5201290969597213042}
 --- !u!114 &7800368944704007601
@@ -444,8 +556,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d7d6f3a2c0d4bd28efdb9ba9f20d6cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHp: 5
-  currentHp: 5
+  maxHp: 3
+  currentHp: 3
   startWithMaxHp: 1
   antiDamage: 1
   healAmount: 1
@@ -455,6 +567,14 @@ MonoBehaviour:
   healLayers:
     serializedVersion: 2
     m_Bits: 8192
+  hitSpriteRenderer: {fileID: 920000000000000003}
+  hitAnimator: {fileID: 920000000000000004}
+  hitDisplayDuration: 0.6
+  hitMinOpacity: 0.6
+  hitFlashFrequency: 4
+  hitStunDuration: 0.6
+  hitKnockbackDistance: 1
+  hitKnockbackUpSpeed: 6
   hpChanged:
     m_PersistentCalls:
       m_Calls: []

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1478269305746901842}
   - component: {fileID: 8365401267892347152}
   - component: {fileID: 2086419734527189064}
+  - component: {fileID: 2086419734527189065}
   m_Layer: 3
   m_Name: "미사일_16"
   m_TagString: Untagged
@@ -114,3 +115,15 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2086419734527189065
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6814746253198027461}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd7eee05eb4b496c8b50a714bb18cd78, type: 3}
+  m_Name: ""
+  m_EditorClassIdentifier: ""

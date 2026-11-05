@@ -33,6 +33,11 @@ public sealed class HitscanLineFireLogic : GunFireLogic
             if (target != null) target.TakeDamage(gunData.Damage);
         }
 
+        if (hit.collider != null)
+        {
+            GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+        }
+
         CreateInstantShotVisual(gunData, context.MuzzlePosition, fireDirection, shotDistance, context.CoroutineRunner);
     }
 

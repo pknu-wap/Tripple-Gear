@@ -10,6 +10,7 @@ public sealed class GameFlowController : MonoBehaviour
 {
     [Header("게임 시작")]
     [SerializeField, KoreanLabel("인트로 타임라인")] private PlayableDirector introTimeline;
+    [SerializeField, KoreanLabel("컷신 중 입력을 막을 플레이어")] private Transform gameplayPlayer;
     [SerializeField, KoreanLabel("컷신 시작 신호 씬")] private string cutsceneSignalSourceSceneName = "로비";
     [SerializeField, KoreanLabel("게임 시작 버튼")] private Button startButton;
     [SerializeField, KoreanLabel("재생하면 버튼 숨기기")] private bool hideStartButtonOnPlay = true;
@@ -26,6 +27,7 @@ public sealed class GameFlowController : MonoBehaviour
     private const double TimelineEndTolerance = 0.001d;
 
     private readonly List<Animator> animatorsToFreeze = new List<Animator>();
+    private readonly List<Behaviour> suspendedGameplayInput = new List<Behaviour>();
 
     private double completionTime = -1d;
     private bool hasCutsceneStartSignal;
@@ -72,6 +74,7 @@ public sealed class GameFlowController : MonoBehaviour
     private void OnDisable()
     {
         UnsubscribeTimeline();
+        ResumeGameplayInput();
 
         if (startButton != null)
         {
@@ -120,6 +123,7 @@ public sealed class GameFlowController : MonoBehaviour
         isTimelinePlaying = true;
         isTimelineCompleted = false;
         SetStartButtonVisible(false);
+        SuspendGameplayInput();
 
         introTimeline.time = 0d;
         introTimeline.Evaluate();
@@ -141,6 +145,7 @@ public sealed class GameFlowController : MonoBehaviour
         if (onlyCompleteWhenReachedEnd && !HasTimelineReachedEnd())
         {
             isTimelinePlaying = false;
+            ResumeGameplayInput();
             SetStartButtonVisible(true);
             return;
         }
@@ -165,8 +170,46 @@ public sealed class GameFlowController : MonoBehaviour
             introTimeline.Stop();
         }
 
+        ResumeGameplayInput();
         DebugTimelineCompleted();
         onTimelineCompleted?.Invoke();
+    }
+
+    private void SuspendGameplayInput()
+    {
+        if (gameplayPlayer == null)
+        {
+            return;
+        }
+
+        SuspendInput(gameplayPlayer.GetComponent<ArisaHorizontalMovement>());
+        SuspendInput(gameplayPlayer.GetComponent<ArisaMouseAim>());
+        SuspendInput(gameplayPlayer.GetComponent<SubmachineGunFire>());
+        SuspendInput(gameplayPlayer.GetComponent<ArisaSkillController>());
+    }
+
+    private void SuspendInput(Behaviour input)
+    {
+        if (input == null || !input.enabled)
+        {
+            return;
+        }
+
+        input.enabled = false;
+        suspendedGameplayInput.Add(input);
+    }
+
+    private void ResumeGameplayInput()
+    {
+        foreach (Behaviour input in suspendedGameplayInput)
+        {
+            if (input != null)
+            {
+                input.enabled = true;
+            }
+        }
+
+        suspendedGameplayInput.Clear();
     }
 
     private void PrepareTimeline()

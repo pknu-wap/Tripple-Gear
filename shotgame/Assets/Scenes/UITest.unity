@@ -1006,7 +1006,6 @@ MonoBehaviour:
     \uB4E4\uC5B4\uC654\uC2B5\uB2C8\uB2E4."
   followTarget: {fileID: 1698246298}
   moveSpeed: 2
-  followYAxis: 0
   animator: {fileID: 1377373891}
   moveController: {fileID: 9100000, guid: d61e7bd0c6f149cb9cfde8524ba78efa, type: 2}
 --- !u!61 &1377373895
