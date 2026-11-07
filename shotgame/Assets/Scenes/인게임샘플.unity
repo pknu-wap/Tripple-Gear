@@ -2355,11 +2355,11 @@ Transform:
   m_GameObject: {fileID: 688306119}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.94, y: -30.02, z: 0}
+  m_LocalPosition: {x: 154.98, y: -28.11, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1814458504}
+  m_Father: {fileID: 758183770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &688306121
 BoxCollider2D:
@@ -2416,10 +2416,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 688306119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1814458505}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerMode: 0
+  triggerManager: {fileID: 2040000001}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -2428,6 +2429,15 @@ MonoBehaviour:
   musicToFadeIn: {fileID: 1219577704}
   musicFadeDuration: 0.5
   musicTransitionTiming: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 429629383}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &733223321
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2708,6 +2718,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 758183770}
+  - component: {fileID: 2040000001}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -2729,9 +2740,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 14307641}
-  - {fileID: 1235282402}
-  - {fileID: 1690358571}
-  - {fileID: 1814458504}
+  - {fileID: 2040000003}
+  - {fileID: 1522823264}
+  - {fileID: 688306120}
   - {fileID: 377301267}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4420,39 +4431,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!1 &1235282401
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1235282402}
-  - component: {fileID: 2040000001}
-  m_Layer: 0
-  m_Name: wavemanager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1235282402
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1235282401}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2040000003}
-  m_Father: {fileID: 758183770}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1236288159
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5749,11 +5727,11 @@ Transform:
   m_GameObject: {fileID: 1522823263}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 25.94, y: -30.02, z: 0}
+  m_LocalPosition: {x: 91.44, y: -28.27, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1690358571}
+  m_Father: {fileID: 758183770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1522823265
 BoxCollider2D:
@@ -5810,10 +5788,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1522823263}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1690358572}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerMode: 0
+  triggerManager: {fileID: 2040000001}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -5822,6 +5801,17 @@ MonoBehaviour:
   musicToFadeIn: {fileID: 2040000013}
   musicFadeDuration: 0.5
   musicTransitionTiming: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 2131911629}
+  - {fileID: 1320712661}
+  - {fileID: 1521345232}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1537833620
 GameObject:
   m_ObjectHideFlags: 0
@@ -6153,62 +6143,6 @@ Transform:
   - {fileID: 1219577703}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1690358570
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1690358571}
-  - component: {fileID: 1690358572}
-  m_Layer: 0
-  m_Name: wavemanager (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1690358571
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1690358570}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 65.5, y: 1.75, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1522823264}
-  m_Father: {fileID: 758183770}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1690358572
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1690358570}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 2131911629}
-  - {fileID: 1320712661}
-  - {fileID: 1521345232}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1698246298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6907662365546511685, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
@@ -6420,60 +6354,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1814458503
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1814458504}
-  - component: {fileID: 1814458505}
-  m_Layer: 0
-  m_Name: wavemanager (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1814458504
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1814458503}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 129.04, y: 1.91, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 688306120}
-  m_Father: {fileID: 758183770}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1814458505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1814458503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 429629383}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1880969645
 GameObject:
   m_ObjectHideFlags: 0
@@ -7018,22 +6898,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1235282401}
+  m_GameObject: {fileID: 758183769}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 1404446792}
-  - {fileID: 476815454}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
+  m_EditorClassIdentifier: Assembly-CSharp::TriggerManager
 --- !u!1 &2040000002
 GameObject:
   m_ObjectHideFlags: 0
@@ -7065,7 +6935,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1235282402}
+  m_Father: {fileID: 758183770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2040000004
 MonoBehaviour:
@@ -7076,10 +6946,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2040000002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 2040000001}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerMode: 0
+  triggerManager: {fileID: 2040000001}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -7088,6 +6959,16 @@ MonoBehaviour:
   musicToFadeIn: {fileID: 2040000013}
   musicFadeDuration: 0.5
   musicTransitionTiming: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 1404446792}
+  - {fileID: 476815454}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &2040000005
 BoxCollider2D:
   m_ObjectHideFlags: 0
