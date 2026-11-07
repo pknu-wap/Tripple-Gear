@@ -44,6 +44,10 @@ public class GunSO : ScriptableObject
     [FormerlySerializedAs("bulletFireSpeed")]
     [SerializeField, KoreanLabel("총알 발사 속도"), Min(0f)] private float 총알발사속도 = 12f;
 
+    [SerializeField, KoreanLabel("발사 소리")] private AudioClip 발사소리;
+
+    [SerializeField, KoreanLabel("발사 소리 크기"), Range(0f, 1f)] private float 발사소리크기 = 0.3f;
+
     [FormerlySerializedAs("damage")]
     [SerializeField, KoreanLabel("데미지"), Min(0f)] private float 데미지;
 
@@ -92,6 +96,8 @@ public class GunSO : ScriptableObject
     public int BulletCount => 총알갯수;
     public float AttackSpeed => 공격속도;
     public float BulletFireSpeed => 총알발사속도;
+    public AudioClip FireSound => 발사소리;
+    public float FireSoundVolume => Mathf.Clamp01(발사소리크기);
     public float Damage => 데미지;
     public float ReloadSpeed => 장전속도;
     public float FireShakeAngle => Mathf.Max(0f, 발사떨림각도);
@@ -129,6 +135,7 @@ public class GunSO : ScriptableObject
     private void OnValidate()
     {
         탄환크기 = Mathf.Max(0f, 탄환크기);
+        발사소리크기 = Mathf.Clamp01(발사소리크기);
         화면밖삭제여유 = Mathf.Max(0f, 화면밖삭제여유);
         탄환최대생존시간 = Mathf.Max(0f, 탄환최대생존시간);
         발사떨림각도 = Mathf.Max(0f, 발사떨림각도);

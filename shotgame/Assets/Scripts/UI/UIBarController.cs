@@ -6,11 +6,81 @@ public class UIBarController : MonoBehaviour
 {
     [Header("UI Reference")]
     [SerializeField] private Image barFillImage;
+    [SerializeField] private GameObject boss;
+    [SerializeField] private GameObject barRoot;
 
     [Header("Bar Settings")]
     [Range(0f, 100f)]
     [SerializeField] private float currentValue = 100f;
     private const float MaxValue = 100f;
+    private MonsterHealth bossHealth;
+
+    private void Awake()
+    {
+        if (!Application.isPlaying || boss == null)
+        {
+            return;
+        }
+
+        bossHealth = boss.GetComponent<MonsterHealth>();
+        SetBossBarVisible(false);
+    }
+
+    private void OnEnable()
+    {
+        if (!Application.isPlaying || boss == null)
+        {
+            return;
+        }
+
+        if (bossHealth == null)
+        {
+            bossHealth = boss.GetComponent<MonsterHealth>();
+        }
+
+        if (bossHealth != null)
+        {
+            bossHealth.HpChanged.AddListener(UpdateBossHealth);
+            UpdateBossHealth(bossHealth.CurrentHp, bossHealth.MaxHp);
+        }
+    }
+
+    private void Update()
+    {
+        if (Application.isPlaying && boss != null)
+        {
+            SetBossBarVisible(boss.activeInHierarchy && bossHealth != null && !bossHealth.IsDead);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (!Application.isPlaying || boss == null)
+        {
+            return;
+        }
+
+        if (bossHealth != null)
+        {
+            bossHealth.HpChanged.RemoveListener(UpdateBossHealth);
+        }
+
+        SetBossBarVisible(false);
+    }
+
+    private void UpdateBossHealth(int currentHp, int maxHp)
+    {
+        SetValue(maxHp > 0 ? currentHp * MaxValue / maxHp : 0f);
+        SetBossBarVisible(boss != null && boss.activeInHierarchy && currentHp > 0);
+    }
+
+    private void SetBossBarVisible(bool visible)
+    {
+        if (barRoot != null && barRoot.activeSelf != visible)
+        {
+            barRoot.SetActive(visible);
+        }
+    }
 
     private void OnValidate()
     {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -39,6 +40,13 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
         Vector2 fireDirection = context.Direction.normalized;
         Quaternion rotation = GetRotation(fireDirection);
         Vector3 hitboxCenter = GetHitboxCenter(context.MuzzlePosition, fireDirection);
+        var damaged = new System.Collections.Generic.HashSet<MonsterHealth>();
+        float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+        foreach (Collider2D targetCollider in Physics2D.OverlapBoxAll(hitboxCenter, HitboxSize, angle, gunData.HitTargetLayers))
+        {
+            MonsterHealth target = targetCollider.GetComponentInParent<MonsterHealth>();
+            if (target != null && damaged.Add(target)) target.TakeDamage(gunData.Damage);
+        }
 
         GameObject hitboxObject = new GameObject(gunData.name + " Shotgun Hitbox");
         hitboxObject.transform.SetPositionAndRotation(
@@ -57,7 +65,24 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
         rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
         rigidbody2D.gravityScale = 0f;
 
+        DamageEnemiesInHitbox(gunData, hitboxCenter, rotation);
         UnityEngine.Object.Destroy(hitboxObject, HitboxLifetime);
+    }
+
+    private void DamageEnemiesInHitbox(GunSO gunData, Vector3 center, Quaternion rotation)
+    {
+        Physics2D.SyncTransforms();
+        Collider2D[] hits = Physics2D.OverlapBoxAll(center, HitboxSize, rotation.eulerAngles.z, gunData.HitTargetLayers);
+        HashSet<MonsterHealth> damagedMonsters = new HashSet<MonsterHealth>();
+
+        foreach (Collider2D hit in hits)
+        {
+            MonsterHealth health = GunDamage.GetEnemyHealth(hit);
+            if (health != null && damagedMonsters.Add(health))
+            {
+                health.TakeDamage(gunData.Damage);
+            }
+        }
     }
 
     private GameObject CreateHitboxVisual(GunSO gunData, Transform hitboxRoot)

@@ -6,6 +6,7 @@ public sealed class SkillPickup : MonoBehaviour
 {
     [SerializeField, KoreanLabel("획득 스킬")] private SkillSO skillData;
     [SerializeField, KoreanLabel("획득 대상 레이어")] private LayerMask targetLayers = ~0;
+    private bool collected;
 
     public SkillSO SkillData => skillData;
 
@@ -26,17 +27,32 @@ public sealed class SkillPickup : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (skillData == null || other == null || !IsTargetLayer(other))
+        if (collected || skillData == null || other == null || !IsTargetLayer(other))
         {
             return;
         }
 
         ArisaSkillController skillController = GetSkillController(other);
-        if (skillController == null || !skillController.TryAcquireSkill(skillData))
+        if (skillController == null)
         {
             return;
         }
 
+        if (skillData.ActivatesOnPickup)
+        {
+            ArisaHealth health = skillController.GetComponent<ArisaHealth>();
+            if (!skillData.TryApplyOnPickup(health))
+            {
+                return;
+            }
+        }
+        else if (!skillController.TryAcquireSkill(skillData))
+        {
+            return;
+        }
+
+        collected = true;
+        GetComponent<BoxCollider2D>().enabled = false;
         Destroy(gameObject);
     }
 

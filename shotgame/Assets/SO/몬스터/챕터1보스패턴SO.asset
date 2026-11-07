@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cfa63507363a7c40bfce233eb7d0e19, type: 3}
+  m_Name: "\uCC55\uD1301\uBCF4\uC2A4\uD328\uD134SO"
+  m_EditorClassIdentifier: Assembly-CSharp::BossAttackSO
+  initialDelay: 2
+  recoveryTime: 1.8
+  warningTime: 0.8
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  missilePrefab: {fileID: 8393731948003835515, guid: d5406a0f430c1b847bacfc35ea568239, type: 3}
+  explosionPrefab: {fileID: 6814746253198027461, guid: 4640f701f7b546fb94802e7ce67b87b2, type: 3}
+  missileWidth: 1.4
+  missileDamage: 1
+  explosionRadius: 0.9
+  explosionLifetime: 1.5
+  explosionScale: 0.6
+  missileInterval: 0.45
+  rainMinCount: 4
+  rainMaxCount: 7
+  rainSpeed: 5
+  horizontalMinCount: 7
+  horizontalMaxCount: 10
+  horizontalSpeed: 3
+  laserPrefab: {fileID: 3626274407673130031, guid: af209f0114dbb024e939ae143fe6b641, type: 3}
+  laserDuration: 2
+  laserWidth: 0.22
+  laserDamage: 1
+  laserHitInterval: 0.45
+  rangedMonsterPrefab: {fileID: 4475872360796116817, guid: d909d9a738aef2f48a573ad63132f2a6, type: 3}
+  summonCount: 2

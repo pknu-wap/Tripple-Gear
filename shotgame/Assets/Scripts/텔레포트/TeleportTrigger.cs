@@ -33,6 +33,10 @@ public sealed class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("페이드 인 속도"), Min(0.01f)] private float fadeInSpeed = 2f;
     [SerializeField, KoreanLabel("페이드 아웃 속도"), Min(0.01f)] private float fadeOutSpeed = 2f;
 
+    [Header("배경음악")]
+    [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
+    [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
+
     [Header("기즈모")]
     [SerializeField, KoreanLabel("기즈모 표시")] private bool drawGizmos = true;
     [SerializeField, KoreanLabel("트리거 기즈모")] private TeleportGizmoKind triggerGizmo = TeleportGizmoKind.WireBox;
@@ -93,6 +97,10 @@ public sealed class TeleportTrigger : MonoBehaviour
         isTeleporting = true;
 
         TeleportDirectionalFade fadeToUse = GetFade();
+        if (musicToFadeOut != null)
+        {
+            musicToFadeOut.FadeOut(1f / fadeInSpeed);
+        }
         if (fadeToUse != null)
         {
             yield return fadeToUse.FadeIn(fadeInSpeed);
@@ -110,6 +118,10 @@ public sealed class TeleportTrigger : MonoBehaviour
             }
         }
 
+        if (musicToFadeIn != null)
+        {
+            musicToFadeIn.FadeIn(1f / fadeOutSpeed);
+        }
         if (fadeToUse != null)
         {
             yield return fadeToUse.FadeOut(fadeOutSpeed);

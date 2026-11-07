@@ -119,3 +119,33 @@ public abstract class GunFireLogic
         return projectileObject.layer == 0 || string.IsNullOrEmpty(LayerMask.LayerToName(projectileObject.layer));
     }
 }
+
+internal static class GunDamage
+{
+    private const string EnemyLayerName = "Enemy";
+
+    public static MonsterHealth GetEnemyHealth(Collider2D hitCollider)
+    {
+        int enemyLayer = LayerMask.NameToLayer(EnemyLayerName);
+        if (hitCollider == null || enemyLayer < 0 || hitCollider.gameObject.layer != enemyLayer)
+        {
+            return null;
+        }
+
+        return hitCollider.GetComponentInParent<MonsterHealth>();
+    }
+
+    public static void ApplyToEnemy(Collider2D hitCollider, float damage)
+    {
+        if (damage <= 0f)
+        {
+            return;
+        }
+
+        MonsterHealth health = GetEnemyHealth(hitCollider);
+        if (health != null)
+        {
+            health.TakeDamage(damage);
+        }
+    }
+}

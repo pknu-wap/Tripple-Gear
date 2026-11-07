@@ -7,11 +7,13 @@ using UnityEngine.InputSystem;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public sealed class ArisaHorizontalMovement : MonoBehaviour
 {
     private static readonly int IsMovingParameter = Animator.StringToHash("IsMoving");
     private const string InertiaStateName = "Inertia";
     private const string DustStateName = "Dust";
+    private const string WaveBoundaryLayerName = "WaveBoundary";
     private const float StopThreshold = 0.03f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
@@ -33,9 +35,10 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("관성 오버레이 렌더러")] private SpriteRenderer[] inertiaOverlayRenderers;
     [SerializeField, KoreanLabel("이동 중 렌더러")] private SpriteRenderer[] movingSpriteRenderers;
     [SerializeField, KoreanLabel("이동 충돌체")] private BoxCollider2D movementCollider;
+    private Rigidbody2D movementBody;
+    private PhysicsMaterial2D frictionlessMaterial;
     [SerializeField, KoreanLabel("자세 충돌체")] private ArisaStanceCollider stanceCollider;
     [SerializeField, KoreanLabel("총 발사")] private SubmachineGunFire gunFire;
-    [SerializeField, KoreanLabel("수평 충돌 레이어")] private LayerMask horizontalCollisionLayers;
     [SerializeField, KoreanLabel("고정 발판 레이어")] private LayerMask solidPlatformLayers;
     [SerializeField, KoreanLabel("일방향 발판 레이어")] private LayerMask oneWayPlatformLayers;
     [SerializeField, KoreanLabel("트리거 충돌 포함")] private bool collisionIncludesTriggers;
@@ -53,6 +56,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private bool hasMouseScreenPosition;
     private Vector2 mouseScreenPosition;
     private float currentHorizontalSpeed;
+    private float hitReactionEndTime;
+    private float hitKnockbackSpeed;
     private float verticalSpeed;
     private float groundY;
     private bool isGrounded = true;
@@ -108,16 +113,50 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     public void TeleportTo(Vector3 position)
     {
+        if (movementBody != null)
+        {
+            movementBody.position = position;
+            movementBody.linearVelocity = Vector2.zero;
+        }
+
         transform.position = position;
         groundY = position.y;
         currentHorizontalSpeed = 0f;
+        hitReactionEndTime = 0f;
+        hitKnockbackSpeed = 0f;
         verticalSpeed = 0f;
+        jumpPressed = false;
         isGrounded = true;
         isCrouching = false;
         isCoasting = false;
         wasCoasting = false;
         ApplyStanceCollider();
         Physics2D.SyncTransforms();
+    }
+
+    public void StartHitReaction(float horizontalDirection, float duration, float distance, float upwardSpeed)
+    {
+        if (duration <= 0f)
+        {
+            return;
+        }
+
+        hitReactionEndTime = Time.time + duration;
+        hitKnockbackSpeed = Mathf.Sign(horizontalDirection) * Mathf.Max(0f, distance) / duration;
+        currentHorizontalSpeed = 0f;
+        if (upwardSpeed > 0f)
+        {
+            verticalSpeed = Mathf.Max(verticalSpeed, upwardSpeed);
+            if (movementBody != null)
+            {
+                Vector2 velocity = movementBody.linearVelocity;
+                movementBody.linearVelocity = new Vector2(velocity.x, Mathf.Max(velocity.y, upwardSpeed));
+            }
+            isGrounded = false;
+        }
+
+        isCoasting = false;
+        wasCoasting = false;
     }
 
     private void Reset()
@@ -128,6 +167,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private void Awake()
     {
         FindReferences();
+        if (movementBody != null)
+        {
+            movementBody.gravityScale = 0f;
+        }
+
+        if (movementCollider != null)
+        {
+            frictionlessMaterial = new PhysicsMaterial2D("Arisa Frictionless")
+            {
+                friction = 0f,
+                bounciness = 0f,
+            };
+            movementCollider.sharedMaterial = frictionlessMaterial;
+        }
+
         groundY = transform.position.y;
         isGrounded = true;
         SetMovingAnimation(false);
@@ -144,6 +198,11 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         if (movementCollider == null)
         {
             movementCollider = GetComponent<BoxCollider2D>();
+        }
+
+        if (movementBody == null)
+        {
+            movementBody = GetComponent<Rigidbody2D>();
         }
 
         if (stanceCollider == null)
@@ -252,14 +311,33 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private void Update()
     {
         SampleInput();
+    }
+
+    private void FixedUpdate()
+    {
+        if (movementBody == null)
+        {
+            return;
+        }
+
+        verticalSpeed = movementBody.linearVelocity.y;
+        bool isHitReacting = Time.time < hitReactionEndTime;
+        if (isHitReacting)
+        {
+            horizontalInput = 0f;
+            jumpPressed = false;
+        }
+
         UpdateCrouchState();
         ApplyStanceCollider();
         RefreshGroundedState();
         UpdateJump();
+        SnapToOneWayPlatform();
+        jumpPressed = false;
 
         bool hasMovementInput = !isCrouching && !Mathf.Approximately(horizontalInput, 0f);
         float targetHorizontalSpeed = horizontalInput * moveSpeed;
-        if (isCrouching)
+        if (isHitReacting || isCrouching)
         {
             currentHorizontalSpeed = 0f;
         }
@@ -269,7 +347,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             currentHorizontalSpeed = Mathf.MoveTowards(
                 currentHorizontalSpeed,
                 targetHorizontalSpeed,
-                speedChange * Time.deltaTime
+                speedChange * Time.fixedDeltaTime
             );
         }
 
@@ -279,8 +357,11 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         bool hasMovementSpeed = Mathf.Abs(currentHorizontalSpeed) > 0f;
-        Vector3 movement = new Vector3(currentHorizontalSpeed, verticalSpeed, 0f) * Time.deltaTime;
-        MoveWithCollisions(movement);
+        float horizontalSpeed = isHitReacting
+            ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
+            : currentHorizontalSpeed;
+        ClampToFallbackGround();
+        movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
         bool isGunReloading = gunFire != null && gunFire.IsReloading;
         bool shouldCoast = isGrounded && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
@@ -304,13 +385,32 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         ApplyCrouchAnimationFrame();
     }
 
-    private void AssignDefaultCollisionLayers()
+    private void OnDisable()
     {
-        if (horizontalCollisionLayers.value == 0)
+        if (movementBody != null)
         {
-            horizontalCollisionLayers = LayerMask.GetMask("Box");
+            movementBody.linearVelocity = Vector2.zero;
         }
 
+        currentHorizontalSpeed = 0f;
+        verticalSpeed = 0f;
+        horizontalInput = 0f;
+        jumpHeld = false;
+        crouchHeld = false;
+        fireHeld = false;
+        jumpPressed = false;
+    }
+
+    private void OnDestroy()
+    {
+        if (frictionlessMaterial != null)
+        {
+            Destroy(frictionlessMaterial);
+        }
+    }
+
+    private void AssignDefaultCollisionLayers()
+    {
         if (solidPlatformLayers.value == 0)
         {
             solidPlatformLayers = LayerMask.GetMask("Box");
@@ -444,7 +544,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         if (!isGrounded)
         {
-            verticalSpeed -= gravity * Time.deltaTime;
+            verticalSpeed -= gravity * Time.fixedDeltaTime;
         }
     }
 
@@ -462,136 +562,45 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
     }
 
-    private void MoveWithCollisions(Vector3 movement)
+    private void SnapToOneWayPlatform()
     {
-        if (movementCollider == null || !movementCollider.enabled)
-        {
-            transform.position += movement;
-            ClampToFallbackGround();
-            return;
-        }
-
-        Physics2D.SyncTransforms();
-
-        float horizontalMovement = movement.x;
-        if (!Mathf.Approximately(horizontalMovement, 0f))
-        {
-            horizontalMovement = GetAllowedHorizontalMovement(horizontalMovement);
-            if (Mathf.Abs(horizontalMovement) < Mathf.Abs(movement.x))
-            {
-                currentHorizontalSpeed = 0f;
-            }
-
-            transform.position += new Vector3(horizontalMovement, 0f, 0f);
-            Physics2D.SyncTransforms();
-        }
-
-        float verticalMovement = movement.y;
-        if (verticalMovement > 0f)
-        {
-            bool hitCeiling;
-            verticalMovement = GetAllowedUpwardMovement(verticalMovement, out hitCeiling);
-            if (hitCeiling)
-            {
-                verticalSpeed = 0f;
-            }
-        }
-        else if (verticalMovement < 0f)
-        {
-            bool landed;
-            verticalMovement = GetAllowedDownwardMovement(verticalMovement, out landed);
-            if (landed)
-            {
-                verticalSpeed = 0f;
-                isGrounded = true;
-            }
-            else
-            {
-                isGrounded = false;
-            }
-        }
-
-        transform.position += new Vector3(0f, verticalMovement, 0f);
-        Physics2D.SyncTransforms();
-
-        if (ClampToFallbackGround())
+        if (verticalSpeed > 0f || movementCollider == null || !movementCollider.enabled
+            || oneWayPlatformLayers.value == 0)
         {
             return;
         }
 
-        if (isGrounded
-            && verticalSpeed <= 0f
-            && !ShouldKeepCrouchGrounded()
-            && !HasGroundBelow(GetCurrentGroundedCheckDistance()))
-        {
-            isGrounded = false;
-        }
-    }
-
-    private float GetAllowedHorizontalMovement(float horizontalMovement)
-    {
-        float directionSign = Mathf.Sign(horizontalMovement);
-        Vector2 direction = directionSign > 0f ? Vector2.right : Vector2.left;
-        float moveDistance = Mathf.Abs(horizontalMovement);
-        int hitCount = CastMovementCollider(direction, moveDistance + GetSkinWidth(), horizontalCollisionLayers);
-        float allowedDistance = moveDistance;
+        float distance = Mathf.Max(groundedCheckDistance,
+            -verticalSpeed * Time.fixedDeltaTime) + GetSkinWidth();
+        int hitCount = CastMovementCollider(Vector2.down, distance, oneWayPlatformLayers);
+        float feetY = movementCollider.bounds.min.y;
+        float highestTop = float.NegativeInfinity;
 
         for (int i = 0; i < hitCount; i++)
         {
             RaycastHit2D hit = movementCastHits[i];
-            if (!IsBlockingHorizontalHit(hit, direction))
+            if (!IsGroundHit(hit, distance))
             {
                 continue;
             }
 
-            allowedDistance = Mathf.Min(allowedDistance, Mathf.Max(0f, hit.distance - GetSkinWidth()));
+            float top = hit.collider.bounds.max.y;
+            if (top <= feetY + oneWayPlatformTopTolerance
+                && top >= feetY - distance - GetSkinWidth())
+            {
+                highestTop = Mathf.Max(highestTop, top);
+            }
         }
 
-        return allowedDistance * directionSign;
-    }
-
-    private float GetAllowedUpwardMovement(float upwardMovement, out bool hitCeiling)
-    {
-        hitCeiling = false;
-        float moveDistance = Mathf.Abs(upwardMovement);
-        int hitCount = CastMovementCollider(Vector2.up, moveDistance + GetSkinWidth(), solidPlatformLayers);
-        float allowedDistance = moveDistance;
-
-        for (int i = 0; i < hitCount; i++)
+        if (float.IsNegativeInfinity(highestTop))
         {
-            RaycastHit2D hit = movementCastHits[i];
-            if (!IsBlockingCeilingHit(hit))
-            {
-                continue;
-            }
-
-            hitCeiling = true;
-            allowedDistance = Mathf.Min(allowedDistance, Mathf.Max(0f, hit.distance - GetSkinWidth()));
+            return;
         }
 
-        return allowedDistance;
-    }
-
-    private float GetAllowedDownwardMovement(float downwardMovement, out bool landed)
-    {
-        landed = false;
-        float moveDistance = Mathf.Abs(downwardMovement);
-        int hitCount = CastMovementCollider(Vector2.down, moveDistance + GetSkinWidth(), GetGroundLayers());
-        float allowedDistance = moveDistance;
-
-        for (int i = 0; i < hitCount; i++)
-        {
-            RaycastHit2D hit = movementCastHits[i];
-            if (!IsGroundHit(hit, moveDistance + GetSkinWidth()))
-            {
-                continue;
-            }
-
-            landed = true;
-            allowedDistance = Mathf.Min(allowedDistance, Mathf.Max(0f, hit.distance - GetSkinWidth()));
-        }
-
-        return -allowedDistance;
+        movementBody.position += new Vector2(0f, highestTop - feetY);
+        verticalSpeed = 0f;
+        isGrounded = true;
+        Physics2D.SyncTransforms();
     }
 
     private bool HasGroundBelow(float distance)
@@ -663,60 +672,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private LayerMask GetGroundLayers()
     {
-        return solidPlatformLayers | oneWayPlatformLayers;
+        return GetSolidPlatformLayers() | oneWayPlatformLayers;
     }
 
-    private bool IsBlockingHorizontalHit(RaycastHit2D hit, Vector2 direction)
+    private LayerMask GetSolidPlatformLayers()
     {
-        if (ShouldIgnoreCollisionHit(hit))
-        {
-            return false;
-        }
-
-        if (IsInLayerMask(hit.collider.gameObject.layer, oneWayPlatformLayers))
-        {
-            return false;
-        }
-
-        if (hit.normal.sqrMagnitude > 0.0001f)
-        {
-            return Vector2.Dot(hit.normal, direction) < -0.01f;
-        }
-
-        Bounds ownBounds = movementCollider.bounds;
-        Bounds otherBounds = hit.collider.bounds;
-        float inset = Mathf.Max(0.01f, GetSkinWidth());
-        bool verticallyOverlapping = otherBounds.max.y > ownBounds.min.y + inset
-            && otherBounds.min.y < ownBounds.max.y - inset;
-
-        if (!verticallyOverlapping)
-        {
-            return false;
-        }
-
-        return direction.x > 0f
-            ? otherBounds.min.x >= ownBounds.center.x
-            : otherBounds.max.x <= ownBounds.center.x;
-    }
-
-    private bool IsBlockingCeilingHit(RaycastHit2D hit)
-    {
-        if (ShouldIgnoreCollisionHit(hit))
-        {
-            return false;
-        }
-
-        if (!IsInLayerMask(hit.collider.gameObject.layer, solidPlatformLayers))
-        {
-            return false;
-        }
-
-        if (hit.normal.sqrMagnitude > 0.0001f)
-        {
-            return hit.normal.y < -0.01f;
-        }
-
-        return hit.collider.bounds.min.y >= movementCollider.bounds.center.y;
+        return solidPlatformLayers | LayerMask.GetMask(WaveBoundaryLayerName);
     }
 
     private bool IsGroundHit(RaycastHit2D hit, float checkDistance)
@@ -798,7 +759,14 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return false;
         }
 
-        transform.position = new Vector3(transform.position.x, groundY, transform.position.z);
+        if (movementBody != null)
+        {
+            movementBody.position = new Vector2(movementBody.position.x, groundY);
+        }
+        else
+        {
+            transform.position = new Vector3(transform.position.x, groundY, transform.position.z);
+        }
         verticalSpeed = 0f;
         isGrounded = true;
         return true;
@@ -865,7 +833,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         fireHeld = ReadFireHeld();
         jumpHeld = ReadJumpHeld();
         crouchHeld = ReadCrouchHeld();
-        jumpPressed = jumpHeld && !previousJumpHeld;
+        jumpPressed |= jumpHeld && !previousJumpHeld;
         hasMouseScreenPosition = ReadMouseScreenPosition(out mouseScreenPosition);
     }
 

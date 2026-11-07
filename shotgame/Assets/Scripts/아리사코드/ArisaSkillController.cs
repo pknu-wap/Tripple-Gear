@@ -18,6 +18,7 @@ public sealed class ArisaSkillController : MonoBehaviour
 #endif
 
     [SerializeField, KoreanLabel("스킬 데이터")] private SkillSO 스킬데이터;
+    [SerializeField, KoreanLabel("시작 시 스킬 없이 시작")] private bool startWithoutSkill;
     [SerializeField, KoreanLabel("대상 카메라")] private Camera 대상카메라;
     [SerializeField, KoreanLabel("이동 컴포넌트")] private ArisaHorizontalMovement 이동컴포넌트;
 
@@ -35,6 +36,7 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     public SkillSO SkillData => 스킬데이터;
     public int RemainingUseCount => remainingUseCount;
+    public event System.Action<int> RemainingUseCountChanged;
     public float CooldownRemaining => IsCoolingDown ? Mathf.Max(0f, cooldownCompleteTime - Time.time) : 0f;
     public bool IsCoolingDown => 스킬데이터 != null && Time.time < cooldownCompleteTime;
 
@@ -48,7 +50,6 @@ public sealed class ArisaSkillController : MonoBehaviour
         runtime?.StopPlaying();
         스킬데이터 = skillData;
         currentSkillData = null;
-        remainingUseCount = 0;
         cooldownCompleteTime = 0f;
         skillConsumed = false;
 
@@ -65,6 +66,12 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void Awake()
     {
+        if (startWithoutSkill)
+        {
+            스킬데이터 = null;
+            skillConsumed = true;
+        }
+
         FindReferences();
         RefreshSkillState();
     }
@@ -210,7 +217,7 @@ public sealed class ArisaSkillController : MonoBehaviour
         if (스킬데이터 == null)
         {
             currentSkillData = null;
-            remainingUseCount = 0;
+            SetRemainingUseCount(0);
             cooldownCompleteTime = 0f;
             return;
         }
@@ -218,7 +225,7 @@ public sealed class ArisaSkillController : MonoBehaviour
         if (스킬데이터 != currentSkillData)
         {
             currentSkillData = 스킬데이터;
-            remainingUseCount = 스킬데이터.MaxUseCount;
+            SetRemainingUseCount(스킬데이터.MaxUseCount);
             cooldownCompleteTime = 0f;
             skillConsumed = false;
         }
@@ -226,7 +233,7 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void ConsumeSkillUse(SkillSO skillToUse)
     {
-        remainingUseCount = Mathf.Max(0, remainingUseCount - 1);
+        SetRemainingUseCount(remainingUseCount - 1);
         if (remainingUseCount <= 0)
         {
             RemoveSkillFromArisa();
@@ -241,8 +248,20 @@ public sealed class ArisaSkillController : MonoBehaviour
         skillConsumed = true;
         스킬데이터 = null;
         currentSkillData = null;
-        remainingUseCount = 0;
+        SetRemainingUseCount(0);
         cooldownCompleteTime = 0f;
+    }
+
+    private void SetRemainingUseCount(int count)
+    {
+        count = Mathf.Max(0, count);
+        if (remainingUseCount == count)
+        {
+            return;
+        }
+
+        remainingUseCount = count;
+        RemainingUseCountChanged?.Invoke(remainingUseCount);
     }
 
     private Camera GetCamera()

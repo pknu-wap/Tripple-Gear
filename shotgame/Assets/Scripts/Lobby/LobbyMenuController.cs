@@ -4,7 +4,7 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class LobbyMenuController : MonoBehaviour
 {
-    [SerializeField] private string newGameSceneName = "시네마틱샘플";
+    [SerializeField] private string newGameSceneName = "인게임샘플";
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button loadGameButton;
     [SerializeField] private Button optionsButton;
