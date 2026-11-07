@@ -374,7 +374,7 @@ MonoBehaviour:
     m_DisplayName: Active
   m_Markers:
     m_Objects: []
-  m_PostPlaybackState: 3
+  m_PostPlaybackState: 0
 --- !u!74 &2026510550688438400
 AnimationClip:
   m_ObjectHideFlags: 0
