@@ -1235,7 +1235,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &377301267
 Transform:
   m_ObjectHideFlags: 0
@@ -4436,7 +4436,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1235282402
 Transform:
   m_ObjectHideFlags: 0
@@ -6169,7 +6169,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1690358571
 Transform:
   m_ObjectHideFlags: 0
@@ -6436,7 +6436,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1814458504
 Transform:
   m_ObjectHideFlags: 0
@@ -6674,6 +6674,14 @@ PrefabInstance:
     - target: {fileID: 998766917757465649, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
       propertyPath: m_Name
       value: "\uC544\uB9AC\uC0AC \uC6C0\uC9C1\uC784_2"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5201290969597213042, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
+      propertyPath: deceleration
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5201290969597213042, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
+      propertyPath: landingHorizontalSpeed
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6069189847862358157, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
       propertyPath: defeated.m_PersistentCalls.m_Calls.Array.size
