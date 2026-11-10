@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -10,6 +9,7 @@ public sealed class LobbyMenuController : MonoBehaviour
     [SerializeField] private Button loadGameButton;
     [SerializeField] private Button optionsButton;
     [SerializeField] private Button quitButton;
+    private bool isStartingNewGame;
 
     private void Awake()
     {
@@ -100,7 +100,10 @@ public sealed class LobbyMenuController : MonoBehaviour
 
     public void StartNewGame()
     {
-        LoadScene(newGameSceneName);
+        if (isStartingNewGame) return;
+        isStartingNewGame = true;
+        if (!GameFlowSignals.LoadSceneAndSend(newGameSceneName, GameFlowSignals.BeginGame))
+            isStartingNewGame = false;
     }
 
     public void LoadGame()
@@ -122,16 +125,4 @@ public sealed class LobbyMenuController : MonoBehaviour
 #endif
     }
 
-    private void LoadScene(string sceneName)
-    {
-        if (string.IsNullOrWhiteSpace(sceneName))
-        {
-            Debug.LogWarning("이동할 씬 이름이 비어 있습니다.", this);
-            return;
-        }
-
-        string fromSceneName = SceneManager.GetActiveScene().name;
-        SceneTransitionSignalReceiver.NotifySceneTransition(fromSceneName, sceneName);
-        SceneManager.LoadScene(sceneName);
-    }
 }

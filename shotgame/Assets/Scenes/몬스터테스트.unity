@@ -333,6 +333,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 758183770}
+  - component: {fileID: 1362445711}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -354,7 +355,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 14307641}
-  - {fileID: 1362445712}
+  - {fileID: 1901790742}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1258429459
@@ -448,60 +449,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1362445710
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1362445712}
-  - component: {fileID: 1362445711}
-  m_Layer: 0
-  m_Name: wavemanager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!114 &1362445711
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1362445710}
+  m_GameObject: {fileID: 758183769}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 1377373890}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!4 &1362445712
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1362445710}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1901790742}
-  m_Father: {fileID: 758183770}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::TriggerManager
 --- !u!1 &1377373890
 GameObject:
   m_ObjectHideFlags: 0
@@ -799,7 +758,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1362445712}
+  m_Father: {fileID: 758183770}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1901790743
 MonoBehaviour:
@@ -810,14 +769,24 @@ MonoBehaviour:
   m_GameObject: {fileID: 1901790741}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1362445711}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerMode: 0
+  triggerManager: {fileID: 1362445711}
   playerLayers:
     serializedVersion: 2
     m_Bits: 4294967295
   requiredPlayer: {fileID: 0}
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 1377373890}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &1901790744
 BoxCollider2D:
   m_ObjectHideFlags: 0

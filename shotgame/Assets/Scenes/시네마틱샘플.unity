@@ -197,8 +197,10 @@ GameObject:
   m_Component:
   - component: {fileID: 377301267}
   - component: {fileID: 377301268}
+  - component: {fileID: 377301269}
+  - component: {fileID: 377301270}
   m_Layer: 0
-  m_Name: cutscenemanager
+  m_Name: InGameSequence
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -230,21 +232,68 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ecc74e3413484001b2559d9d4de5e40a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameFlowController
+  m_EditorClassIdentifier: Assembly-CSharp::TimelineCutscenePlayer
   introTimeline: {fileID: 1748739689}
-  cutsceneSignalSourceSceneName: "\uB85C\uBE44"
-  startButton: {fileID: 0}
-  hideStartButtonOnPlay: 1
   completeWhenLastAnimationClipEnds: 1
   onlyCompleteWhenReachedEnd: 1
   stopTimelineOnComplete: 1
-  freezeAnimatorsOnComplete: 1
+  freezeAnimatorsOnComplete: 0
   extraAnimatorsToFreeze: []
   completedLogMessage: "\uD0C0\uC784\uB77C\uC778 \uC885\uB8CC: \uAC8C\uC784 \uC2DC\uC791
     \uB85C\uC9C1 \uD638\uCD9C"
   onTimelineCompleted:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &377301269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377301266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333d9529f97d4229812a8465ddd57c9a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::InGameSequenceController
+  playOnStart: 0
+  intro: {fileID: 377301268}
+  chapters: []
+  onGameplayStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onSequenceCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &377301270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377301266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc8697aa4fcf4c9794705b0a060caa53, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GameFlowSignalReceiver
+  signalName: BeginGame
+  executeOnce: 0
+  onReceived:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 377301269}
+        m_TargetAssemblyTypeName: InGameSequenceController, Assembly-CSharp
+        m_MethodName: BeginSequence
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument:
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &591702665
 GameObject:
   m_ObjectHideFlags: 0
@@ -852,7 +901,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2000000002
 RectTransform:
   m_ObjectHideFlags: 0
@@ -948,6 +997,7 @@ GameObject:
   - component: {fileID: 2000000012}
   - component: {fileID: 2000000013}
   - component: {fileID: 2000000014}
+  - component: {fileID: 2000000015}
   m_Layer: 5
   m_Name: GameStartButton
   m_TagString: Untagged
@@ -1056,19 +1106,22 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2000000013}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 377301268}
-        m_TargetAssemblyTypeName: GameFlowController, Assembly-CSharp
-        m_MethodName: StartGame
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
+--- !u!114 &2000000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2000000010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1b2563b9fe4ecdb3c013c7cd02d05c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GameFlowSignalSender
+  signalName: BeginGame
+  targetSceneName:
+  button: {fileID: 2000000014}
 --- !u!1 &2000000020
 GameObject:
   m_ObjectHideFlags: 0

@@ -50,7 +50,6 @@ public static class LobbySceneBuilder
         CreateBlackBackground(canvas.transform);
 
         LobbyMenuController controller = CreateLobbyController();
-        CreateTransitionSignalReceiver();
 
         Text title = CreateText(canvas.transform, "Title", "Tripple gear", 56, TextAnchor.MiddleCenter);
         RectTransform titleTransform = title.rectTransform;
@@ -65,7 +64,7 @@ public static class LobbySceneBuilder
         Button quitButton = CreateButton(canvas.transform, "QuitButton", "종료", new Vector2(0f, -120f));
 
         SerializedObject controllerObject = new SerializedObject(controller);
-        controllerObject.FindProperty("newGameSceneName").stringValue = TestBattleSceneName;
+        controllerObject.FindProperty("newGameSceneName").stringValue = "시네마틱샘플";
         controllerObject.FindProperty("newGameButton").objectReferenceValue = newGameButton;
         controllerObject.FindProperty("loadGameButton").objectReferenceValue = loadGameButton;
         controllerObject.FindProperty("optionsButton").objectReferenceValue = optionsButton;
@@ -133,12 +132,6 @@ public static class LobbySceneBuilder
     {
         GameObject controllerObject = new GameObject("LobbyMenuController");
         return controllerObject.AddComponent<LobbyMenuController>();
-    }
-
-    private static SceneTransitionSignalReceiver CreateTransitionSignalReceiver()
-    {
-        GameObject receiverObject = new GameObject("SceneTransitionSignalReceiver");
-        return receiverObject.AddComponent<SceneTransitionSignalReceiver>();
     }
 
     private static Text CreateText(
