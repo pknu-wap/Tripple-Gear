@@ -187,5 +187,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
   monsterPrefab: {fileID: 8622938717200000005, guid: 59337893fbd1d5146b638e054bf31447, type: 3}
   monstersPerBatch: 3
-  spawnOffset: {x: -2, y: 0}
-  waveManager: {fileID: 0}

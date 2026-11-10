@@ -21,7 +21,6 @@ public sealed class WaveManager : MonoBehaviour
     public bool IsCompleted => State == WaveState.Completed;
     public UnityEvent WaveStarted => waveStarted;
     public UnityEvent WaveCompleted => waveCompleted;
-    internal Camera WaveCamera => cameraManager != null ? cameraManager.ManagedCamera : null;
 
     private readonly List<GameObject> waveMonsters = new List<GameObject>();
     private CameraManager lockedManager;
@@ -30,11 +29,6 @@ public sealed class WaveManager : MonoBehaviour
     private bool cameraWasEnabled;
     private bool reportedInvalidSetup;
     private readonly BoxCollider2D[] cameraBoundaries = new BoxCollider2D[4];
-
-    internal void TrackSpawnedMonster(GameObject monster)
-    {
-        waveMonsters.Add(monster);
-    }
 
     public bool TryStartWave()
     {
@@ -115,11 +109,6 @@ public sealed class WaveManager : MonoBehaviour
         return waveMonsters.Count > 0;
     }
 
-    public bool IsWaveEnded()
-    {
-        return waveMonsters.Count == 0;
-    }
-
     private void LateUpdate()
     {
         if (State != WaveState.Running)
@@ -134,7 +123,6 @@ public sealed class WaveManager : MonoBehaviour
 
         lockedCamera.transform.position = lockedPosition;
         UpdateCameraBoundaries();
-        waveMonsters.RemoveAll(monster => monster == null);
         foreach (GameObject monster in waveMonsters)
         {
             if (monster != null && monster.activeInHierarchy)
@@ -156,17 +144,6 @@ public sealed class WaveManager : MonoBehaviour
         }
         State = WaveState.Cancelled;
         RestoreCamera();
-    }
-
-    public void EndWave()
-    {
-        if (State != WaveState.Running)
-        {
-            return;
-        }
-        State = WaveState.Completed;
-        RestoreCamera();
-        waveCompleted.Invoke();
     }
 
     private void RestoreCamera()
