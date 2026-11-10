@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 public sealed class ArisaHorizontalMovement : MonoBehaviour
 {
@@ -17,6 +17,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private const float StopThreshold = 0.03f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
+    [SerializeField, KoreanLabel("달리는 맵 화면 왼쪽 여유"), Min(0f)] private float runningMapLeftPadding = 0.2f;
     [SerializeField, KoreanLabel("착지 시 남길 최대 수평 속도"), Min(0f)] private float landingHorizontalSpeed = 0f;
     [SerializeField, KoreanLabel("가속도")] private float acceleration = 18f;
     [SerializeField, KoreanLabel("감속도")] private float deceleration = 12f;
@@ -36,8 +37,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("관성 먼지 애니메이터")] private Animator inertiaDustAnimator;
     [SerializeField, KoreanLabel("관성 오버레이 렌더러")] private SpriteRenderer[] inertiaOverlayRenderers;
     [SerializeField, KoreanLabel("이동 중 렌더러")] private SpriteRenderer[] movingSpriteRenderers;
-    [SerializeField, KoreanLabel("이동 충돌체")] private BoxCollider2D movementCollider;
+    [SerializeField, KoreanLabel("이동 충돌체")] private CapsuleCollider2D movementCollider;
     private Rigidbody2D movementBody;
+    private CameraManager cameraManager;
     private PhysicsMaterial2D frictionlessMaterial;
     [SerializeField, KoreanLabel("자세 충돌체")] private ArisaStanceCollider stanceCollider;
     [SerializeField, KoreanLabel("총 발사")] private SubmachineGunFire gunFire;
@@ -243,12 +245,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         if (movementCollider == null)
         {
-            movementCollider = GetComponent<BoxCollider2D>();
+            movementCollider = GetComponent<CapsuleCollider2D>();
         }
 
         if (movementBody == null)
         {
             movementBody = GetComponent<Rigidbody2D>();
+        }
+
+        if (cameraManager == null)
+        {
+#if UNITY_2023_1_OR_NEWER
+            cameraManager = Object.FindFirstObjectByType<CameraManager>();
+#else
+            cameraManager = Object.FindObjectOfType<CameraManager>();
+#endif
         }
 
         if (stanceCollider == null)
@@ -431,6 +442,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         float horizontalSpeed = justLanded ? currentHorizontalSpeed : isHitReacting
             ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
             : currentHorizontalSpeed;
+        horizontalSpeed = KeepInsideRunningMapScreen(horizontalSpeed);
         ClampToFallbackGround();
         movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
@@ -455,6 +467,46 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     {
         ApplyCrouchAnimationFrame();
         ApplyLandingAnimationFrame();
+    }
+
+    private float KeepInsideRunningMapScreen(float horizontalSpeed)
+    {
+        if (cameraManager == null || cameraManager.FollowMode != CameraFollowMode.RunningMap
+            || cameraManager.FollowTarget != transform || movementCollider == null)
+        {
+            return horizontalSpeed;
+        }
+
+        Camera cameraToUse = cameraManager.ManagedCamera;
+        if (cameraToUse == null || !cameraToUse.orthographic)
+        {
+            return horizontalSpeed;
+        }
+
+        float leftEdge = cameraToUse.transform.position.x
+            - cameraToUse.orthographicSize * cameraToUse.aspect + runningMapLeftPadding;
+        float distanceToEdge = movementCollider.bounds.min.x - leftEdge;
+        if (distanceToEdge < 0f)
+        {
+            Vector2 position = movementBody.position;
+            position.x -= distanceToEdge;
+            movementBody.position = position;
+            Physics2D.SyncTransforms();
+            distanceToEdge = 0f;
+        }
+
+        if (horizontalSpeed < 0f)
+        {
+            float limitedSpeed = Mathf.Max(horizontalSpeed, -distanceToEdge / Time.fixedDeltaTime);
+            if (limitedSpeed > horizontalSpeed)
+            {
+                currentHorizontalSpeed = 0f;
+            }
+
+            return limitedSpeed;
+        }
+
+        return horizontalSpeed;
     }
 
     private void ApplyLandingAnimationFrame()
@@ -785,34 +837,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return 0;
         }
 
-        return Physics2D.BoxCast(
-            GetMovementColliderWorldCenter(),
-            GetMovementColliderWorldSize(),
-            GetMovementColliderWorldAngle(),
-            direction,
-            CreateContactFilter(layerMask),
-            movementCastHits,
-            distance
-        );
-    }
-
-    private Vector2 GetMovementColliderWorldCenter()
-    {
-        return movementCollider.transform.TransformPoint(movementCollider.offset);
-    }
-
-    private Vector2 GetMovementColliderWorldSize()
-    {
-        Vector3 scale = movementCollider.transform.lossyScale;
-        return new Vector2(
-            Mathf.Abs(movementCollider.size.x * scale.x),
-            Mathf.Abs(movementCollider.size.y * scale.y)
-        );
-    }
-
-    private float GetMovementColliderWorldAngle()
-    {
-        return movementCollider.transform.eulerAngles.z;
+        return movementCollider.Cast(direction, CreateContactFilter(layerMask), movementCastHits, distance);
     }
 
     private ContactFilter2D CreateContactFilter(LayerMask layerMask)
