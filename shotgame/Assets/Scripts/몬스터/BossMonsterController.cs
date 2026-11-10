@@ -19,7 +19,7 @@ public sealed class BossMonsterController : MonoBehaviour
     [SerializeField, KoreanLabel("영역 최소 좌표")] private Vector2 arenaMin = new Vector2(-17f, 0f);
     [SerializeField, KoreanLabel("영역 최대 좌표")] private Vector2 arenaMax = new Vector2(-2f, 7f);
 
-    private readonly List<MonsterHealth> summonedMonsters = new List<MonsterHealth>();
+    private readonly List<GameObject> summonedMonsters = new List<GameObject>();
     private readonly RaycastHit2D[] laserHits = new RaycastHit2D[32];
     private MonsterHealth health;
     private GameObject combatObjects;
@@ -36,7 +36,8 @@ public sealed class BossMonsterController : MonoBehaviour
     {
         get
         {
-            summonedMonsters.RemoveAll(monster => monster == null || monster.IsDead);
+            summonedMonsters.RemoveAll(monster => monster == null
+                || (monster.TryGetComponent<MonsterHealth>(out var monsterHealth) && monsterHealth.IsDead));
             return summonedMonsters.Count;
         }
     }
@@ -88,7 +89,6 @@ public sealed class BossMonsterController : MonoBehaviour
     private IEnumerator BattleLoop()
     {
         Status = "전투 준비";
-        yield return new WaitForSeconds(attackData.InitialDelay);
         while (!encounterEnded && !health.IsDead)
         {
             if (player == null) player = FindFirstObjectByType<ArisaHealth>();
@@ -150,11 +150,7 @@ public sealed class BossMonsterController : MonoBehaviour
         for (int i = 0; i < LastMissileCount; i++)
         {
             float x = Random.Range(area.xMin + 0.6f, area.xMax - 0.6f);
-            Status = "미사일 낙하 예고";
-            LineRenderer warning = CreateLine("낙하 예고", new Vector2(x, area.yMin + 0.05f),
-                new Vector2(x, area.yMax), new Color(1f, 0.2f, 0.1f, 0.45f), 0.06f);
             yield return new WaitForSeconds(attackData.WarningTime);
-            Destroy(warning.gameObject);
             Status = "미사일 낙하";
             SpawnMissile(new Vector2(x, area.yMax + 0.7f), Vector2.down, attackData.RainSpeed);
             yield return new WaitForSeconds(attackData.MissileInterval);
@@ -168,11 +164,7 @@ public sealed class BossMonsterController : MonoBehaviour
         for (int i = 0; i < LastMissileCount; i++)
         {
             float y = Random.Range(area.yMin + 0.55f, area.yMax - 0.6f);
-            Status = "가로 미사일 예고";
-            LineRenderer warning = CreateLine("가로 발사 예고", new Vector2(area.xMax + 0.8f, y),
-                new Vector2(area.xMax - 1.2f, y), new Color(1f, 0.5f, 0.1f, 0.65f), 0.07f);
             yield return new WaitForSeconds(attackData.WarningTime);
-            Destroy(warning.gameObject);
             Status = "가로 미사일";
             SpawnMissile(new Vector2(area.xMax + 0.8f, y), Vector2.left, attackData.HorizontalSpeed);
             yield return new WaitForSeconds(attackData.MissileInterval);
@@ -283,10 +275,7 @@ public sealed class BossMonsterController : MonoBehaviour
         foreach (Vector2 position in positions)
         {
             GameObject monster = Instantiate(attackData.RangedMonsterPrefab, position, Quaternion.identity, combatObjects.transform);
-            MonsterHealth monsterHealth = monster.GetComponent<MonsterHealth>();
-            if (monsterHealth != null) summonedMonsters.Add(monsterHealth);
-            RangedMonsterAttack ranged = monster.GetComponent<RangedMonsterAttack>();
-            if (ranged != null) ranged.Initialize(player, combatObjects.transform);
+            summonedMonsters.Add(monster);
         }
         Status = "원거리 몹 소환";
     }
