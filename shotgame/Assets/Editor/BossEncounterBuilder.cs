@@ -13,7 +13,6 @@ public static class BossEncounterBuilder
     public const string ScenePath = "Assets/Scenes/보스테스트.unity";
     public const string BossPrefabPath = "Assets/몬스터/챕터1보스몹/챕터1보스.prefab";
     public const string PatternPath = "Assets/SO/몬스터/챕터1보스패턴SO.asset";
-    public const string RangedPrefabPath = "Assets/몬스터/원거리몹/보스소환원거리몹.prefab";
     private const string FlyingMonsterPrefabPath = "Assets/몬스터/일반몹/플라잉몹_0.prefab";
     private const string ArtDirectory = "Assets/몬스터/챕터1보스몹";
 
@@ -29,8 +28,6 @@ public static class BossEncounterBuilder
         Material lineMaterial = LoadOrCreateMaterial();
         Sprite tile = LoadOrCreateTile();
         MonsterSO bossData = LoadOrCreateMonsterData("챕터1보스SO", 120, 1);
-        MonsterSO rangedData = LoadOrCreateMonsterData("보스소환원거리몹SO", 3, 1);
-        BuildRangedPrefab(rangedData);
 
         BossAttackSO patterns = AssetDatabase.LoadAssetAtPath<BossAttackSO>(PatternPath);
         if (patterns == null)
@@ -41,7 +38,7 @@ public static class BossEncounterBuilder
         Set(patterns, "missilePrefab", Load<GameObject>("Assets/게임오브젝트/미사일탄환_0.prefab"));
         Set(patterns, "explosionPrefab", Load<GameObject>("Assets/게임오브젝트/미사일_16.prefab"));
         Set(patterns, "laserPrefab", Load<GameObject>("Assets/게임오브젝트/스나이퍼_0.prefab"));
-        Set(patterns, "rangedMonsterPrefab", Load<GameObject>(RangedPrefabPath));
+        Set(patterns, "rangedMonsterPrefab", Load<GameObject>(FlyingMonsterPrefabPath));
 
         BuildBossPrefab(bossData, patterns, lineMaterial);
         GunSO gun = BuildDemoGun();
@@ -129,30 +126,6 @@ public static class BossEncounterBuilder
         finally { Object.DestroyImmediate(boss); }
     }
 
-    private static void BuildRangedPrefab(MonsterSO data)
-    {
-        // 인게임샘플에서 사용하는 플라잉몹의 크기와 애니메이션을 유지한다.
-        GameObject monster = Object.Instantiate(Load<GameObject>(FlyingMonsterPrefabPath));
-        try
-        {
-            monster.name = "보스소환원거리몹";
-            monster.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-            SpriteRenderer renderer = monster.GetComponent<SpriteRenderer>();
-            renderer.sortingOrder = 15;
-            monster.layer = LayerMask.NameToLayer("Enemy");
-            BoxCollider2D collider = monster.AddComponent<BoxCollider2D>();
-            collider.size = renderer.sprite.bounds.size * 0.8f;
-            collider.offset = renderer.sprite.bounds.center;
-            Set(monster.AddComponent<MonsterHealth>(), "monsterData", data);
-            RangedMonsterAttack ranged = monster.AddComponent<RangedMonsterAttack>();
-            SpriteRenderer bullet = Load<GameObject>("Assets/게임오브젝트/기관단총.prefab").GetComponentInChildren<SpriteRenderer>();
-            Set(ranged, "bulletSprite", bullet.sprite);
-            Set(ranged, "bulletMaterial", bullet.sharedMaterial);
-            PrefabUtility.SaveAsPrefabAsset(monster, RangedPrefabPath);
-        }
-        finally { Object.DestroyImmediate(monster); }
-    }
-
     private static MonsterSO LoadOrCreateMonsterData(string name, int hp, int damage)
     {
         string path = "Assets/SO/몬스터/" + name + ".asset";
@@ -163,7 +136,6 @@ public static class BossEncounterBuilder
         Set(data, "maxHp", hp);
         Set(data, "moveSpeed", 0f);
         Set(data, "attackDamage", damage);
-        Set(data, "firstAttackDelay", 1.2f);
         Set(data, "attackInterval", 1.8f);
         return data;
     }

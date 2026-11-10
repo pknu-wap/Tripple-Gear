@@ -96,7 +96,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
             started = true;
             phase = Phase.Approach;
             approachStartPosition = transform.position;
-            nextAttackTime = Time.time + Data.FirstAttackDelay;
+            nextAttackTime = 0f;
         }
 
         switch (phase)

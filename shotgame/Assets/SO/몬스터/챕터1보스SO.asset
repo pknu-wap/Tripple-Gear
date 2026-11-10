@@ -15,5 +15,4 @@ MonoBehaviour:
   maxHp: 150
   moveSpeed: 0
   attackDamage: 1
-  firstAttackDelay: 1.2
   attackInterval: 1.8
