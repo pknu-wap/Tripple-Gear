@@ -12,7 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cfa63507363a7c40bfce233eb7d0e19, type: 3}
   m_Name: "\uCC55\uD1301\uBCF4\uC2A4\uD328\uD134SO"
   m_EditorClassIdentifier: Assembly-CSharp::BossAttackSO
-  initialDelay: 2
   recoveryTime: 1.8
   warningTime: 0.8
   groundLayers:

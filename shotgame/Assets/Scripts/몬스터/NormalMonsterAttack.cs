@@ -18,7 +18,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
     private ArisaHealth targetPlayerHealth;
     private float nextAttackTime;
     private bool isAttacking;
-    private bool wasOverlappingPlayer;
+    private bool hasPendingHit;
     private Collider2D[] ownColliders;
     private readonly List<Collider2D> touchingPlayerColliders = new List<Collider2D>();
     private MonsterHealth health;
@@ -56,11 +56,10 @@ public sealed class NormalMonsterAttack : MonoBehaviour
             return;
         }
 
-        bool hadActiveContact = wasOverlappingPlayer;
         ArisaHealth overlappingPlayerHealth;
         if (!TryFindOverlappingPlayer(out overlappingPlayerHealth))
         {
-            if (hadActiveContact || touchingPlayerHealth != null || isAttacking)
+            if (touchingPlayerHealth != null || isAttacking)
             {
                 ClearPlayerContact();
             }
@@ -68,17 +67,9 @@ public sealed class NormalMonsterAttack : MonoBehaviour
             return;
         }
 
-        bool isNewContact = !hadActiveContact || touchingPlayerHealth != overlappingPlayerHealth;
         touchingPlayerHealth = overlappingPlayerHealth;
         targetPlayerHealth = overlappingPlayerHealth;
-        wasOverlappingPlayer = true;
         UpdateChaseState(true);
-
-        if (isNewContact)
-        {
-            nextAttackTime = Time.time + MonsterData.FirstAttackDelay;
-        }
-
         AttackTouchingPlayer();
     }
 
@@ -123,25 +114,33 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void AttackTouchingPlayer()
     {
-        if (touchingPlayerHealth == null)
-        {
-            ClearPlayerContact();
-            return;
-        }
-
-        UpdateChaseState(true);
-
-        if (Time.time < nextAttackTime)
+        if (hasPendingHit || Time.time < nextAttackTime)
         {
             return;
         }
 
         EnterAttackState();
-        touchingPlayerHealth.TakeDamage(MonsterData.AttackDamage, transform.position);
-
-        Debug.Log(playerHitLogMessage, touchingPlayerHealth);
+        hasPendingHit = true;
         nextAttackTime = Time.time + MonsterData.AttackInterval;
         RestartCurrentAnimation();
+    }
+
+    public void ApplyAttackHit()
+    {
+        if (!isActiveAndEnabled || !hasPendingHit || MonsterData == null || health.IsDead)
+        {
+            return;
+        }
+
+        hasPendingHit = false;
+        touchingPlayerColliders.Clear();
+        if (!TryCollectOverlappingPlayer(touchingPlayerHealth, out ArisaHealth playerHealth))
+        {
+            return;
+        }
+
+        playerHealth.TakeDamage(MonsterData.AttackDamage, transform.position);
+        Debug.Log(playerHitLogMessage, playerHealth);
     }
 
     private void TryStartPlayerContact(Collider2D other)
@@ -157,22 +156,15 @@ public sealed class NormalMonsterAttack : MonoBehaviour
             return;
         }
 
-        bool hadActiveContact = wasOverlappingPlayer;
         if (touchingPlayerHealth != null && touchingPlayerHealth != playerHealth)
         {
             ClearPlayerContact();
-            hadActiveContact = false;
         }
 
         touchingPlayerHealth = playerHealth;
         targetPlayerHealth = playerHealth;
         AddPlayerCollider(other);
         UpdateChaseState(true);
-
-        if (!hadActiveContact)
-        {
-            nextAttackTime = Time.time + MonsterData.FirstAttackDelay;
-        }
     }
 
     private void TryEndPlayerContact(Collider2D other)
@@ -190,7 +182,8 @@ public sealed class NormalMonsterAttack : MonoBehaviour
     {
         touchingPlayerColliders.Clear();
         touchingPlayerHealth = null;
-        wasOverlappingPlayer = false;
+        hasPendingHit = false;
+        nextAttackTime = 0f;
         ExitAttackState();
         UpdateChaseState(false);
     }
@@ -220,7 +213,6 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
         isAttacking = true;
         SetAnimationController(attackController);
-        RestartCurrentAnimation();
     }
 
     private void ExitAttackState()
