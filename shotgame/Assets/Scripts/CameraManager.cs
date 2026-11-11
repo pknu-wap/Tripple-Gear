@@ -7,6 +7,12 @@ public enum CameraAreaGizmoDrawMode
     FilledOnly,
 }
 
+public enum CameraFollowMode
+{
+    [InspectorName("달리는 맵")] RunningMap,
+    [InspectorName("떨어지는 맵")] FallingMap,
+}
+
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(-100)]
 public sealed class CameraManager : MonoBehaviour
@@ -75,6 +81,7 @@ public sealed class CameraManager : MonoBehaviour
     [SerializeField, KoreanLabel("추적 대상")] private Transform followTarget;
     [SerializeField, KoreanLabel("추적 위치 보정")] private Vector3 followOffset = new Vector3(0f, 0f, -10f);
     [SerializeField, KoreanLabel("부드럽게 따라가는 시간"), Min(0f)] private float smoothTime = 0.1f;
+    [SerializeField, KoreanLabel("기본 카메라 방식")] private CameraFollowMode followMode = CameraFollowMode.RunningMap;
 
     [Header("영역 제한")]
     [SerializeField, KoreanLabel("카메라 영역 사용")] private bool useCameraArea = true;
@@ -96,9 +103,12 @@ public sealed class CameraManager : MonoBehaviour
     [SerializeField, KoreanLabel("영역 기즈모 색상")] private Color areaGizmoColor = new Color(0.15f, 0.7f, 1f, 0.25f);
 
     private Vector3 followVelocity;
+    private float furthestFollowX = float.NegativeInfinity;
+    private float lowestFollowY = float.PositiveInfinity;
 
     public Camera ManagedCamera => GetCamera();
     public Transform FollowTarget => followTarget;
+    public CameraFollowMode FollowMode => followMode;
     public float OrthographicSize => orthographicSize;
     public bool UseCameraArea => useCameraArea;
     public Vector2 AreaMin => GetAreaMin();
@@ -122,6 +132,8 @@ public sealed class CameraManager : MonoBehaviour
         {
             SetCameraAreaByIndex(startingCameraAreaIndex);
         }
+
+        ResetFollowProgress();
     }
 
     private void OnValidate()
@@ -138,16 +150,46 @@ public sealed class CameraManager : MonoBehaviour
         Camera cameraToUse = GetCamera();
         Transform cameraTransform = GetCameraTransform(cameraToUse);
         Vector3 desiredPosition = GetDesiredPosition();
-        Vector3 nextPosition = desiredPosition;
+        Vector3 nextPosition = cameraTransform.position;
 
-        if (followTarget != null && smoothTime > 0f)
+        if (followTarget != null)
         {
-            nextPosition = Vector3.SmoothDamp(
-                cameraTransform.position,
-                desiredPosition,
-                ref followVelocity,
-                smoothTime
-            );
+            nextPosition.z = desiredPosition.z;
+
+            if (followMode == CameraFollowMode.FallingMap)
+            {
+                followVelocity.x = 0f;
+                if (desiredPosition.y <= lowestFollowY && desiredPosition.y < nextPosition.y)
+                {
+                    nextPosition.y = smoothTime > 0f
+                        ? Mathf.SmoothDamp(nextPosition.y, desiredPosition.y, ref followVelocity.y, smoothTime)
+                        : desiredPosition.y;
+                    nextPosition.y = Mathf.Min(cameraTransform.position.y, nextPosition.y);
+                }
+                else
+                {
+                    followVelocity.y = 0f;
+                }
+
+                lowestFollowY = Mathf.Min(lowestFollowY, desiredPosition.y);
+            }
+            else
+            {
+                followVelocity.y = 0f;
+                if (desiredPosition.x >= furthestFollowX && desiredPosition.x > nextPosition.x)
+                {
+                    nextPosition.x = smoothTime > 0f
+                        ? Mathf.SmoothDamp(nextPosition.x, desiredPosition.x, ref followVelocity.x, smoothTime)
+                        : desiredPosition.x;
+                    nextPosition.x = Mathf.Max(cameraTransform.position.x, nextPosition.x);
+                }
+                else
+                {
+                    followVelocity.x = 0f;
+                }
+
+                furthestFollowX = Mathf.Max(furthestFollowX, desiredPosition.x);
+            }
         }
 
         cameraTransform.position = ClampToCameraArea(nextPosition, cameraToUse);
@@ -162,7 +204,7 @@ public sealed class CameraManager : MonoBehaviour
     public void SetFollowTarget(Transform target, bool snapImmediately)
     {
         followTarget = target;
-        followVelocity = Vector3.zero;
+        ResetFollowProgress();
 
         if (snapImmediately)
         {
@@ -173,7 +215,13 @@ public sealed class CameraManager : MonoBehaviour
     public void ClearFollowTarget()
     {
         followTarget = null;
-        followVelocity = Vector3.zero;
+        ResetFollowProgress();
+    }
+
+    public void SetFollowMode(CameraFollowMode mode)
+    {
+        followMode = mode;
+        ResetFollowProgress();
     }
 
     public void SetOrthographicSize(float size)
@@ -271,9 +319,17 @@ public sealed class CameraManager : MonoBehaviour
 
     public void SnapToTarget()
     {
-        followVelocity = Vector3.zero;
+        ResetFollowProgress();
         Camera cameraToUse = GetCamera();
         GetCameraTransform(cameraToUse).position = ClampToCameraArea(GetDesiredPosition(), cameraToUse);
+    }
+
+    private void ResetFollowProgress()
+    {
+        followVelocity = Vector3.zero;
+        Vector3 desiredPosition = GetDesiredPosition();
+        furthestFollowX = followTarget != null ? desiredPosition.x : float.NegativeInfinity;
+        lowestFollowY = followTarget != null ? desiredPosition.y : float.PositiveInfinity;
     }
 
     public void ClampCurrentPosition()

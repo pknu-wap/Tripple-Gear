@@ -13,6 +13,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
     [SerializeField, KoreanLabel("대상 카메라")] private Camera targetCamera;
     [SerializeField, KoreanLabel("카메라 진입 로그")] private bool logWhenEnteredCamera = true;
     [SerializeField, KoreanLabel("카메라 진입 메시지")] private string cameraEnteredLogMessage = "일반몹이 Main Camera 영역에 들어왔습니다.";
+    [SerializeField, KoreanLabel("화면 밖 비활성화 시간"), Min(0f)] private float offscreenDisableDelay = 2f;
 
     [Header("추적")]
     [SerializeField, KoreanLabel("플레이어")] private Transform followTarget;
@@ -29,6 +30,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private bool isChasing;
     private bool isMovementPaused;
+    private float offscreenSince = -1f;
     private SpriteRenderer spriteRenderer;
     private Vector3 baseLocalScale;
     private bool baseSpriteFlipX;
@@ -62,11 +64,17 @@ public sealed class NormalMonsterChase : MonoBehaviour
         startingY = transform.position.y;
     }
 
+    private void OnEnable()
+    {
+        offscreenSince = -1f;
+    }
+
     private void OnValidate()
     {
         jumpHeight = Mathf.Max(0.1f, jumpHeight);
         jumpDuration = Mathf.Max(0.1f, jumpDuration);
         jumpMoveSpeedMultiplier = Mathf.Max(0.1f, jumpMoveSpeedMultiplier);
+        offscreenDisableDelay = Mathf.Max(0f, offscreenDisableDelay);
         if (!Application.isPlaying)
         {
             FindReferences();
@@ -89,6 +97,12 @@ public sealed class NormalMonsterChase : MonoBehaviour
                 StartChasing();
             }
 
+            return;
+        }
+
+        if (HasBeenOutsideCameraLongEnough())
+        {
+            gameObject.SetActive(false);
             return;
         }
 
@@ -395,6 +409,38 @@ public sealed class NormalMonsterChase : MonoBehaviour
             && viewportPosition.x <= 1f
             && viewportPosition.y >= 0f
             && viewportPosition.y <= 1f;
+    }
+
+    private bool HasBeenOutsideCameraLongEnough()
+    {
+        Camera cameraToUse = GetCamera();
+        if (cameraToUse == null || IsVisibleInCamera(cameraToUse))
+        {
+            offscreenSince = -1f;
+            return false;
+        }
+
+        if (offscreenSince < 0f)
+        {
+            offscreenSince = Time.time;
+        }
+
+        return Time.time - offscreenSince >= offscreenDisableDelay;
+    }
+
+    private bool IsVisibleInCamera(Camera cameraToUse)
+    {
+        Bounds bounds = spriteRenderer != null ? spriteRenderer.bounds
+            : movementCollider != null ? movementCollider.bounds
+            : new Bounds(transform.position, Vector3.zero);
+        Vector3 viewportMin = cameraToUse.WorldToViewportPoint(bounds.min);
+        Vector3 viewportMax = cameraToUse.WorldToViewportPoint(bounds.max);
+
+        return viewportMax.z > 0f
+            && Mathf.Max(viewportMin.x, viewportMax.x) >= 0f
+            && Mathf.Min(viewportMin.x, viewportMax.x) <= 1f
+            && Mathf.Max(viewportMin.y, viewportMax.y) >= 0f
+            && Mathf.Min(viewportMin.y, viewportMax.y) <= 1f;
     }
 
     private bool TryAssignFollowTarget()

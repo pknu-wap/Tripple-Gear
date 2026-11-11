@@ -3,12 +3,17 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public sealed class TimelineCutscenePlayer : MonoBehaviour
+public sealed class GameFlowController : MonoBehaviour
 {
-    [Header("컷신 재생")]
+    [Header("게임 시작")]
     [SerializeField, KoreanLabel("인트로 타임라인")] private PlayableDirector introTimeline;
+    [SerializeField, KoreanLabel("컷신 중 입력을 막을 플레이어")] private Transform gameplayPlayer;
+    [SerializeField, KoreanLabel("컷신 시작 신호 씬")] private string cutsceneSignalSourceSceneName = "로비";
+    [SerializeField, KoreanLabel("게임 시작 버튼")] private Button startButton;
+    [SerializeField, KoreanLabel("재생하면 버튼 숨기기")] private bool hideStartButtonOnPlay = true;
 
     [Header("타임라인 종료")]
     [SerializeField, KoreanLabel("마지막 애니메이션 클립에서 완료")] private bool completeWhenLastAnimationClipEnds = true;
@@ -16,14 +21,16 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
     [SerializeField, KoreanLabel("완료하면 타임라인 정지")] private bool stopTimelineOnComplete = true;
     [SerializeField, KoreanLabel("완료 프레임 고정")] private bool freezeAnimatorsOnComplete = true;
     [SerializeField, KoreanLabel("추가 고정 애니메이터")] private Animator[] extraAnimatorsToFreeze;
-    [SerializeField, KoreanLabel("완료 디버그 메시지")] private string completedLogMessage = "컷신 재생 완료";
+    [SerializeField, KoreanLabel("완료 디버그 메시지")] private string completedLogMessage = "타임라인 종료: 게임 시작 로직 호출";
     [SerializeField, KoreanLabel("완료 후 호출")] private UnityEvent onTimelineCompleted;
 
     private const double TimelineEndTolerance = 0.001d;
 
     private readonly List<Animator> animatorsToFreeze = new List<Animator>();
+    private readonly List<Behaviour> suspendedGameplayInput = new List<Behaviour>();
 
     private double completionTime = -1d;
+    private bool hasCutsceneStartSignal;
     private bool isTimelinePlaying;
     private bool isTimelineCompleted;
 
@@ -43,25 +50,36 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
         DisableTimelinePlayOnAwake();
     }
 
-    public event System.Action Completed;
-    public event System.Action Cancelled;
-    public bool IsPlaying => isTimelinePlaying;
-    public bool IsCompleted => isTimelineCompleted;
+    private void OnEnable()
+    {
+        FindReferences();
+        SubscribeTimeline();
 
-    private void OnEnable() => SubscribeTimeline();
+        if (startButton != null)
+        {
+            startButton.onClick.AddListener(StartGame);
+        }
+    }
+
+    private void Start()
+    {
+        string currentSceneName = gameObject.scene.name;
+        if (SceneTransitionSignalReceiver.TryConsumeSceneTransition(cutsceneSignalSourceSceneName, currentSceneName))
+        {
+            hasCutsceneStartSignal = true;
+            StartGame();
+        }
+    }
 
     private void OnDisable()
     {
         UnsubscribeTimeline();
-        Cancel();
-    }
+        ResumeGameplayInput();
 
-    public void Cancel()
-    {
-        if (!isTimelinePlaying) return;
-        isTimelinePlaying = false;
-        if (introTimeline != null) introTimeline.Stop();
-        Cancelled?.Invoke();
+        if (startButton != null)
+        {
+            startButton.onClick.RemoveListener(StartGame);
+        }
     }
 
     private void Update()
@@ -77,31 +95,39 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
         }
     }
 
-    // Void entry point for Inspector UnityEvents (standalone cutscenes).
-    public void Play() => TryPlay();
-
-    public bool TryPlay()
+    public void StartGame()
     {
-        if (!isActiveAndEnabled || isTimelinePlaying) return false;
-        FindReferences();
-        if (introTimeline == null || introTimeline.playableAsset == null)
+        if (!hasCutsceneStartSignal)
         {
-            Debug.LogError("컷신 타임라인과 재생 에셋을 연결해 주세요.", this);
-            return false;
+            Debug.Log("로비의 새게임 신호가 없어 컷신을 재생하지 않습니다.", this);
+            return;
         }
-        SubscribeTimeline();
-        // Hold the end time so Update can detect completion even on a long frame.
-        introTimeline.extrapolationMode = DirectorWrapMode.Hold;
+
+        if (isTimelinePlaying)
+        {
+            return;
+        }
+
+        FindReferences();
+
+        if (introTimeline == null)
+        {
+            Debug.LogWarning("게임 시작 타임라인이 연결되지 않았습니다.", this);
+            return;
+        }
+
+        hasCutsceneStartSignal = false;
         CacheAnimatorsToFreeze();
         SetAnimatorsEnabled(true);
         completionTime = GetCompletionTime();
         isTimelinePlaying = true;
         isTimelineCompleted = false;
+        SetStartButtonVisible(false);
+        SuspendGameplayInput();
 
         introTimeline.time = 0d;
         introTimeline.Evaluate();
         introTimeline.Play();
-        return true;
     }
 
     public void DebugTimelineCompleted()
@@ -119,7 +145,8 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
         if (onlyCompleteWhenReachedEnd && !HasTimelineReachedEnd())
         {
             isTimelinePlaying = false;
-            Cancelled?.Invoke();
+            ResumeGameplayInput();
+            SetStartButtonVisible(true);
             return;
         }
 
@@ -128,9 +155,6 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
 
     private void CompleteTimeline()
     {
-        if (!isTimelinePlaying || isTimelineCompleted) return;
-        isTimelinePlaying = false;
-        isTimelineCompleted = true;
         ForceTimelineToCompletionFrame();
 
         if (freezeAnimatorsOnComplete)
@@ -138,14 +162,54 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
             SetAnimatorsEnabled(false);
         }
 
+        isTimelinePlaying = false;
+        isTimelineCompleted = true;
+
         if (stopTimelineOnComplete && introTimeline != null && introTimeline.state == PlayState.Playing)
         {
             introTimeline.Stop();
         }
 
+        ResumeGameplayInput();
         DebugTimelineCompleted();
         onTimelineCompleted?.Invoke();
-        Completed?.Invoke();
+    }
+
+    private void SuspendGameplayInput()
+    {
+        if (gameplayPlayer == null)
+        {
+            return;
+        }
+
+        SuspendInput(gameplayPlayer.GetComponent<ArisaHorizontalMovement>());
+        SuspendInput(gameplayPlayer.GetComponent<ArisaMouseAim>());
+        SuspendInput(gameplayPlayer.GetComponent<SubmachineGunFire>());
+        SuspendInput(gameplayPlayer.GetComponent<ArisaSkillController>());
+    }
+
+    private void SuspendInput(Behaviour input)
+    {
+        if (input == null || !input.enabled)
+        {
+            return;
+        }
+
+        input.enabled = false;
+        suspendedGameplayInput.Add(input);
+    }
+
+    private void ResumeGameplayInput()
+    {
+        foreach (Behaviour input in suspendedGameplayInput)
+        {
+            if (input != null)
+            {
+                input.enabled = true;
+            }
+        }
+
+        suspendedGameplayInput.Clear();
     }
 
     private void PrepareTimeline()
@@ -316,6 +380,21 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
         }
     }
 
+    private void SetStartButtonVisible(bool visible)
+    {
+        if (startButton == null)
+        {
+            return;
+        }
+
+        startButton.interactable = visible;
+
+        if (hideStartButtonOnPlay)
+        {
+            startButton.gameObject.SetActive(visible);
+        }
+    }
+
     private void SubscribeTimeline()
     {
         if (introTimeline != null)
@@ -340,5 +419,23 @@ public sealed class TimelineCutscenePlayer : MonoBehaviour
             introTimeline = GetComponentInChildren<PlayableDirector>();
         }
 
+        if (introTimeline == null)
+        {
+            introTimeline = FindTimelineInScene();
+        }
+
+        if (startButton == null)
+        {
+            startButton = GetComponentInChildren<Button>(true);
+        }
+    }
+
+    private static PlayableDirector FindTimelineInScene()
+    {
+#if UNITY_2023_1_OR_NEWER
+        return Object.FindFirstObjectByType<PlayableDirector>();
+#else
+        return Object.FindObjectOfType<PlayableDirector>();
+#endif
     }
 }

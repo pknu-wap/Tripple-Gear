@@ -1,47 +1,21 @@
-﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public enum TriggerMode
-{
-    Wave,
-    Mission,
-    Story,
-    InheritLegacyMode = -1,
-}
-
-public enum MusicTransitionTiming
-{
-    [InspectorName("차례대로")]
-    Sequential,
-    [InspectorName("동시에")]
-    Crossfade,
-}
-
-public class Trigger : TriggerBase
+[DisallowMultipleComponent]
+[DefaultExecutionOrder(1000)]
+public sealed class WaveManager : MonoBehaviour
 {
     private const string CameraBoundaryLayerName = "WaveBoundary";
     private const float CameraBoundaryThickness = 1f;
 
     public enum WaveState { Ready, Running, Completed, Cancelled }
 
-    [SerializeField] private TriggerMode triggerMode = TriggerMode.InheritLegacyMode;
-    [SerializeField, KoreanLabel("한 번만 발동")] private bool triggerOnce;
-
-    [Header("웨이브")]
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
     [SerializeField, KoreanLabel("활성화할 몬스터")] private GameObject[] monsters;
     [SerializeField, KoreanLabel("웨이브 시작 이벤트")] private UnityEvent waveStarted = new UnityEvent();
     [SerializeField, KoreanLabel("웨이브 완료 이벤트")] private UnityEvent waveCompleted = new UnityEvent();
 
-    [Header("배경음악")]
-    [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
-    [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
-    [SerializeField, KoreanLabel("음악 페이드 시간"), Min(0f)] private float musicFadeDuration = 0.5f;
-    [SerializeField, KoreanLabel("곡 전환 방식")] private MusicTransitionTiming musicTransitionTiming;
-
-    public TriggerMode Mode => ResolveMode(Manager);
     public WaveState State { get; private set; }
     public bool HasStarted => State != WaveState.Ready;
     public bool IsCompleted => State == WaveState.Completed;
@@ -49,112 +23,50 @@ public class Trigger : TriggerBase
     public UnityEvent WaveCompleted => waveCompleted;
 
     private readonly List<GameObject> waveMonsters = new List<GameObject>();
-    private TriggerManager activeManager;
     private CameraManager lockedManager;
     private Camera lockedCamera;
     private Vector3 lockedPosition;
     private bool cameraWasEnabled;
     private bool reportedInvalidSetup;
-    private bool entryTriggered;
     private readonly BoxCollider2D[] cameraBoundaries = new BoxCollider2D[4];
-
-    protected override void Reset()
-    {
-        base.Reset();
-        triggerMode = TriggerMode.Wave;
-    }
-
-    private TriggerMode ResolveMode(TriggerManager manager)
-    {
-        if (triggerMode != TriggerMode.InheritLegacyMode)
-        {
-            return triggerMode;
-        }
-
-        return manager != null ? manager.LegacyMode : TriggerMode.Wave;
-    }
-
-    protected void OnTriggerStay2D(Collider2D other)
-    {
-        if (HasStarted)
-        {
-            return;
-        }
-
-        TriggerManager manager = Manager;
-        if (manager != null && ResolveMode(manager) == TriggerMode.Wave)
-        {
-            TryActivate(other, manager);
-        }
-    }
 
     public bool TryStartWave()
     {
-        TriggerManager manager = Manager;
-        return manager != null && ResolveMode(manager) == TriggerMode.Wave && TryActivate(manager);
-    }
-
-    internal sealed override bool Activate(TriggerManager manager)
-    {
-        TriggerMode mode = ResolveMode(manager);
-        switch (mode)
-        {
-            case TriggerMode.Wave:
-                return StartWave(manager);
-            case TriggerMode.Mission:
-            case TriggerMode.Story:
-                return TryActivateEntry(mode);
-            default:
-                return false;
-        }
-    }
-
-    private bool TryActivateEntry(TriggerMode mode)
-    {
-        if (triggerOnce && entryTriggered)
+        if (!isActiveAndEnabled || HasStarted)
         {
             return false;
         }
 
-        entryTriggered = true;
-        Debug.Log($"[{mode}Trigger] {name}에 플레이어가 진입했습니다.", this);
-        return true;
-    }
-
-    private bool StartWave(TriggerManager manager)
-    {
-        if (HasStarted)
-        {
-            return false;
-        }
-
-        Camera camera = cameraManager != null ? cameraManager.ManagedCamera : null;
-        if (!PrepareWave(manager, camera))
+        if (!PrepareWave())
         {
             if (!reportedInvalidSetup)
             {
-                Debug.LogWarning("WaveTrigger: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
+                Debug.LogWarning("WaveManager: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
                 reportedInvalidSetup = true;
             }
             return false;
         }
 
-        if (!cameraManager.isActiveAndEnabled || !manager.TryTrackWave(camera, this))
+        // A disabled camera manager may already belong to another running wave.
+        if (!cameraManager.isActiveAndEnabled)
         {
             return false;
         }
 
-        activeManager = manager;
         lockedManager = cameraManager;
-        lockedCamera = camera;
+        lockedCamera = cameraManager.ManagedCamera;
         lockedPosition = lockedCamera.transform.position;
         cameraWasEnabled = lockedManager.enabled;
         State = WaveState.Running;
         lockedManager.enabled = false;
         CreateCameraBoundaries();
 
-        for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
+        for (int i = 0; i < waveMonsters.Count; i++)
         {
+            if (State != WaveState.Running)
+            {
+                return true;
+            }
             GameObject monster = waveMonsters[i];
             if (monster != null)
             {
@@ -166,17 +78,14 @@ public class Trigger : TriggerBase
         {
             waveStarted.Invoke();
         }
-        if (gameObject.activeInHierarchy)
-        {
-            PlayMusicTransition();
-        }
         return true;
     }
 
-    private bool PrepareWave(TriggerManager manager, Camera camera)
+    private bool PrepareWave()
     {
         waveMonsters.Clear();
-        if (camera == null || !camera.orthographic
+        if (cameraManager == null || cameraManager.ManagedCamera == null
+            || !cameraManager.ManagedCamera.orthographic
             || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0 || monsters == null)
         {
             return false;
@@ -190,7 +99,6 @@ public class Trigger : TriggerBase
             }
             if (!monster.scene.IsValid() || monster.scene != gameObject.scene
                 || transform.IsChildOf(monster.transform)
-                || manager.transform.IsChildOf(monster.transform)
                 || cameraManager.transform.IsChildOf(monster.transform)
                 || (monster.transform.parent != null && !monster.transform.parent.gameObject.activeInHierarchy))
             {
@@ -201,7 +109,7 @@ public class Trigger : TriggerBase
         return waveMonsters.Count > 0;
     }
 
-    internal void UpdateWave()
+    private void LateUpdate()
     {
         if (State != WaveState.Running)
         {
@@ -241,12 +149,6 @@ public class Trigger : TriggerBase
     private void RestoreCamera()
     {
         RemoveCameraBoundaries();
-        if (activeManager != null)
-        {
-            activeManager.UntrackWave(lockedCamera);
-        }
-        activeManager = null;
-
         if (lockedManager != null)
         {
             lockedManager.enabled = cameraWasEnabled;
@@ -314,37 +216,8 @@ public class Trigger : TriggerBase
         }
     }
 
-    protected void OnDisable()
+    private void OnDisable()
     {
         CancelWave();
-    }
-
-    private void PlayMusicTransition()
-    {
-        if (musicToFadeOut != null && musicToFadeOut != musicToFadeIn)
-        {
-            musicToFadeOut.FadeOut(musicFadeDuration);
-        }
-        if (musicToFadeIn != null && musicToFadeIn != musicToFadeOut)
-        {
-            if (musicToFadeOut != null && musicTransitionTiming == MusicTransitionTiming.Sequential
-                && musicFadeDuration > 0f)
-            {
-                StartCoroutine(FadeInAfterOut());
-            }
-            else
-            {
-                musicToFadeIn.FadeIn(musicFadeDuration);
-            }
-        }
-    }
-
-    private IEnumerator FadeInAfterOut()
-    {
-        yield return new WaitForSecondsRealtime(musicFadeDuration);
-        if (musicToFadeIn != null)
-        {
-            musicToFadeIn.FadeIn(musicFadeDuration);
-        }
     }
 }
