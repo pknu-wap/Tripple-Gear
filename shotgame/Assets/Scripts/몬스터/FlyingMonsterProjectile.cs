@@ -2,7 +2,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(CircleCollider2D), typeof(Rigidbody2D))]
-public sealed class FlyingMonsterProjectile : MonoBehaviour
+public sealed class FlyingMonsterProjectile : MonsterProjectile
 {
     [SerializeField, KoreanLabel("막히는 레이어")] private LayerMask blockingLayers;
 
@@ -15,7 +15,7 @@ public sealed class FlyingMonsterProjectile : MonoBehaviour
     private bool launched;
     private bool hasHit;
 
-    public void Launch(Vector2 launchDirection, float launchSpeed, float lifetime, int attackDamage, ArisaHealth player)
+    public override void Launch(Vector2 launchDirection, float launchSpeed, float lifetime, int attackDamage, ArisaHealth player)
     {
         direction = launchDirection.sqrMagnitude > 0.0001f ? launchDirection.normalized : Vector2.down;
         speed = Mathf.Max(0f, launchSpeed);
