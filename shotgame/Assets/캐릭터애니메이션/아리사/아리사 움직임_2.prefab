@@ -237,7 +237,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6907662365546511685}
-  - component: {fileID: 7800368944704007600}
+  - component: {fileID: 7800368944704007603}
   - component: {fileID: 7800368944704007602}
   - component: {fileID: 6458455707057984966}
   - component: {fileID: 8088237261403433592}
@@ -277,8 +277,8 @@ Transform:
   - {fileID: 920000000000000002}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &7800368944704007600
-BoxCollider2D:
+--- !u!70 &7800368944704007603
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -312,17 +312,8 @@ BoxCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: -0.95, y: -1.05}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.9, y: 2.65}
-    newSize: {x: 0.9, y: 2.65}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   m_Size: {x: 1.43, y: 2.65}
-  m_EdgeRadius: 0
+  m_Direction: 0
 --- !u!50 &7800368944704007602
 Rigidbody2D:
   serializedVersion: 5
@@ -439,10 +430,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 7
+  landingHorizontalSpeed: 0
   acceleration: 15
   deceleration: 7
   jumpSpeed: 10
   gravity: 18
+  fallGravityMultiplier: 1.7
   inertiaFrameRate: 12
   inertiaFrameCount: 4
   animator: {fileID: 6458455707057984966}
@@ -452,6 +445,28 @@ MonoBehaviour:
   - {fileID: 759477705297205685, guid: 3211cd5c383563842af162dc48b7f563, type: 3}
   - {fileID: 273391784822976301, guid: 3211cd5c383563842af162dc48b7f563, type: 3}
   crouchFrameRate: 20
+  landingSprites:
+  - {fileID: 21300002, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300004, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300006, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300000, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  landingFrameRate: 16
+  jumpPreparationDuration: 0.14
+  jumpPreparationSprites:
+  - {fileID: 21300000, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300002, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300004, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  - {fileID: 21300006, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
+  jumpPreparationUpperBodyOffsets:
+  - {x: 0, y: 0}
+  - {x: 0, y: -0.14027}
+  - {x: 0, y: -0.34366}
+  - {x: 0, y: -0.17884}
+  landingUpperBodyOffsets:
+  - {x: 0, y: -0.14027}
+  - {x: 0, y: -0.34366}
+  - {x: 0, y: -0.17884}
+  - {x: 0, y: 0}
   inertiaSpriteRenderer: {fileID: 6033805962797859765}
   inertiaAnimator: {fileID: 7335342971788207954}
   inertiaDustSpriteRenderer: {fileID: 68233175928987197}
@@ -463,7 +478,7 @@ MonoBehaviour:
   - {fileID: 6796997444090711213}
   - {fileID: 6837424505087146462}
   - {fileID: 1949585202604632812}
-  movementCollider: {fileID: 7800368944704007600}
+  movementCollider: {fileID: 7800368944704007603}
   stanceCollider: {fileID: 7800368944704007601}
   gunFire: {fileID: 4753550355424884465}
   solidPlatformLayers:
@@ -535,14 +550,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   movement: {fileID: 5201290969597213042}
   aim: {fileID: 8088237261403433592}
-  targetCollider: {fileID: 7800368944704007600}
+  targetCollider: {fileID: 7800368944704007603}
   standingSize: {x: 1.43, y: 2.65}
   standingOffset: {x: -0.95, y: -1.05}
   crouchFrame1Size: {x: 1.15, y: 1.55}
-  crouchFrame1Offset: {x: -0.05, y: -1.35}
+  crouchFrame1Offset: {x: -0.05, y: -1.6}
   leftCrouchFrame1OffsetAdjustment: {x: 0, y: 0}
   crouchFrame2Size: {x: 2.35, y: 1.87}
-  crouchFrame2Offset: {x: -0.64, y: -1.5}
+  crouchFrame2Offset: {x: -0.64, y: -1.44}
   leftCrouchFrame2OffsetAdjustment: {x: 0, y: 0}
 --- !u!114 &6069189847862358157
 MonoBehaviour:

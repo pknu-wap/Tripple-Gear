@@ -26,6 +26,7 @@ public sealed class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
     [SerializeField, KoreanLabel("새 카메라 영역 번호")] private int cameraAreaIndex = -1;
     [SerializeField, KoreanLabel("새 카메라 영역 이름")] private string cameraAreaName;
+    [SerializeField, KoreanLabel("목적지 카메라 방식")] private CameraFollowMode destinationFollowMode = CameraFollowMode.RunningMap;
     [SerializeField, KoreanLabel("텔레포트 후 카메라 스냅")] private bool snapCameraAfterTeleport = true;
 
     [Header("페이드")]
@@ -92,6 +93,22 @@ public sealed class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(subject));
     }
 
+    public void TeleportPlayer()
+    {
+        if (isTeleporting || !isActiveAndEnabled)
+        {
+            return;
+        }
+
+        if (teleportSubject == null)
+        {
+            Debug.LogWarning("보스 처치 텔레포트를 사용하려면 텔레포트 대상을 연결해 주세요.", this);
+            return;
+        }
+
+        StartCoroutine(TeleportRoutine(teleportSubject));
+    }
+
     private IEnumerator TeleportRoutine(Transform subject)
     {
         isTeleporting = true;
@@ -108,6 +125,7 @@ public sealed class TeleportTrigger : MonoBehaviour
 
         TeleportSubject(subject);
         ApplyCameraArea();
+        ApplyCameraFollowMode();
 
         if (snapCameraAfterTeleport)
         {
@@ -165,6 +183,15 @@ public sealed class TeleportTrigger : MonoBehaviour
         if (cameraAreaIndex >= 0)
         {
             manager.SetCameraAreaByIndex(cameraAreaIndex);
+        }
+    }
+
+    private void ApplyCameraFollowMode()
+    {
+        CameraManager manager = GetCameraManager();
+        if (manager != null)
+        {
+            manager.SetFollowMode(destinationFollowMode);
         }
     }
 

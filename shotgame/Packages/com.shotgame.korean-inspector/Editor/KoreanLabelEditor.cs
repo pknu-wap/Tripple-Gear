@@ -36,7 +36,7 @@ public sealed class KoreanLabelScriptableObjectEditor : Editor
     }
 }
 
-public static class KoreanLabelEditorUtility
+internal static class KoreanLabelEditorUtility
 {
     private const BindingFlags FieldFlags =
         BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
@@ -53,6 +53,7 @@ public static class KoreanLabelEditorUtility
     {
         serializedObject.Update();
 
+        Dictionary<string, LabelData> labels = GetLabels(targetType);
         SerializedProperty property = serializedObject.GetIterator();
         bool enterChildren = true;
 
@@ -60,25 +61,20 @@ public static class KoreanLabelEditorUtility
         {
             using (new EditorGUI.DisabledScope(property.propertyPath == "m_Script"))
             {
-                DrawProperty(property, targetType);
+                if (labels.TryGetValue(property.name, out LabelData labelData))
+                {
+                    EditorGUILayout.PropertyField(property, labelData.Content, true);
+                }
+                else
+                {
+                    EditorGUILayout.PropertyField(property, true);
+                }
             }
 
             enterChildren = false;
         }
 
         serializedObject.ApplyModifiedProperties();
-    }
-
-    public static void DrawProperty(SerializedProperty property, Type targetType)
-    {
-        if (GetLabels(targetType).TryGetValue(property.name, out LabelData labelData))
-        {
-            EditorGUILayout.PropertyField(property, labelData.Content, true);
-        }
-        else
-        {
-            EditorGUILayout.PropertyField(property, true);
-        }
     }
 
     private static Dictionary<string, LabelData> GetLabels(Type targetType)
