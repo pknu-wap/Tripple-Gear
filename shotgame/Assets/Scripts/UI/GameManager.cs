@@ -1,4 +1,6 @@
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -7,11 +9,16 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject gameOverUI;
 
+    [SerializeField]
+    private string lobbySceneName = "로비";
+
     private bool isGameOver = false;
 
     private void Awake()
     {
         Instance = this;
+
+        Time.timeScale = 1f;
 
         if (gameOverUI != null)
         {
@@ -25,10 +32,21 @@ public class GameManager : MonoBehaviour
 
         isGameOver = true;
 
-        // 게임오버 UI 표시
         gameOverUI.SetActive(true);
-
-        // 게임 정지
         Time.timeScale = 0f;
+    }
+
+    // 현재 게임 다시 시작
+    public void Retry()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // 로비로 이동
+    public void GoToLobby()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(lobbySceneName);
     }
 }
