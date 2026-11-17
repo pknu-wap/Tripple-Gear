@@ -1,0 +1,951 @@
+fileFormatVersion: 2
+guid: c9beb01a5c7746fe81255048c2c74db4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: FlyingAttack_00
+  - first:
+      213: 21300002
+    second: FlyingAttack_01
+  - first:
+      213: 21300004
+    second: FlyingAttack_02
+  - first:
+      213: 21300006
+    second: FlyingAttack_03
+  - first:
+      213: 21300008
+    second: FlyingAttack_04
+  - first:
+      213: 21300010
+    second: FlyingAttack_05
+  - first:
+      213: 21300012
+    second: FlyingAttack_06
+  - first:
+      213: 21300014
+    second: FlyingAttack_07
+  - first:
+      213: 21300016
+    second: FlyingAttack_08
+  - first:
+      213: 21300018
+    second: FlyingAttack_09
+  - first:
+      213: 21300020
+    second: FlyingAttack_10
+  - first:
+      213: 21300022
+    second: FlyingAttack_11
+  - first:
+      213: 21300024
+    second: FlyingAttack_12
+  - first:
+      213: 21300026
+    second: FlyingAttack_13
+  - first:
+      213: 21300028
+    second: FlyingAttack_14
+  - first:
+      213: 21300030
+    second: FlyingAttack_15
+  - first:
+      213: 21300032
+    second: FlyingAttack_16
+  - first:
+      213: 21300034
+    second: FlyingAttack_17
+  - first:
+      213: 21300036
+    second: FlyingAttack_18
+  - first:
+      213: 21300038
+    second: FlyingAttack_19
+  - first:
+      213: 21300040
+    second: FlyingAttack_20
+  - first:
+      213: 21300042
+    second: FlyingAttack_21
+  - first:
+      213: 21300044
+    second: FlyingAttack_22
+  - first:
+      213: 21300046
+    second: FlyingAttack_23
+  - first:
+      213: 21300048
+    second: FlyingAttack_24
+  - first:
+      213: 21300050
+    second: FlyingAttack_25
+  - first:
+      213: 21300052
+    second: FlyingAttack_26
+  - first:
+      213: 21300054
+    second: FlyingAttack_27
+  - first:
+      213: 21300056
+    second: FlyingAttack_28
+  - first:
+      213: 21300058
+    second: FlyingAttack_29
+  - first:
+      213: 21300060
+    second: FlyingAttack_30
+  - first:
+      213: 21300062
+    second: FlyingAttack_31
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: FlyingAttack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3f9f7e363554a3f842dee0887c2b2f2
+      internalID: 21300000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_01
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24ef44a48f5b4dfcba71bea5e54e0cc1
+      internalID: 21300002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_02
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b91deaa587054347855f190d2d547d32
+      internalID: 21300004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_03
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 43ce09196326426e9cc63a4a7a949d77
+      internalID: 21300006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_04
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1564ed0a777d4bdebb5145658758f961
+      internalID: 21300008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_05
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef5ba61568284f8ba8bf99094cb75031
+      internalID: 21300010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_06
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb12bfb4f0a84c948ad1f878fdd63066
+      internalID: 21300012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_07
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 1308
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e34255d6b2ad423388deb5867095e0ee
+      internalID: 21300014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_08
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 963c7860b66f49f9ba2d8180ae9b313b
+      internalID: 21300016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_09
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2601df9c6b3b44d5891c462cf54b57d2
+      internalID: 21300018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_10
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 45c5f52ce205415f84fa6b0d9c0aad30
+      internalID: 21300020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_11
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b748500fb5db440cb4104d2761da5f6a
+      internalID: 21300022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_12
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ecb33e30fd3d42e3b3046258f4566128
+      internalID: 21300024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_13
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b08b24ff1edc4ca18b50349502895942
+      internalID: 21300026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_14
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 604fec65aa0f492891c931e3fcb054c2
+      internalID: 21300028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_15
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 872
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 736a39e04cf14f0880eff7de5cb71a91
+      internalID: 21300030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_16
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be5163921ec44eb2b337cfab9a3686d4
+      internalID: 21300032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_17
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c32de3f5db94779bc6dcbaf76f9c0a8
+      internalID: 21300034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_18
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59de232b8e644283808a7891da6a339e
+      internalID: 21300036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_19
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ddd1c84ea6940f2b0f86dd4a4fb4766
+      internalID: 21300038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_20
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5df5a2faa7164438965a2c0b5aa3afe8
+      internalID: 21300040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_21
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fcd7db37eff4c57a4dc2e9be4b43c56
+      internalID: 21300042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_22
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ca7a9195ed5d4dd5bd2d687f5db19617
+      internalID: 21300044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_23
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 436
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f5aa15fdefb407eb52be604517bd002
+      internalID: 21300046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_24
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21ca9f29590e44c69c6f786d67cabcf6
+      internalID: 21300048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_25
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6564511fa3ef4cd9b8fcb3fbb63108a4
+      internalID: 21300050
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_26
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a02f8c34fcc141fc85229a8c9c949def
+      internalID: 21300052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_27
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2f37dcb13634058bef2fdbade0f06d3
+      internalID: 21300054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_28
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39a9cec713ea43eaa754352d0835684e
+      internalID: 21300056
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_29
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90f5c8f81e804e8fbb8b1ef3245b7954
+      internalID: 21300058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_30
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a5e7f706ac04fd082f072f7d9e29661
+      internalID: 21300060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FlyingAttack_31
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 0
+        width: 464
+        height: 436
+      alignment: 9
+      pivot: {x: 0.5, y: 0.48050459}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1bfcf40b5aeb4436b340a6f2bf3e6fca
+      internalID: 21300062
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 0877a2328294489ba882170cfc3653fc
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      FlyingAttack_00: 21300000
+      FlyingAttack_01: 21300002
+      FlyingAttack_02: 21300004
+      FlyingAttack_03: 21300006
+      FlyingAttack_04: 21300008
+      FlyingAttack_05: 21300010
+      FlyingAttack_06: 21300012
+      FlyingAttack_07: 21300014
+      FlyingAttack_08: 21300016
+      FlyingAttack_09: 21300018
+      FlyingAttack_10: 21300020
+      FlyingAttack_11: 21300022
+      FlyingAttack_12: 21300024
+      FlyingAttack_13: 21300026
+      FlyingAttack_14: 21300028
+      FlyingAttack_15: 21300030
+      FlyingAttack_16: 21300032
+      FlyingAttack_17: 21300034
+      FlyingAttack_18: 21300036
+      FlyingAttack_19: 21300038
+      FlyingAttack_20: 21300040
+      FlyingAttack_21: 21300042
+      FlyingAttack_22: 21300044
+      FlyingAttack_23: 21300046
+      FlyingAttack_24: 21300048
+      FlyingAttack_25: 21300050
+      FlyingAttack_26: 21300052
+      FlyingAttack_27: 21300054
+      FlyingAttack_28: 21300056
+      FlyingAttack_29: 21300058
+      FlyingAttack_30: 21300060
+      FlyingAttack_31: 21300062
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

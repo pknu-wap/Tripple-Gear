@@ -88,7 +88,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7380443786479503065, guid: 1d5dac1878e756049b5d282a84e38edb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8105f5e943b04804a76dacb9a2fc9769, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterData: {fileID: 11400000, guid: fcb3ef450734489d92ba93d7bab09554, type: 2}
+  monsterData: {fileID: 11400000, guid: f1c16f955faf4d29ba3acdb37a0abe22, type: 2}
   hpChanged:
     m_PersistentCalls:
       m_Calls: []

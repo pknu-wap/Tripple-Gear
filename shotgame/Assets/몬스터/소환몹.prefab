@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 3
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 05b3244305ee4dc89ba5f075704b98a5, type: 3}
+  m_Sprite: {fileID: 7482667652216324306, guid: 1d8c484a1bc54848acadf66fb31a115f, type: 3}
   m_Color: {r: 0.94, g: 0.44, b: 0.17, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterHealth
-  monsterData: {fileID: 11400000, guid: fcb3ef450734489d92ba93d7bab09554, type: 2}
+  monsterData: {fileID: 11400000, guid: a0d82fe61b534c598630fe91b44a7608, type: 2}
   hpChanged:
     m_PersistentCalls:
       m_Calls: []

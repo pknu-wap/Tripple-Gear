@@ -5,12 +5,14 @@ using UnityEngine;
 public sealed class MonsterSpawner : MonoBehaviour
 {
     private const double InitialSpawnDelay = 1d;
-    private const double DelayBetweenBatches = 5d;
-    private const double SpawnInterval = 0.5d;
 
     [SerializeField, KoreanLabel("소환할 몬스터 프리팹")] private MonsterHealth monsterPrefab;
     [SerializeField, KoreanLabel("한 번에 소환할 마릿수"), Min(1)]
     private int monstersPerBatch = 3;
+    [SerializeField, KoreanLabel("몬스터 사이 소환 간격 (초)"), Min(0f)]
+    private float spawnInterval = 0.5f;
+    [SerializeField, KoreanLabel("다음 소환 묶음까지 대기 (초)"), Min(0f)]
+    private float delayBetweenBatches = 5f;
 
     private MonsterHealth health;
     private bool hasEnteredCamera;
@@ -52,7 +54,8 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         SpawnMonster();
         remainingInBatch--;
-        nextSpawnTime = now + (remainingInBatch > 0 ? SpawnInterval : DelayBetweenBatches);
+        float delay = remainingInBatch > 0 ? spawnInterval : delayBetweenBatches;
+        nextSpawnTime = now + Mathf.Max(0f, delay);
     }
 
     private bool IsInsideCameraView(Camera battleCamera)

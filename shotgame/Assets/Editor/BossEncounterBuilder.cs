@@ -98,6 +98,22 @@ public static class BossEncounterBuilder
 
     private static void BuildBossPrefab(MonsterSO data, BossAttackSO patterns, Material lineMaterial)
     {
+        // Rebuilding the demo scene must retain the authored boss visuals and attack anchors.
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(BossPrefabPath) != null)
+        {
+            GameObject existing = PrefabUtility.LoadPrefabContents(BossPrefabPath);
+            try
+            {
+                BossMonsterController controller = existing.GetComponent<BossMonsterController>();
+                Set(existing.GetComponent<MonsterHealth>(), "monsterData", data);
+                Set(controller, "attackData", patterns);
+                Set(controller, "lineMaterial", lineMaterial);
+                PrefabUtility.SaveAsPrefabAsset(existing, BossPrefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(existing); }
+            return;
+        }
+
         GameObject boss = new GameObject("챕터1보스");
         try
         {

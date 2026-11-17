@@ -36,6 +36,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     private Phase phase;
     private Vector3 retreatDestination;
     private Vector3 approachStartPosition;
+    private Vector3 burstTargetPosition;
     private float nextAttackTime;
     private float nextBurstShotTime;
     private float pauseEndTime;
@@ -198,24 +199,31 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
             return;
         }
 
-        Vector3 playerPosition = GetPlayerPosition();
-        FireBurstShot(playerPosition);
+        FireBurstShot();
         if (burstShotsRemaining == 0)
         {
-            BeginRetreat(playerPosition);
+            BeginRetreat(GetPlayerPosition());
         }
     }
 
     public void ReleaseAttackProjectile()
     {
-        if (!isActiveAndEnabled || phase != Phase.AnimatingShot || hasReleasedAnimatedShot
+        if (!hasReleasedAnimatedShot)
+        {
+            ReleaseBurstProjectile();
+        }
+    }
+
+    public void ReleaseBurstProjectile()
+    {
+        if (!isActiveAndEnabled || phase != Phase.AnimatingShot || burstShotsRemaining == 0
             || Data == null || health.IsDead || player == null || player.IsDead || projectilePrefab == null)
         {
             return;
         }
 
         hasReleasedAnimatedShot = true;
-        FireBurstShot(GetPlayerPosition());
+        FireBurstShot();
     }
 
     public void FinishAttackAnimation()
@@ -236,9 +244,14 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
         BeginRetreat(GetPlayerPosition());
     }
 
-    private void FireBurstShot(Vector3 playerPosition)
+    private void FireBurstShot()
     {
-        FireAtPlayer(playerPosition);
+        if (burstShotsRemaining == shotsPerAttack)
+        {
+            burstTargetPosition = GetPlayerPosition();
+        }
+
+        FireAtPlayer(burstTargetPosition);
         burstShotsRemaining--;
         if (burstShotsRemaining > 0)
         {
