@@ -5,6 +5,9 @@ using UnityEngine;
 public sealed class MonsterSpawner : MonoBehaviour
 {
     private const double InitialSpawnDelay = 1d;
+    private const float SummonChargeTime = 1f / 3f;
+    private const float SpawnEventGrace = 0.12f;
+    private static readonly int SummonState = Animator.StringToHash("Base Layer.Summon");
 
     [SerializeField, KoreanLabel("소환할 몬스터 프리팹")] private MonsterHealth monsterPrefab;
     [SerializeField, KoreanLabel("한 번에 소환할 마릿수"), Min(1)]
@@ -15,13 +18,17 @@ public sealed class MonsterSpawner : MonoBehaviour
     private float delayBetweenBatches = 5f;
 
     private MonsterHealth health;
+    private Animator summonAnimator;
     private bool hasEnteredCamera;
+    private bool waitingForSpawnEvent;
     private double nextSpawnTime;
+    private float chargeWindow = SummonChargeTime;
     private int remainingInBatch;
 
     private void Awake()
     {
         health = GetComponent<MonsterHealth>();
+        summonAnimator = GetComponent<Animator>();
     }
 
     private void LateUpdate()
@@ -42,11 +49,46 @@ public sealed class MonsterSpawner : MonoBehaviour
             return;
         }
 
-        if (now < nextSpawnTime)
+        if (waitingForSpawnEvent)
         {
+            if (now >= nextSpawnTime + SpawnEventGrace)
+            {
+                CompleteSpawn(now);
+            }
             return;
         }
 
+        if (chargeWindow > 0f && summonAnimator != null && summonAnimator.isActiveAndEnabled
+            && summonAnimator.runtimeAnimatorController != null && summonAnimator.HasState(0, SummonState)
+            && now < nextSpawnTime)
+        {
+            double timeUntilSpawn = nextSpawnTime - now;
+            if (timeUntilSpawn <= chargeWindow)
+            {
+                waitingForSpawnEvent = true;
+                summonAnimator.speed = SummonChargeTime / Mathf.Max(0.001f, (float)timeUntilSpawn);
+                summonAnimator.Play(SummonState, 0, 0f);
+            }
+            return;
+        }
+
+        if (now >= nextSpawnTime)
+        {
+            CompleteSpawn(now);
+        }
+    }
+
+    public void SpawnFromAnimation()
+    {
+        if (waitingForSpawnEvent && isActiveAndEnabled && !health.IsDead && monsterPrefab != null)
+        {
+            CompleteSpawn(Time.timeAsDouble);
+        }
+    }
+
+    private void CompleteSpawn(double now)
+    {
+        waitingForSpawnEvent = false;
         if (remainingInBatch == 0)
         {
             remainingInBatch = Mathf.Max(1, monstersPerBatch);
@@ -54,8 +96,9 @@ public sealed class MonsterSpawner : MonoBehaviour
 
         SpawnMonster();
         remainingInBatch--;
-        float delay = remainingInBatch > 0 ? spawnInterval : delayBetweenBatches;
-        nextSpawnTime = now + Mathf.Max(0f, delay);
+        float delay = Mathf.Max(0f, remainingInBatch > 0 ? spawnInterval : delayBetweenBatches);
+        nextSpawnTime = now + delay;
+        chargeWindow = Mathf.Min(SummonChargeTime, delay * (2f / 3f));
     }
 
     private bool IsInsideCameraView(Camera battleCamera)
