@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  monsterData: {fileID: 11400000, guid: fcb3ef450734489d92ba93d7bab09554, type: 2}
+  monsterData: {fileID: 11400000, guid: e2cb9c47422f4d7ebe8dcbf001cb6306, type: 2}
   hpChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -263,6 +263,8 @@ MonoBehaviour:
   chase: {fileID: 830000000000000003}
   health: {fileID: 830000000000000004}
   projectilePrefab: {fileID: 840000000000000006, guid: a55933626f434fa0b9b97936fa360c00, type: 3}
+  stationaryController: {fileID: 9100000, guid: e93aecab4a5c412a84f17fe9d573c239, type: 2}
+  attackController: {fileID: 9100000, guid: 7a69442dc22840f1870cc1555f91f149, type: 2}
   fireRange: 3.5
   shotsPerAttack: 3
   shotInterval: 0.25

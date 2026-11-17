@@ -17,6 +17,8 @@ public enum CameraFollowMode
 [DefaultExecutionOrder(-100)]
 public sealed class CameraManager : MonoBehaviour
 {
+    private const float WaveResumeDuration = 0.45f;
+
     [System.Serializable]
     public sealed class CameraAreaPreset
     {
@@ -105,6 +107,8 @@ public sealed class CameraManager : MonoBehaviour
     private Vector3 followVelocity;
     private float furthestFollowX = float.NegativeInfinity;
     private float lowestFollowY = float.PositiveInfinity;
+    private Vector3 waveResumeStartPosition;
+    private float waveResumeElapsed = WaveResumeDuration;
 
     public Camera ManagedCamera => GetCamera();
     public Transform FollowTarget => followTarget;
@@ -151,6 +155,8 @@ public sealed class CameraManager : MonoBehaviour
         Transform cameraTransform = GetCameraTransform(cameraToUse);
         Vector3 desiredPosition = GetDesiredPosition();
         Vector3 nextPosition = cameraTransform.position;
+        bool resumingFromWave = waveResumeElapsed < WaveResumeDuration;
+        float followSmoothTime = resumingFromWave ? 0f : smoothTime;
 
         if (followTarget != null)
         {
@@ -159,10 +165,14 @@ public sealed class CameraManager : MonoBehaviour
             if (followMode == CameraFollowMode.FallingMap)
             {
                 followVelocity.x = 0f;
+                if (resumingFromWave)
+                {
+                    desiredPosition.y = Mathf.Min(desiredPosition.y, lowestFollowY);
+                }
                 if (desiredPosition.y <= lowestFollowY && desiredPosition.y < nextPosition.y)
                 {
-                    nextPosition.y = smoothTime > 0f
-                        ? Mathf.SmoothDamp(nextPosition.y, desiredPosition.y, ref followVelocity.y, smoothTime)
+                    nextPosition.y = followSmoothTime > 0f
+                        ? Mathf.SmoothDamp(nextPosition.y, desiredPosition.y, ref followVelocity.y, followSmoothTime)
                         : desiredPosition.y;
                     nextPosition.y = Mathf.Min(cameraTransform.position.y, nextPosition.y);
                 }
@@ -176,10 +186,14 @@ public sealed class CameraManager : MonoBehaviour
             else
             {
                 followVelocity.y = 0f;
+                if (resumingFromWave)
+                {
+                    desiredPosition.x = Mathf.Max(desiredPosition.x, furthestFollowX);
+                }
                 if (desiredPosition.x >= furthestFollowX && desiredPosition.x > nextPosition.x)
                 {
-                    nextPosition.x = smoothTime > 0f
-                        ? Mathf.SmoothDamp(nextPosition.x, desiredPosition.x, ref followVelocity.x, smoothTime)
+                    nextPosition.x = followSmoothTime > 0f
+                        ? Mathf.SmoothDamp(nextPosition.x, desiredPosition.x, ref followVelocity.x, followSmoothTime)
                         : desiredPosition.x;
                     nextPosition.x = Mathf.Max(cameraTransform.position.x, nextPosition.x);
                 }
@@ -192,8 +206,23 @@ public sealed class CameraManager : MonoBehaviour
             }
         }
 
-        cameraTransform.position = ClampToCameraArea(nextPosition, cameraToUse);
+        nextPosition = ClampToCameraArea(nextPosition, cameraToUse);
+        if (resumingFromWave)
+        {
+            waveResumeElapsed += Time.deltaTime;
+            float progress = Mathf.SmoothStep(0f, 1f, waveResumeElapsed / WaveResumeDuration);
+            nextPosition = Vector3.Lerp(waveResumeStartPosition, nextPosition, progress);
+        }
+
+        cameraTransform.position = nextPosition;
         ApplyCameraSize();
+    }
+
+    public void ResumeFollowAfterWave()
+    {
+        ResetFollowProgress();
+        waveResumeStartPosition = GetCameraTransform(GetCamera()).position;
+        waveResumeElapsed = 0f;
     }
 
     public void SetFollowTarget(Transform target)
@@ -327,6 +356,7 @@ public sealed class CameraManager : MonoBehaviour
     private void ResetFollowProgress()
     {
         followVelocity = Vector3.zero;
+        waveResumeElapsed = WaveResumeDuration;
         Vector3 desiredPosition = GetDesiredPosition();
         furthestFollowX = followTarget != null ? desiredPosition.x : float.NegativeInfinity;
         lowestFollowY = followTarget != null ? desiredPosition.y : float.PositiveInfinity;
@@ -334,6 +364,7 @@ public sealed class CameraManager : MonoBehaviour
 
     public void ClampCurrentPosition()
     {
+        waveResumeElapsed = WaveResumeDuration;
         Camera cameraToUse = GetCamera();
         Transform cameraTransform = GetCameraTransform(cameraToUse);
         cameraTransform.position = ClampToCameraArea(cameraTransform.position, cameraToUse);

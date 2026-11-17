@@ -11,6 +11,12 @@ GameObject:
   - component: {fileID: 1224833646775121581}
   - component: {fileID: 1605817006229360842}
   - component: {fileID: 5610637849320416557}
+  - component: {fileID: 830000000000000001}
+  - component: {fileID: 830000000000000002}
+  - component: {fileID: 830000000000000003}
+  - component: {fileID: 830000000000000004}
+  - component: {fileID: 830000000000000005}
+  - component: {fileID: 830000000000000006}
   m_Layer: 10
   m_Name: "\uC6D0\uAC70\uB9AC\uBAB9idle_0"
   m_TagString: Untagged
@@ -82,7 +88,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7380443786479503065, guid: 1d5dac1878e756049b5d282a84e38edb, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8105f5e943b04804a76dacb9a2fc9769, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -114,3 +120,158 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!61 &830000000000000001
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 3.09, y: 3.18}
+    newSize: {x: 3.09, y: 3.18}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 3.09, y: 3.18}
+  m_EdgeRadius: 0
+--- !u!50 &830000000000000002
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
+--- !u!114 &830000000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a1c9e02d3b14e4fb8c0c8f714e4f0aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 0}
+  logWhenEnteredCamera: 0
+  cameraEnteredLogMessage: Ground ranged enemy entered the camera view.
+  offscreenDisableDelay: 2
+  followTarget: {fileID: 0}
+  jumpOverObstacles: 1
+  jumpHeight: 3.5
+  jumpDuration: 2.2
+  jumpMoveSpeedMultiplier: 2.2
+  animator: {fileID: 5610637849320416557}
+  moveController: {fileID: 9100000, guid: 835872261ed44ce69ef1cc4c255ab9cc, type: 2}
+--- !u!114 &830000000000000004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterData: {fileID: 11400000, guid: f1c16f955faf4d29ba3acdb37a0abe22, type: 2}
+  hpChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  defeated:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &830000000000000005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d2ff3245cf47028f9ce5d2fdd338e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  deathEffectPrefab: {fileID: 6814746253198027461, guid: 4640f701f7b546fb94802e7ce67b87b2, type: 3}
+--- !u!114 &830000000000000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552640592249322736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a315f878869743d38abb01cfd1d9d490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chase: {fileID: 830000000000000003}
+  health: {fileID: 830000000000000004}
+  projectilePrefab: {fileID: 6839154201672385412, guid: f1eb7744ac644672be75d00e70a0d5d6, type: 3}
+  stationaryController: {fileID: 9100000, guid: 68cbb3f19f534eb78f81b02a1bacff4e, type: 2}
+  attackController: {fileID: 9100000, guid: efef31b2b64d42dd94eeef042a58d1f2, type: 2}
+  fireRange: 10
+  shotsPerAttack: 1
+  shotInterval: 0.25
+  retreatDistance: 1.5
+  retreatSpeedMultiplier: 1.5
+  retreatPause: 0.3
+  minimumReapproachDistance: 0.75
+  projectileSpawnOffset: 0.8
+  projectileSpeed: 7
+  projectileLifetime: 4

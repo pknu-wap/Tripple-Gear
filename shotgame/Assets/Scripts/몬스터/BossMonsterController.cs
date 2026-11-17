@@ -12,6 +12,7 @@ public sealed class BossMonsterController : MonoBehaviour
     [SerializeField, KoreanLabel("패턴 데이터")] private BossAttackSO attackData;
     [SerializeField, KoreanLabel("플레이어")] private ArisaHealth player;
     [SerializeField, KoreanLabel("레이저 발사점")] private Transform laserOrigin;
+    [SerializeField, KoreanLabel("공격 모션")] private BossAttackVisual attackVisual;
     [SerializeField, KoreanLabel("선 머티리얼")] private Material lineMaterial;
     [SerializeField, KoreanLabel("자동 전투 시작")] private bool autoStart = true;
     [SerializeField, KoreanLabel("보스 웨이브 매니저")] private WaveManager bossWaveManager;
@@ -152,10 +153,14 @@ public sealed class BossMonsterController : MonoBehaviour
         for (int i = 0; i < LastMissileCount; i++)
         {
             float x = Random.Range(area.xMin + 0.6f, area.xMax - 0.6f);
-            yield return new WaitForSeconds(attackData.WarningTime);
+            Status = "낙하 미사일 예고";
+            yield return AnimateOpening(BossAttackPattern.MissileRain, true, attackData.WarningTime);
             Status = "미사일 낙하";
-            SpawnMissile(new Vector2(x, area.yMax + 0.7f), Vector2.down, attackData.RainSpeed);
-            yield return new WaitForSeconds(attackData.MissileInterval);
+            Vector2 dropPoint = new Vector2(x, area.yMax + 0.7f);
+            if (attackVisual != null) StartCoroutine(LaunchRisingMissile(dropPoint));
+            else SpawnMissile(dropPoint, Vector2.down, attackData.RainSpeed);
+            yield return AnimateOpening(BossAttackPattern.MissileRain, false, attackData.MissileInterval);
+            attackVisual?.ResetPose();
         }
     }
 
@@ -163,17 +168,98 @@ public sealed class BossMonsterController : MonoBehaviour
     {
         Rect area = ArenaBounds;
         LastMissileCount = Random.Range(attackData.HorizontalMinCount, attackData.HorizontalMaxCount + 1);
+        int[] lanes = new int[LastMissileCount];
+        for (int i = 0; i < lanes.Length; i++) lanes[i] = i;
+        float low = Mathf.Min(area.yMin + 0.55f, area.center.y);
+        float high = Mathf.Max(area.yMax - 0.6f, area.center.y);
         for (int i = 0; i < LastMissileCount; i++)
         {
-            float y = Random.Range(area.yMin + 0.55f, area.yMax - 0.6f);
-            yield return new WaitForSeconds(attackData.WarningTime);
+            int choice = Random.Range(i, lanes.Length);
+            (lanes[i], lanes[choice]) = (lanes[choice], lanes[i]);
+            float height = Mathf.Lerp(low, high, (lanes[i] + Random.Range(0.2f, 0.8f)) / lanes.Length);
+            Status = "가로 미사일 예고";
+            yield return AnimateOpening(BossAttackPattern.HorizontalMissiles, true, attackData.WarningTime);
             Status = "가로 미사일";
-            SpawnMissile(new Vector2(area.xMax + 0.8f, y), Vector2.left, attackData.HorizontalSpeed);
-            yield return new WaitForSeconds(attackData.MissileInterval);
+            if (attackVisual != null) StartCoroutine(LaunchChestMissile(area.xMax, height));
+            else SpawnMissile(new Vector2(area.xMax + 0.8f, height), Vector2.left, attackData.HorizontalSpeed);
+            yield return AnimateOpening(BossAttackPattern.HorizontalMissiles, false, attackData.MissileInterval);
+            attackVisual?.ResetPose();
+        }
+    }
+
+    private IEnumerator LaunchChestMissile(float arenaRight, float height)
+    {
+        Vector2 start = attackVisual.ChestMuzzle;
+        Vector2 end = new Vector2(Mathf.Min(start.x - 0.65f, arenaRight + 0.8f), height);
+        GameObject missile = CreateMissile(start);
+        missile.transform.rotation = Quaternion.Euler(0f, 0f, 180f);
+        float duration = Mathf.Clamp(Vector2.Distance(start, end) / 12f, 0.17f, 0.45f);
+        for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+        {
+            if (missile == null) yield break;
+            float progress = elapsed / duration;
+            Vector2 position = new Vector2(Mathf.Lerp(start.x, end.x, progress),
+                Mathf.SmoothStep(start.y, end.y, progress));
+            float verticalTangent = (end.y - start.y) * (6f * progress * (1f - progress));
+            float angle = Mathf.Atan2(verticalTangent, end.x - start.x) * Mathf.Rad2Deg;
+            missile.transform.SetPositionAndRotation(position, Quaternion.Euler(0f, 0f, angle));
+            yield return null;
+        }
+
+        if (missile == null) yield break;
+        missile.transform.position = end;
+        ArmMissile(missile, Vector2.left, attackData.HorizontalSpeed);
+    }
+
+    private IEnumerator AnimateOpening(BossAttackPattern pattern, bool opening, float duration)
+    {
+        if (attackVisual == null)
+        {
+            yield return new WaitForSeconds(duration);
+            yield break;
+        }
+
+        float motionDuration = Mathf.Min(duration, 0.32f);
+        for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+        {
+            float progress = Mathf.SmoothStep(0f, 1f, elapsed / motionDuration);
+            attackVisual.ShowPose(pattern, opening ? progress : 1f - progress);
+            yield return null;
+        }
+        attackVisual.ShowPose(pattern, opening ? 1f : 0f);
+    }
+
+    private IEnumerator LaunchRisingMissile(Vector2 dropPoint)
+    {
+        Vector2 start = attackVisual.RainMuzzle;
+        GameObject missile = CreateMissile(start);
+        missile.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
+        Camera cameraToUse = Camera.main;
+        float top = cameraToUse != null && cameraToUse.orthographic
+            ? cameraToUse.transform.position.y + cameraToUse.orthographicSize + attackData.MissileWidth * 0.5f
+            : dropPoint.y;
+        Vector2 end = new Vector2(start.x, Mathf.Max(start.y + 1.25f, top));
+        const float riseDuration = 0.38f;
+        for (float elapsed = 0f; elapsed < riseDuration; elapsed += Time.deltaTime)
+        {
+            if (missile == null) yield break;
+            missile.transform.position = Vector2.Lerp(start, end, elapsed / riseDuration);
+            yield return null;
+        }
+
+        if (missile != null)
+        {
+            missile.transform.position = dropPoint;
+            ArmMissile(missile, Vector2.down, attackData.RainSpeed);
         }
     }
 
     private void SpawnMissile(Vector2 position, Vector2 direction, float speed)
+    {
+        ArmMissile(CreateMissile(position), direction, speed);
+    }
+
+    private GameObject CreateMissile(Vector2 position)
     {
         GameObject missile = Instantiate(attackData.MissilePrefab, position, Quaternion.identity, combatObjects.transform);
         missile.name = "보스 미사일";
@@ -184,8 +270,16 @@ public sealed class BossMonsterController : MonoBehaviour
             missile.transform.localScale *= attackData.MissileWidth / Mathf.Max(0.01f, currentWidth);
             renderer.sortingOrder = 25;
         }
-        missile.AddComponent<EnemyProjectile2D>().Launch(direction, speed, attackData.MissileDamage,
-            attackData.GroundLayers, 0.14f, 14f, attackData.ExplosionPrefab,
+        return missile;
+    }
+
+    private void ArmMissile(GameObject missile, Vector2 direction, float speed)
+    {
+        if (!missile.TryGetComponent(out EnemyProjectile2D projectile))
+            projectile = missile.AddComponent<EnemyProjectile2D>();
+        LayerMask missileGroundLayers = attackData.GroundLayers.value & ~LayerMask.GetMask("Stair");
+        projectile.Launch(direction, speed, attackData.MissileDamage,
+            missileGroundLayers, 0.14f, 14f, attackData.ExplosionPrefab,
             attackData.ExplosionRadius, attackData.ExplosionLifetime, attackData.ExplosionScale);
     }
 
@@ -196,20 +290,22 @@ public sealed class BossMonsterController : MonoBehaviour
         Vector2 start = new Vector2(area.xMin, origin.y);
         Vector2 end = new Vector2(area.xMin, area.yMax);
         Status = "레이저 예고";
-        LineRenderer startWarning = CreateLine("레이저 시작선", origin, start, new Color(1f, 0.1f, 0.1f, 0.7f), 0.06f);
-        LineRenderer endWarning = CreateLine("레이저 종료선", origin, end, new Color(0.3f, 1f, 0.3f, 0.45f), 0.04f);
-        yield return new WaitForSeconds(attackData.WarningTime);
+        LineRenderer startWarning = CreateLine("레이저 수평 예고선", origin, start,
+            new Color(1f, 0.26f, 0.11f, 0.85f), attackData.LaserWidth * 0.35f);
+        LineRenderer endWarning = CreateLine("레이저 회전 끝 예고선", origin, end,
+            new Color(1f, 0.68f, 0.24f, 0.68f), attackData.LaserWidth * 0.25f);
+        yield return AnimateLaserCharge(0f, 1f, attackData.WarningTime);
+        startWarning.enabled = false;
+        endWarning.enabled = false;
         Destroy(startWarning.gameObject);
         Destroy(endWarning.gameObject);
 
         GameObject laser = Instantiate(attackData.LaserPrefab, origin, Quaternion.identity, combatObjects.transform);
-        laser.name = "보스 무지개 레이저";
+        laser.name = "보스 레이저";
         SpriteRenderer sprite = laser.GetComponentInChildren<SpriteRenderer>();
-        // 지정 프리팹의 광선 모양 위에 무지개 그라데이션을 겹친다.
-        LineRenderer rainbow = CreateLine("무지개 그라데이션", origin, start, Color.white, attackData.LaserWidth);
-        rainbow.colorGradient = CreateRainbowGradient();
-        rainbow.positionCount = 32;
-        rainbow.sortingOrder = 32;
+        LineRenderer core = CreateLine("레이저 중심선", origin, start, new Color(1f, 0.83f, 0.48f),
+            attackData.LaserWidth * 0.45f);
+        core.sortingOrder = 32;
         Status = "레이저 발사";
         float elapsed = 0f;
         float nextHitAt = 0f;
@@ -218,12 +314,11 @@ public sealed class BossMonsterController : MonoBehaviour
         while (elapsed < attackData.LaserDuration)
         {
             float t = Mathf.Clamp01(elapsed / attackData.LaserDuration);
-            float angle = Mathf.LerpAngle(startAngle, endAngle, t);
+            float angle = Mathf.LerpAngle(startAngle, endAngle, Mathf.SmoothStep(0f, 1f, t));
             Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
             float length = (origin.x - area.xMin) / Mathf.Max(0.01f, -direction.x);
             Vector2 tip = origin + direction * length;
-            for (int vertex = 0; vertex < rainbow.positionCount; vertex++)
-                rainbow.SetPosition(vertex, Vector2.Lerp(origin, tip, vertex / (float)(rainbow.positionCount - 1)));
+            core.SetPosition(1, tip);
             if (sprite != null && sprite.sprite != null)
             {
                 Vector2 size = sprite.sprite.bounds.size;
@@ -231,7 +326,7 @@ public sealed class BossMonsterController : MonoBehaviour
                 laser.transform.localScale = new Vector3(length / Mathf.Max(0.01f, size.x),
                     attackData.LaserWidth * 1.25f / Mathf.Max(0.01f, size.y), 1f);
                 laser.transform.position = (Vector3)(origin + direction * length * 0.5f);
-                sprite.color = Color.HSVToRGB(t, 0.8f, 1f);
+                sprite.color = new Color(1f, 0.25f, 0.08f);
                 sprite.sortingOrder = 31;
             }
             if (Time.time >= nextHitAt && DamageAlongLaser(origin, direction, length))
@@ -240,7 +335,24 @@ public sealed class BossMonsterController : MonoBehaviour
             yield return null;
         }
         Destroy(laser);
-        Destroy(rainbow.gameObject);
+        Destroy(core.gameObject);
+        yield return AnimateLaserCharge(1f, 0f, 0.35f);
+    }
+
+    private IEnumerator AnimateLaserCharge(float start, float end, float duration)
+    {
+        if (attackVisual == null)
+        {
+            yield return new WaitForSeconds(duration);
+            yield break;
+        }
+
+        for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+        {
+            attackVisual.SetLaserCharge(Mathf.SmoothStep(start, end, elapsed / duration));
+            yield return null;
+        }
+        attackVisual.SetLaserCharge(end);
     }
 
     private bool DamageAlongLaser(Vector2 origin, Vector2 direction, float length)
@@ -262,24 +374,65 @@ public sealed class BossMonsterController : MonoBehaviour
         if (!CanSummon) yield break;
         Rect area = ArenaBounds;
         Status = "원거리 몹 소환 예고";
-        List<Vector2> positions = new List<Vector2>();
-        List<GameObject> warnings = new List<GameObject>();
+        yield return AnimateOpening(BossAttackPattern.Summon, true, attackData.WarningTime);
+        Status = "원거리 몹 소환";
         for (int i = 0; i < attackData.SummonCount; i++)
         {
             Vector2 position = new Vector2(Mathf.Lerp(area.xMin + 1f, area.xMax - 1f,
                 (i + 0.5f) / attackData.SummonCount), area.yMax - 0.8f);
-            positions.Add(position);
-            warnings.Add(CreateLine("소환 예고", position + Vector2.left * 0.5f,
-                position + Vector2.right * 0.5f, Color.cyan, 0.15f).gameObject);
-        }
-        yield return new WaitForSeconds(attackData.WarningTime);
-        foreach (GameObject warning in warnings) Destroy(warning);
-        foreach (Vector2 position in positions)
-        {
             GameObject monster = Instantiate(attackData.RangedMonsterPrefab, position, Quaternion.identity, combatObjects.transform);
             summonedMonsters.Add(monster);
+            if (attackVisual != null)
+            {
+                StartCoroutine(LaunchSummon(monster, position));
+                yield return new WaitForSeconds(0.28f);
+            }
         }
-        Status = "원거리 몹 소환";
+
+        if (attackVisual != null)
+        {
+            yield return AnimateOpening(BossAttackPattern.Summon, false, 0.38f);
+            attackVisual.ResetPose();
+        }
+    }
+
+    private IEnumerator LaunchSummon(GameObject monster, Vector2 destination)
+    {
+        NormalMonsterChase chase = monster.GetComponent<NormalMonsterChase>();
+        FlyingMonsterAttack attack = monster.GetComponent<FlyingMonsterAttack>();
+        Rigidbody2D body = monster.GetComponent<Rigidbody2D>();
+        SpriteRenderer renderer = monster.GetComponentInChildren<SpriteRenderer>();
+        int sortingLayer = renderer != null ? renderer.sortingLayerID : 0;
+        int sortingOrder = renderer != null ? renderer.sortingOrder : 0;
+        attackVisual.ShowInFrontOfBody(renderer);
+        bool resumeChase = chase != null && chase.enabled;
+        bool resumeAttack = attack != null && attack.enabled;
+        bool resumePhysics = body != null && body.simulated;
+        if (resumeChase) chase.enabled = false;
+        if (resumeAttack) attack.enabled = false;
+        if (resumePhysics) body.simulated = false;
+        Vector2 start = attackVisual.HangarExit;
+        monster.transform.position = start;
+
+        float duration = Mathf.Clamp(Vector2.Distance(start, destination) / 15f, 0.32f, 1f);
+        for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)
+        {
+            if (monster == null) yield break;
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+            monster.transform.position = Vector2.Lerp(start, destination, t);
+            yield return null;
+        }
+
+        if (monster == null) yield break;
+        monster.transform.position = destination;
+        if (renderer != null)
+        {
+            renderer.sortingLayerID = sortingLayer;
+            renderer.sortingOrder = sortingOrder;
+        }
+        if (resumePhysics) body.simulated = true;
+        if (resumeChase) chase.enabled = true;
+        if (resumeAttack) attack.enabled = true;
     }
 
     private void EnsureCombatRoot()
@@ -304,16 +457,6 @@ public sealed class BossMonsterController : MonoBehaviour
         return line;
     }
 
-    private static Gradient CreateRainbowGradient()
-    {
-        Gradient gradient = new Gradient();
-        GradientColorKey[] colors = new GradientColorKey[7];
-        for (int i = 0; i < colors.Length; i++)
-            colors[i] = new GradientColorKey(Color.HSVToRGB(i / 7f, 0.9f, 1f), i / 6f);
-        gradient.SetKeys(colors, new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 1f) });
-        return gradient;
-    }
-
     private void HandleDefeated()
     {
         EndEncounter("보스 처치");
@@ -330,6 +473,7 @@ public sealed class BossMonsterController : MonoBehaviour
         IsAttacking = false;
         Status = status;
         StopAllCoroutines();
+        attackVisual?.ResetPose();
         if (combatObjects != null)
         {
             combatObjects.SetActive(false);

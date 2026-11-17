@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4519049190000000005}
   - component: {fileID: 4519049190000000006}
   - component: {fileID: 4519049190000000007}
+  - component: {fileID: 4519049190000000008}
   m_Layer: 10
   m_Name: "\uC18C\uD658\uBAB9"
   m_TagString: Untagged
@@ -85,7 +86,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 3
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 05b3244305ee4dc89ba5f075704b98a5, type: 3}
+  m_Sprite: {fileID: 7482667652216324306, guid: 1d8c484a1bc54848acadf66fb31a115f, type: 3}
   m_Color: {r: 0.94, g: 0.44, b: 0.17, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -153,7 +154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a09471ab7f14601ac95c6cecf91ed33, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterHealth
-  monsterData: {fileID: 11400000, guid: fcb3ef450734489d92ba93d7bab09554, type: 2}
+  monsterData: {fileID: 11400000, guid: a0d82fe61b534c598630fe91b44a7608, type: 2}
   hpChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -187,3 +188,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
   monsterPrefab: {fileID: 8622938717200000005, guid: 59337893fbd1d5146b638e054bf31447, type: 3}
   monstersPerBatch: 3
+--- !u!95 &4519049190000000008
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4519049190000000001}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6ef1eb3509344a269a06517c844a0a03, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -1,6 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
+#if UNITY_EDITOR && ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 public enum TeleportGizmoKind
 {
     WireBox,
@@ -16,6 +20,9 @@ public sealed class TeleportTrigger : MonoBehaviour
 {
     [Header("텔레포트")]
     [SerializeField, KoreanLabel("텔레포트 대상")] private Transform teleportSubject;
+#if UNITY_EDITOR
+    [SerializeField, KoreanLabel("임시 테스트용 F1 이동")] private bool temporaryF1Shortcut;
+#endif
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
@@ -76,6 +83,21 @@ public sealed class TeleportTrigger : MonoBehaviour
             triggerCollider.isTrigger = true;
         }
     }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (!temporaryF1Shortcut) return;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current?.f1Key.wasPressedThisFrame == true)
+            TeleportPlayer();
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.F1))
+            TeleportPlayer();
+#endif
+    }
+#endif
 
     private void OnTriggerEnter2D(Collider2D other)
     {

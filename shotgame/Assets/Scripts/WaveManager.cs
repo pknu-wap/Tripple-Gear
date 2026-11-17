@@ -151,6 +151,11 @@ public sealed class WaveManager : MonoBehaviour
         RemoveCameraBoundaries();
         if (lockedManager != null)
         {
+            if (cameraWasEnabled)
+            {
+                lockedManager.ResumeFollowAfterWave();
+            }
+
             lockedManager.enabled = cameraWasEnabled;
         }
         lockedManager = null;
