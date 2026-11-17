@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(MonsterHealth), typeof(SpriteRenderer))]
+[RequireComponent(typeof(MonsterHealth), typeof(SpriteRenderer), typeof(MonsterDeathEffect))]
 [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
 public sealed class ExplosiveMonster : MonoBehaviour
 {
@@ -11,11 +11,9 @@ public sealed class ExplosiveMonster : MonoBehaviour
         Idle,
         Patrol,
         Fuse,
-        Blast,
     }
 
     private const float FuseDuration = 3f;
-    private const float BlastRecoveryDuration = 0.15f;
     private static readonly Color WarningColor = new Color(1f, 0.24f, 0.1f);
     private static readonly ContactFilter2D BodyFilter = new ContactFilter2D { useTriggers = false };
 
@@ -33,8 +31,7 @@ public sealed class ExplosiveMonster : MonoBehaviour
     private Color patrolColor;
     private Phase phase;
     private float patrolElapsed;
-    private double phaseEndsAt;
-    private bool wasTouchingPlayer;
+    private double fuseEndsAt;
 
     private void Awake()
     {
@@ -80,21 +77,15 @@ public sealed class ExplosiveMonster : MonoBehaviour
                 Patrol(now);
                 break;
             case Phase.Fuse:
-                if (now >= phaseEndsAt)
+                if (now >= fuseEndsAt)
                 {
-                    Explode(now);
+                    Explode();
                 }
                 else
                 {
-                    float elapsed = FuseDuration - (float)(phaseEndsAt - now);
+                    float elapsed = FuseDuration - (float)(fuseEndsAt - now);
                     spriteRenderer.color = Color.Lerp(WarningColor, patrolColor,
                         Mathf.PingPong(elapsed * 4f, 1f));
-                }
-                break;
-            case Phase.Blast:
-                if (now >= phaseEndsAt)
-                {
-                    phase = Phase.Patrol;
                 }
                 break;
         }
@@ -103,13 +94,10 @@ public sealed class ExplosiveMonster : MonoBehaviour
     private void Patrol(double now)
     {
         contactCollider.Overlap(BodyFilter, overlaps);
-        bool touchingPlayer = FindLivingPlayer() != null;
-        bool startedContact = touchingPlayer && !wasTouchingPlayer;
-        wasTouchingPlayer = touchingPlayer;
-        if (startedContact)
+        if (FindLivingPlayer() != null)
         {
             phase = Phase.Fuse;
-            phaseEndsAt = now + FuseDuration;
+            fuseEndsAt = now + FuseDuration;
             spriteRenderer.color = WarningColor;
             return;
         }
@@ -120,12 +108,8 @@ public sealed class ExplosiveMonster : MonoBehaviour
         body.MovePosition(patrolOrigin + Vector2.left * distance);
     }
 
-    private void Explode(double now)
+    private void Explode()
     {
-        phase = Phase.Blast;
-        phaseEndsAt = now + BlastRecoveryDuration;
-        spriteRenderer.color = patrolColor;
-
         if (explosionEffectPrefab != null)
         {
             Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
@@ -137,6 +121,8 @@ public sealed class ExplosiveMonster : MonoBehaviour
         {
             player.TakeDamage(health.Data.AttackDamage, body.position);
         }
+
+        health.TakeDamage(health.CurrentHp);
     }
 
     private ArisaHealth FindLivingPlayer()
