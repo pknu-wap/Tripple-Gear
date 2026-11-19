@@ -7,8 +7,8 @@ public sealed class TriggerManager : MonoBehaviour
 
     internal TriggerMode LegacyMode => triggerMode;
 
-    internal bool TryActivate(TriggerBase trigger)
+    internal bool TryActivate(TriggerBase trigger, ArisaHorizontalMovement player)
     {
-        return isActiveAndEnabled && trigger.Activate(this);
+        return isActiveAndEnabled && trigger.Activate(this, player);
     }
 }

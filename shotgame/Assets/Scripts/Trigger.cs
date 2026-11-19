@@ -20,7 +20,7 @@ public enum MusicTransitionTiming
 }
 
 [DefaultExecutionOrder(1000)]
-public class Trigger : TriggerBase
+public partial class Trigger : TriggerBase
 {
     private const string CameraBoundaryLayerName = "WaveBoundary";
     private const float CameraBoundaryThickness = 1f;
@@ -83,7 +83,8 @@ public class Trigger : TriggerBase
         }
 
         TriggerManager manager = Manager;
-        if (ResolveMode(manager) == TriggerMode.Wave)
+        TriggerMode mode = ResolveMode(manager);
+        if (mode == TriggerMode.Wave || (mode == TriggerMode.Mission && HasMissionObjectives && CurrentMissionState == MissionState.Ready))
         {
             TryActivate(other, manager);
         }
@@ -95,7 +96,7 @@ public class Trigger : TriggerBase
         return ResolveMode(manager) == TriggerMode.Wave && TryActivate(manager);
     }
 
-    internal sealed override bool Activate(TriggerManager manager)
+    internal sealed override bool Activate(TriggerManager manager, ArisaHorizontalMovement player)
     {
         TriggerMode mode = ResolveMode(manager);
         switch (mode)
@@ -103,6 +104,7 @@ public class Trigger : TriggerBase
             case TriggerMode.Wave:
                 return StartWave();
             case TriggerMode.Mission:
+                return HasMissionObjectives ? StartMission(player) : manager != null && TryActivateEntry(mode);
             case TriggerMode.Story:
                 return manager != null && TryActivateEntry(mode);
             default:
@@ -145,13 +147,8 @@ public class Trigger : TriggerBase
             return false;
         }
 
-        lockedManager = cameraManager;
-        lockedCamera = cameraManager.ManagedCamera;
-        lockedPosition = lockedCamera.transform.position;
-        cameraWasEnabled = lockedManager.enabled;
         State = WaveState.Running;
-        lockedManager.enabled = false;
-        CreateCameraBoundaries();
+        LockCamera();
 
         for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
         {
@@ -204,6 +201,7 @@ public class Trigger : TriggerBase
 
     private void LateUpdate()
     {
+        UpdateMissionCamera();
         if (State != WaveState.Running)
         {
             return;
@@ -254,6 +252,16 @@ public class Trigger : TriggerBase
         lockedManager = null;
         lockedCamera = null;
         waveMonsters.Clear();
+    }
+
+    private void LockCamera()
+    {
+        lockedManager = cameraManager;
+        lockedCamera = cameraManager.ManagedCamera;
+        lockedPosition = lockedCamera.transform.position;
+        cameraWasEnabled = lockedManager.enabled;
+        lockedManager.enabled = false;
+        CreateCameraBoundaries();
     }
 
     private void CreateCameraBoundaries()
@@ -317,6 +325,7 @@ public class Trigger : TriggerBase
     private void OnDisable()
     {
         CancelWave();
+        CancelMission();
     }
 
     private void PlayMusicTransition()

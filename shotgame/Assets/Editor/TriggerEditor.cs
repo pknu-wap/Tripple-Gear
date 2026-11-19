@@ -60,6 +60,38 @@ public sealed class TriggerEditor : Editor
             DrawProperty("musicFadeDuration");
             DrawProperty("musicTransitionTiming");
         }
+        else if (mode == TriggerMode.Mission)
+        {
+            DrawProperty("missionObjectives");
+            if (serializedObject.FindProperty("missionObjectives").arraySize == 0)
+            {
+                DrawProperty("triggerOnce");
+            }
+            DrawProperty("missionCombination");
+            DrawProperty("missionLockCamera");
+            SerializedProperty lockCamera = serializedObject.FindProperty("missionLockCamera");
+            if (lockCamera.boolValue || lockCamera.hasMultipleDifferentValues)
+            {
+                DrawProperty("cameraManager");
+            }
+            DrawProperty("missionPresentation");
+            SerializedProperty presentation = serializedObject.FindProperty("missionPresentation");
+            if (!presentation.hasMultipleDifferentValues)
+            {
+                switch ((Trigger.ClearPresentation)presentation.intValue)
+                {
+                    case Trigger.ClearPresentation.Animator:
+                        DrawProperty("missionAnimator");
+                        DrawProperty("missionAnimatorTrigger");
+                        break;
+                    case Trigger.ClearPresentation.Timeline:
+                        DrawProperty("missionTimeline");
+                        break;
+                }
+            }
+            DrawProperty("missionStarted");
+            DrawProperty("missionCompleted");
+        }
         else
         {
             DrawProperty("triggerOnce");

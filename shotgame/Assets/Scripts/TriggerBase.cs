@@ -46,18 +46,18 @@ public abstract class TriggerBase : MonoBehaviour
         ArisaHorizontalMovement player = other.GetComponentInParent<ArisaHorizontalMovement>();
         if (player != null && (requiredPlayer == null || player == requiredPlayer))
         {
-            TryActivate(manager);
+            TryActivate(manager, player);
         }
     }
 
-    protected bool TryActivate(TriggerManager manager)
+    protected bool TryActivate(TriggerManager manager, ArisaHorizontalMovement player = null)
     {
         if (!isActiveAndEnabled)
         {
             return false;
         }
 
-        bool activated = manager != null ? manager.TryActivate(this) : Activate(null);
+        bool activated = manager != null ? manager.TryActivate(this, player) : Activate(null, player);
         if (!activated)
         {
             return false;
@@ -67,5 +67,5 @@ public abstract class TriggerBase : MonoBehaviour
         return true;
     }
 
-    internal abstract bool Activate(TriggerManager manager);
+    internal abstract bool Activate(TriggerManager manager, ArisaHorizontalMovement player);
 }
