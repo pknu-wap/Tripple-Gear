@@ -1,20 +1,48 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-[DisallowMultipleComponent]
+public enum TriggerMode
+{
+    Wave,
+    Mission,
+    Story,
+    InheritLegacyMode = -1,
+}
+
+public enum MusicTransitionTiming
+{
+    [InspectorName("차례대로")]
+    Sequential,
+    [InspectorName("동시에")]
+    Crossfade,
+}
+
 [DefaultExecutionOrder(1000)]
-public sealed class WaveManager : MonoBehaviour
+public class Trigger : TriggerBase
 {
     private const string CameraBoundaryLayerName = "WaveBoundary";
     private const float CameraBoundaryThickness = 1f;
 
     public enum WaveState { Ready, Running, Completed, Cancelled }
 
+    [SerializeField] private TriggerMode triggerMode = TriggerMode.InheritLegacyMode;
+    [SerializeField, KoreanLabel("한 번만 발동")] private bool triggerOnce;
+
+    [Header("웨이브")]
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
     [SerializeField, KoreanLabel("활성화할 몬스터")] private GameObject[] monsters;
     [SerializeField, KoreanLabel("웨이브 시작 이벤트")] private UnityEvent waveStarted = new UnityEvent();
     [SerializeField, KoreanLabel("웨이브 완료 이벤트")] private UnityEvent waveCompleted = new UnityEvent();
+
+    [Header("배경음악")]
+    [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
+    [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
+    [SerializeField, KoreanLabel("음악 페이드 시간"), Min(0f)] private float musicFadeDuration = 0.5f;
+    [SerializeField, KoreanLabel("곡 전환 방식")] private MusicTransitionTiming musicTransitionTiming;
+
+    public TriggerMode Mode => ResolveMode(Manager);
 
     public WaveState State { get; private set; }
     public bool HasStarted => State != WaveState.Ready;
@@ -29,10 +57,74 @@ public sealed class WaveManager : MonoBehaviour
     private bool cameraWasEnabled;
     private bool reportedInvalidSetup;
     private readonly BoxCollider2D[] cameraBoundaries = new BoxCollider2D[4];
+    private bool entryTriggered;
+
+    protected override void Reset()
+    {
+        base.Reset();
+        triggerMode = TriggerMode.Wave;
+    }
+
+    private TriggerMode ResolveMode(TriggerManager manager)
+    {
+        if (triggerMode != TriggerMode.InheritLegacyMode)
+        {
+            return triggerMode;
+        }
+
+        return manager != null ? manager.LegacyMode : TriggerMode.Wave;
+    }
+
+    protected void OnTriggerStay2D(Collider2D other)
+    {
+        if (HasStarted)
+        {
+            return;
+        }
+
+        TriggerManager manager = Manager;
+        if (ResolveMode(manager) == TriggerMode.Wave)
+        {
+            TryActivate(other, manager);
+        }
+    }
 
     public bool TryStartWave()
     {
-        if (!isActiveAndEnabled || HasStarted)
+        TriggerManager manager = Manager;
+        return ResolveMode(manager) == TriggerMode.Wave && TryActivate(manager);
+    }
+
+    internal sealed override bool Activate(TriggerManager manager)
+    {
+        TriggerMode mode = ResolveMode(manager);
+        switch (mode)
+        {
+            case TriggerMode.Wave:
+                return StartWave();
+            case TriggerMode.Mission:
+            case TriggerMode.Story:
+                return manager != null && TryActivateEntry(mode);
+            default:
+                return false;
+        }
+    }
+
+    private bool TryActivateEntry(TriggerMode mode)
+    {
+        if (triggerOnce && entryTriggered)
+        {
+            return false;
+        }
+
+        entryTriggered = true;
+        Debug.Log($"[{mode}Trigger] {name}에 플레이어가 진입했습니다.", this);
+        return true;
+    }
+
+    private bool StartWave()
+    {
+        if (HasStarted)
         {
             return false;
         }
@@ -41,7 +133,7 @@ public sealed class WaveManager : MonoBehaviour
         {
             if (!reportedInvalidSetup)
             {
-                Debug.LogWarning("WaveManager: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
+                Debug.LogWarning("Trigger: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
                 reportedInvalidSetup = true;
             }
             return false;
@@ -61,12 +153,8 @@ public sealed class WaveManager : MonoBehaviour
         lockedManager.enabled = false;
         CreateCameraBoundaries();
 
-        for (int i = 0; i < waveMonsters.Count; i++)
+        for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
         {
-            if (State != WaveState.Running)
-            {
-                return true;
-            }
             GameObject monster = waveMonsters[i];
             if (monster != null)
             {
@@ -77,6 +165,11 @@ public sealed class WaveManager : MonoBehaviour
         if (State == WaveState.Running)
         {
             waveStarted.Invoke();
+        }
+
+        if (gameObject.activeInHierarchy)
+        {
+            PlayMusicTransition();
         }
         return true;
     }
@@ -224,5 +317,34 @@ public sealed class WaveManager : MonoBehaviour
     private void OnDisable()
     {
         CancelWave();
+    }
+
+    private void PlayMusicTransition()
+    {
+        if (musicToFadeOut != null && musicToFadeOut != musicToFadeIn)
+        {
+            musicToFadeOut.FadeOut(musicFadeDuration);
+        }
+        if (musicToFadeIn != null && musicToFadeIn != musicToFadeOut)
+        {
+            if (musicToFadeOut != null && musicTransitionTiming == MusicTransitionTiming.Sequential
+                && musicFadeDuration > 0f)
+            {
+                StartCoroutine(FadeInAfterOut());
+            }
+            else
+            {
+                musicToFadeIn.FadeIn(musicFadeDuration);
+            }
+        }
+    }
+
+    private IEnumerator FadeInAfterOut()
+    {
+        yield return new WaitForSecondsRealtime(musicFadeDuration);
+        if (musicToFadeIn != null)
+        {
+            musicToFadeIn.FadeIn(musicFadeDuration);
+        }
     }
 }

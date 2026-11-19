@@ -201,7 +201,7 @@ MonoBehaviour:
   - areaName: "\uCC55\uD1302"
     useArea: 1
     areaMin: {x: -3.1, y: -59.3}
-    areaMax: {x: 99, y: -42.7}
+    areaMax: {x: 152.254, y: -42.7}
     drawGizmo: 1
     gizmoDrawMode: 0
     gizmoColor: {r: 0.15, g: 0.7, b: 1, a: 0.25}
@@ -1821,14 +1821,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 688306119}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1814458505}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerManager: {fileID: 0}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
   requiredPlayer: {fileID: 1954365327}
+  onTriggered:
+    m_PersistentCalls:
+      m_Calls: []
+  triggerMode: 0
+  triggerOnce: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 429629383}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
   musicToFadeOut: {fileID: 0}
   musicToFadeIn: {fileID: 1219577704}
   musicFadeDuration: 0.5
@@ -2991,14 +3005,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 897781460}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1189241517}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerManager: {fileID: 0}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
   requiredPlayer: {fileID: 1954365327}
+  onTriggered:
+    m_PersistentCalls:
+      m_Calls: []
+  triggerMode: 0
+  triggerOnce: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 1289823583}
+  - {fileID: 1293402295}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
   musicToFadeOut: {fileID: 0}
   musicToFadeIn: {fileID: 2040000013}
   musicFadeDuration: 0.5
@@ -4114,7 +4143,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1189241516}
-  - component: {fileID: 1189241517}
   m_Layer: 0
   m_Name: "\uC6E8\uC774\uBE0C 01 - \uD50C\uB77C\uC789\uBAB9 (1)"
   m_TagString: Untagged
@@ -4139,28 +4167,6 @@ Transform:
   - {fileID: 1997212820}
   m_Father: {fileID: 57441526}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1189241517
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1189241515}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 1289823583}
-  - {fileID: 1293402295}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1219577702
 GameObject:
   m_ObjectHideFlags: 0
@@ -4369,7 +4375,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1235282402}
-  - component: {fileID: 2040000001}
   m_Layer: 0
   m_Name: "\uC6E8\uC774\uBE0C 01 - \uD50C\uB77C\uC789\uBAB9"
   m_TagString: Untagged
@@ -5614,14 +5619,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 1522823263}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 1690358572}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerManager: {fileID: 0}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
   requiredPlayer: {fileID: 1954365327}
+  onTriggered:
+    m_PersistentCalls:
+      m_Calls: []
+  triggerMode: 0
+  triggerOnce: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 2131911629}
+  - {fileID: 1320712661}
+  - {fileID: 1521345232}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
   musicToFadeOut: {fileID: 0}
   musicToFadeIn: {fileID: 2040000013}
   musicFadeDuration: 0.5
@@ -6104,7 +6125,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1690358571}
-  - component: {fileID: 1690358572}
   m_Layer: 0
   m_Name: "\uC6E8\uC774\uBE0C 02 - \uD63C\uD569"
   m_TagString: Untagged
@@ -6129,29 +6149,6 @@ Transform:
   - {fileID: 9101000000000000024}
   m_Father: {fileID: 9101000000000000008}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1690358572
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1690358570}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 2131911629}
-  - {fileID: 1320712661}
-  - {fileID: 1521345232}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!4 &1698246298 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6907662365546511685, guid: ceaa5e4dd09ef6244a4263fdb0c56912, type: 3}
@@ -6372,7 +6369,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1814458504}
-  - component: {fileID: 1814458505}
   m_Layer: 0
   m_Name: "\uBCF4\uC2A4 \uC6E8\uC774\uBE0C - \uD06C\uB85C\uCF54"
   m_TagString: Untagged
@@ -6396,27 +6392,6 @@ Transform:
   - {fileID: 688306120}
   m_Father: {fileID: 9101000000000000012}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1814458505
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1814458503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 429629383}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1820183195
 GameObject:
   m_ObjectHideFlags: 0
@@ -7248,28 +7223,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 994bd31a69d8ec84293de5379ee665db, type: 3}
---- !u!114 &2040000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1235282401}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 86a907a329fe47a6bf4434ad852ffb0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveManager
-  cameraManager: {fileID: 14307642}
-  monsters:
-  - {fileID: 1404446792}
-  - {fileID: 476815454}
-  waveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  waveCompleted:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &2040000002
 GameObject:
   m_ObjectHideFlags: 0
@@ -7312,14 +7265,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 2040000002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b8c807946e452595b47656ea2e14f9, type: 3}
+  m_Script: {fileID: 11500000, guid: 885429380f1c48adb836160f4b7235f8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::WaveTrigger
-  waveManager: {fileID: 2040000001}
+  m_EditorClassIdentifier: Assembly-CSharp::Trigger
+  triggerManager: {fileID: 0}
   playerLayers:
     serializedVersion: 2
     m_Bits: 1
   requiredPlayer: {fileID: 1954365327}
+  onTriggered:
+    m_PersistentCalls:
+      m_Calls: []
+  triggerMode: 0
+  triggerOnce: 0
+  cameraManager: {fileID: 14307642}
+  monsters:
+  - {fileID: 1404446792}
+  - {fileID: 476815454}
+  waveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  waveCompleted:
+    m_PersistentCalls:
+      m_Calls: []
   musicToFadeOut: {fileID: 0}
   musicToFadeIn: {fileID: 2040000013}
   musicFadeDuration: 0.5
@@ -9227,9 +9195,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2140000003}
     - target: {fileID: 5317564675523893526, guid: f7ef829c46c69274ca740883ded2b0f4, type: 3}
-      propertyPath: bossWaveManager
+      propertyPath: bossWaveTrigger
       value: 
-      objectReference: {fileID: 1814458505}
+      objectReference: {fileID: 688306122}
     - target: {fileID: 5526689480356807333, guid: f7ef829c46c69274ca740883ded2b0f4, type: 3}
       propertyPath: m_LocalScale.x
       value: 2.3675532
@@ -10211,6 +10179,8 @@ Transform:
   - {fileID: 1890286073}
   - {fileID: 800100018}
   - {fileID: 637742396}
+  - {fileID: 9104000000000000305}
+  - {fileID: 9104000000000000308}
   m_Father: {fileID: 9104000000000000002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &9104000000000000105
@@ -10260,7 +10230,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4679225367095545654, guid: 34eb23afe68c40a29585a289eb3ccc22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10319,7 +10289,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4679225367095545654, guid: 34eb23afe68c40a29585a289eb3ccc22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10378,7 +10348,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4679225367095545654, guid: 34eb23afe68c40a29585a289eb3ccc22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10437,7 +10407,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4679225367095545654, guid: 34eb23afe68c40a29585a289eb3ccc22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10496,7 +10466,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -5
+  m_SortingOrder: -3
   m_MaskInteraction: 0
   m_Sprite: {fileID: 4679225367095545654, guid: 34eb23afe68c40a29585a289eb3ccc22, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -10608,6 +10578,175 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4519049190000000002, guid: 8f03954905b946cb85d1970a6bc017e3, type: 3}
   m_PrefabInstance: {fileID: 9104000000000000203}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &9104000000000000304
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9104000000000000305}
+  - component: {fileID: 9104000000000000306}
+  m_Layer: 0
+  m_Name: "\uBD80\uB463\uAC00 \uB05D"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9104000000000000305
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9104000000000000304}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 125.6396, y: -51.63, z: 0}
+  m_LocalScale: {x: 2.4507182, y: 2.4507182, z: 2.4507182}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9104000000000000004}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &9104000000000000306
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9104000000000000304}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: -5
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: -4018236522271387785, guid: e33807c4736343df8f1f22cc93205c54, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 21.72, y: 7.243535}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+--- !u!1 &9104000000000000307
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9104000000000000308}
+  - component: {fileID: 9104000000000000309}
+  m_Layer: 8
+  m_Name: "\uBD80\uB463\uAC00 \uB05D \uACBD\uACC4"
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9104000000000000308
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9104000000000000307}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 134.85628, y: -50, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9104000000000000004}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!61 &9104000000000000309
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9104000000000000307}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 0.2, y: 22}
+  m_EdgeRadius: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
