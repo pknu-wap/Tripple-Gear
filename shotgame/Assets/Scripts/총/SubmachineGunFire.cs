@@ -61,6 +61,13 @@ public sealed class SubmachineGunFire : MonoBehaviour
     public event System.Action<int, int> AmmoChanged;
     public event System.Action ShotFired;
 
+    public void EquipGun(GunSO gun)
+    {
+        gunData = gun;
+        nextShotTime = 0f;
+        FillBulletCount();
+    }
+
     private void Reset()
     {
         FindReferences();
@@ -106,6 +113,11 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (Time.timeScale == 0f)
+        {
+            return;
+        }
+
         UpdateReload();
 
         if (ReadReloadPressed())

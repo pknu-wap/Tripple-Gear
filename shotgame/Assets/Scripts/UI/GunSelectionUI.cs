@@ -9,34 +9,35 @@ public class GunSelectionUI : MonoBehaviour
 
     public void SelectSubmachineGun()
     {
-        GameManager.Instance.SelectGun(submachineGun);
+        SelectGun(submachineGun);
     }
 
     public void SelectShotgun()
     {
-        GameManager.Instance.SelectGun(shotgun);
+        SelectGun(shotgun);
     }
 
     public void SelectSniper()
     {
-        GameManager.Instance.SelectGun(sniper);
+        SelectGun(sniper);
     }
 
     public void SelectMissile()
     {
-        GameManager.Instance.SelectGun(missile);
+        SelectGun(missile);
     }
+
     private void SelectGun(GunSO gun)
     {
         if (gun == null)
         {
-            Debug.LogError("¼±ÅÃÇÑ ÃÑ µ¥ÀÌÅÍ°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+            Debug.LogError("ì„ íƒí•œ ì´ ë°ì´í„°ê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
             return;
         }
 
         if (GameManager.Instance == null)
         {
-            Debug.LogError("GameManager¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            Debug.LogError("GameManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 

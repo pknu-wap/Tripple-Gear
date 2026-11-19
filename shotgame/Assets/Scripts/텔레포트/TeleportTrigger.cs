@@ -92,6 +92,14 @@ public sealed class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(subject));
     }
 
+    public IEnumerator TeleportPlayer()
+    {
+        if (!isTeleporting && isActiveAndEnabled && teleportSubject != null)
+        {
+            yield return TeleportRoutine(teleportSubject);
+        }
+    }
+
     private IEnumerator TeleportRoutine(Transform subject)
     {
         isTeleporting = true;

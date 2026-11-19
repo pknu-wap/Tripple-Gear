@@ -103,7 +103,7 @@ public sealed class ArisaSkillController : MonoBehaviour
     {
         RefreshSkillState();
 
-        if (!ReadSkillPressed())
+        if (Time.timeScale == 0f || !ReadSkillPressed())
         {
             return;
         }
