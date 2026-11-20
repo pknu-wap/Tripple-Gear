@@ -53,6 +53,7 @@ public sealed class TriggerEditor : Editor
         {
             DrawProperty("cameraManager");
             DrawProperty("monsters");
+            DrawProperty("enemySpawnGroups");
             DrawProperty("waveStarted");
             DrawProperty("waveCompleted");
             DrawProperty("musicToFadeOut");
@@ -62,12 +63,16 @@ public sealed class TriggerEditor : Editor
         }
         else if (mode == TriggerMode.Mission)
         {
+            DrawProperty("missionIntroTimeline");
             DrawProperty("missionObjectives");
             if (serializedObject.FindProperty("missionObjectives").arraySize == 0)
             {
                 DrawProperty("triggerOnce");
             }
             DrawProperty("missionCombination");
+            DrawProperty("enemySpawnGroups");
+            DrawProperty("continueSpawningAfterMissionClear");
+            DrawProperty("clearMissionSpawnedEnemies");
             DrawProperty("missionLockCamera");
             SerializedProperty lockCamera = serializedObject.FindProperty("missionLockCamera");
             if (lockCamera.boolValue || lockCamera.hasMultipleDifferentValues)

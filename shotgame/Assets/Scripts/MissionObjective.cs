@@ -17,10 +17,11 @@ public sealed class MissionObjective : MonoBehaviour
     public bool IsRunning { get; private set; }
     public bool IsCompleted { get; private set; }
     public int Count { get; private set; }
+    public int RequiredCount => Mathf.Max(1, requiredCount);
     public float ElapsedSeconds { get; private set; }
-    public int RemainingCount => IsRunning && goalType == GoalType.Count ? Mathf.Max(1, requiredCount) - Count : 0;
+    public int RemainingCount => IsRunning && goalType == GoalType.Count ? RequiredCount - Count : 0;
     public float Progress => goalType == GoalType.Count
-        ? (float)Count / Mathf.Max(1, requiredCount)
+        ? (float)Count / RequiredCount
         : ElapsedSeconds / Mathf.Max(0.01f, requiredSeconds);
 
     internal event Action<MissionObjective> Completed;
@@ -67,7 +68,7 @@ public sealed class MissionObjective : MonoBehaviour
     private void PublishProgress()
     {
         bool reachedTarget = goalType == GoalType.Count
-            ? Count >= Mathf.Max(1, requiredCount)
+            ? Count >= RequiredCount
             : ElapsedSeconds >= Mathf.Max(0.01f, requiredSeconds);
         if (!reachedTarget)
         {

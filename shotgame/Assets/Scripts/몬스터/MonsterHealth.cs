@@ -72,7 +72,18 @@ public sealed class MonsterHealth : MonoBehaviour
         hpChanged?.Invoke(currentHp, MaxHp);
         if (IsDead && previousHp > 0)
         {
+            DropItem();
             defeated?.Invoke();
+        }
+    }
+
+    private void DropItem()
+    {
+        GameObject prefab = monsterData.DropPrefab;
+        float chance = monsterData.DropChance;
+        if (prefab != null && chance > 0f && (chance >= 1f || Random.value < chance))
+        {
+            Instantiate(prefab, transform.position, prefab.transform.rotation);
         }
     }
 }

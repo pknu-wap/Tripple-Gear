@@ -29,6 +29,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
     [SerializeField, KoreanLabel("이동 컨트롤러")] private RuntimeAnimatorController moveController;
 
     private bool isChasing;
+    private bool encounterSpawn;
     private bool isMovementPaused;
     private float offscreenSince = -1f;
     private SpriteRenderer spriteRenderer;
@@ -92,7 +93,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
         if (!isChasing)
         {
-            if (IsInsideCameraView())
+            if (encounterSpawn || IsInsideCameraView())
             {
                 StartChasing();
             }
@@ -100,7 +101,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
             return;
         }
 
-        if (HasBeenOutsideCameraLongEnough())
+        if (!encounterSpawn && HasBeenOutsideCameraLongEnough())
         {
             gameObject.SetActive(false);
             return;
@@ -121,6 +122,15 @@ public sealed class NormalMonsterChase : MonoBehaviour
             followTarget = target;
         }
     }
+
+    public void BeginEncounterApproach(Transform target, Camera view)
+    {
+        encounterSpawn = true;
+        SetFollowTarget(target);
+        if (view != null) targetCamera = view;
+    }
+
+    public void EndEncounterApproach() => encounterSpawn = false;
 
     public void SetMovementPaused(bool paused)
     {

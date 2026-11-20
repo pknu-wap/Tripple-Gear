@@ -102,7 +102,7 @@ public partial class Trigger : TriggerBase
         switch (mode)
         {
             case TriggerMode.Wave:
-                return StartWave();
+                return StartWave(player);
             case TriggerMode.Mission:
                 return HasMissionObjectives ? StartMission(player) : manager != null && TryActivateEntry(mode);
             case TriggerMode.Story:
@@ -124,9 +124,10 @@ public partial class Trigger : TriggerBase
         return true;
     }
 
-    private bool StartWave()
+    private bool StartWave(ArisaHorizontalMovement player)
     {
-        if (HasStarted)
+        if (HasStarted || CurrentMissionState == MissionState.Running || CurrentMissionState == MissionState.PlayingClear
+            || CurrentMissionState == MissionState.PlayingIntro || runningSpawns.Count > 0)
         {
             return false;
         }
@@ -149,6 +150,7 @@ public partial class Trigger : TriggerBase
 
         State = WaveState.Running;
         LockCamera();
+        StartEnemySpawns(player, false);
 
         for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
         {
@@ -176,12 +178,12 @@ public partial class Trigger : TriggerBase
         waveMonsters.Clear();
         if (cameraManager == null || cameraManager.ManagedCamera == null
             || !cameraManager.ManagedCamera.orthographic
-            || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0 || monsters == null)
+            || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0 || !ValidateEnemySpawns())
         {
             return false;
         }
 
-        foreach (GameObject monster in monsters)
+        foreach (GameObject monster in monsters ?? System.Array.Empty<GameObject>())
         {
             if (monster == null || waveMonsters.Contains(monster))
             {
@@ -196,12 +198,12 @@ public partial class Trigger : TriggerBase
             }
             waveMonsters.Add(monster);
         }
-        return waveMonsters.Count > 0;
+        return waveMonsters.Count > 0 || HasEnemySpawns;
     }
 
     private void LateUpdate()
     {
-        UpdateMissionCamera();
+        UpdateMission();
         if (State != WaveState.Running)
         {
             return;
@@ -214,6 +216,10 @@ public partial class Trigger : TriggerBase
 
         lockedCamera.transform.position = lockedPosition;
         UpdateCameraBoundaries();
+        if (UpdateEnemySpawns())
+        {
+            return;
+        }
         foreach (GameObject monster in waveMonsters)
         {
             if (monster != null && monster.activeInHierarchy)
@@ -223,6 +229,7 @@ public partial class Trigger : TriggerBase
         }
 
         State = WaveState.Completed;
+        StopEnemySpawns(false);
         RestoreCamera();
         waveCompleted.Invoke();
     }
@@ -234,6 +241,7 @@ public partial class Trigger : TriggerBase
             return;
         }
         State = WaveState.Cancelled;
+        StopEnemySpawns(true);
         RestoreCamera();
     }
 
@@ -326,6 +334,7 @@ public partial class Trigger : TriggerBase
     {
         CancelWave();
         CancelMission();
+        StopEnemySpawns(true);
     }
 
     private void PlayMusicTransition()

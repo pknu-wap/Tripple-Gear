@@ -5,7 +5,7 @@ using UnityEngine.Playables;
 
 public partial class Trigger
 {
-    public enum MissionState { Ready, Running, PlayingClear, Completed, Cancelled }
+    public enum MissionState { Ready, Running, PlayingClear, Completed, Cancelled, PlayingIntro }
 
     private enum MissionCombination
     {
@@ -21,6 +21,8 @@ public partial class Trigger
         Timeline,
     }
 
+    [SerializeField, KoreanLabel("시작 타임라인"), Tooltip("재생이 끝나면 미션 목표와 적 출현이 시작됩니다. Play On Awake를 꺼 주세요.")]
+    private PlayableDirector missionIntroTimeline;
     [SerializeField, KoreanLabel("미션 목표 목록")] private MissionObjective[] missionObjectives;
     [SerializeField, KoreanLabel("목표 조합 방식")] private MissionCombination missionCombination;
     [SerializeField, KoreanLabel("진행 중 카메라 고정")] private bool missionLockCamera;
@@ -34,17 +36,33 @@ public partial class Trigger
     public MissionState CurrentMissionState { get; private set; }
 
     private bool HasMissionObjectives => missionObjectives != null && missionObjectives.Length > 0;
+    private ArisaHorizontalMovement missionPlayer;
     private ArisaHealth missionPlayerHealth;
     private int currentObjectiveIndex;
     private int completedObjectives;
     private bool missionOwnsCamera;
     private bool reportedInvalidMission;
     private PlayableDirector playingMissionTimeline;
+    private PlayableDirector playingMissionIntro;
+    private DirectorWrapMode missionIntroPreviousWrapMode;
 
     private bool StartMission(ArisaHorizontalMovement player)
     {
         if (CurrentMissionState != MissionState.Ready || State == WaveState.Running)
         {
+            return false;
+        }
+
+        if (!ValidateEnemySpawns())
+        {
+            ReportInvalidMission("적 출현 그룹에 몬스터 프리팹과 씬의 출현 지점을 연결해 주세요.");
+            return false;
+        }
+
+        if (missionIntroTimeline != null && (!missionIntroTimeline.isActiveAndEnabled
+            || missionIntroTimeline.playableAsset == null || missionIntroTimeline.state == PlayState.Playing))
+        {
+            ReportInvalidMission("시작 타임라인에 활성 Playable Director와 타임라인을 연결하고 Play On Awake를 꺼 주세요.");
             return false;
         }
 
@@ -82,7 +100,7 @@ public partial class Trigger
             missionOwnsCamera = true;
         }
 
-        CurrentMissionState = MissionState.Running;
+        missionPlayer = player;
         missionPlayerHealth = playerHealth;
         if (missionPlayerHealth != null)
         {
@@ -93,6 +111,29 @@ public partial class Trigger
             objective.Owner = this;
             objective.Completed += HandleObjectiveCompleted;
         }
+
+        if (missionIntroTimeline == null)
+        {
+            BeginMissionGameplay();
+        }
+        else
+        {
+            CurrentMissionState = MissionState.PlayingIntro;
+            playingMissionIntro = missionIntroTimeline;
+            missionIntroPreviousWrapMode = playingMissionIntro.extrapolationMode;
+            // Keep the last sample until we observe completion and release the graph.
+            playingMissionIntro.extrapolationMode = DirectorWrapMode.Hold;
+            playingMissionIntro.stopped += OnMissionIntroStopped;
+            playingMissionIntro.Play();
+        }
+        return true;
+    }
+
+    private void BeginMissionGameplay()
+    {
+        CurrentMissionState = MissionState.Running;
+        StartEnemySpawns(missionPlayer, true);
+        missionPlayer = null;
 
         missionStarted.Invoke();
         if (CurrentMissionState == MissionState.Running)
@@ -113,7 +154,51 @@ public partial class Trigger
                 }
             }
         }
-        return true;
+    }
+
+    private void UpdateMissionIntro()
+    {
+        if (playingMissionIntro == null || !playingMissionIntro.isActiveAndEnabled
+            || (missionOwnsCamera && (lockedCamera == null || lockedManager == null)))
+        {
+            CancelMission();
+            return;
+        }
+
+        if (playingMissionIntro.time + 0.00001d < playingMissionIntro.duration)
+        {
+            return;
+        }
+
+        ReleaseMissionIntro(stopPlayback: true);
+        if (CurrentMissionState != MissionState.PlayingIntro)
+        {
+            return;
+        }
+
+        if (missionOwnsCamera && lockedCamera != null)
+        {
+            lockedPosition = lockedCamera.transform.position;
+        }
+        BeginMissionGameplay();
+    }
+
+    private void OnMissionIntroStopped(PlayableDirector director)
+    {
+        ReleaseMissionIntro(stopPlayback: false);
+        CancelMission();
+    }
+
+    private void ReleaseMissionIntro(bool stopPlayback)
+    {
+        PlayableDirector director = playingMissionIntro;
+        playingMissionIntro = null;
+        if (director != null)
+        {
+            director.stopped -= OnMissionIntroStopped;
+            if (stopPlayback && director.playableGraph.IsValid()) director.Stop();
+            director.extrapolationMode = missionIntroPreviousWrapMode;
+        }
     }
 
     private void HandleObjectiveCompleted(MissionObjective objective)
@@ -137,6 +222,17 @@ public partial class Trigger
     private void ClearMission()
     {
         CurrentMissionState = MissionState.PlayingClear;
+        if (!continueSpawningAfterMissionClear)
+        {
+            StopEnemySpawns(clearMissionSpawnedEnemies);
+        }
+        else if (clearMissionSpawnedEnemies)
+        {
+            foreach (RunningSpawnGroup group in runningSpawns)
+            {
+                ReleaseSpawnedEnemies(group, true);
+            }
+        }
         StopMissionObjectives();
         if (CurrentMissionState != MissionState.PlayingClear)
         {
@@ -185,12 +281,15 @@ public partial class Trigger
 
     public void CancelMission()
     {
-        if (CurrentMissionState != MissionState.Running && CurrentMissionState != MissionState.PlayingClear)
+        if (CurrentMissionState != MissionState.PlayingIntro && CurrentMissionState != MissionState.Running
+            && CurrentMissionState != MissionState.PlayingClear)
         {
             return;
         }
 
         CurrentMissionState = MissionState.Cancelled;
+        ReleaseMissionIntro(stopPlayback: true);
+        StopEnemySpawns(true);
         PlayableDirector timeline = playingMissionTimeline;
         StopMissionObjectives();
         ReleaseMission();
@@ -215,6 +314,7 @@ public partial class Trigger
 
     private void ReleaseMission()
     {
+        missionPlayer = null;
         if (playingMissionTimeline != null)
         {
             playingMissionTimeline.stopped -= OnMissionTimelineStopped;
@@ -236,10 +336,25 @@ public partial class Trigger
 
     private void OnMissionTimelineStopped(PlayableDirector director) => CancelMission();
 
-    private void UpdateMissionCamera()
+    private void UpdateMission()
     {
-        if (!missionOwnsCamera || CurrentMissionState != MissionState.Running)
+        if (CurrentMissionState == MissionState.PlayingIntro)
         {
+            UpdateMissionIntro();
+            return;
+        }
+        if (CurrentMissionState != MissionState.Running)
+        {
+            if (continueSpawningAfterMissionClear
+                && (CurrentMissionState == MissionState.PlayingClear || CurrentMissionState == MissionState.Completed))
+            {
+                UpdateEnemySpawns();
+            }
+            return;
+        }
+        if (!missionOwnsCamera)
+        {
+            UpdateEnemySpawns();
             return;
         }
         if (lockedCamera == null || lockedManager == null)
@@ -250,6 +365,7 @@ public partial class Trigger
 
         lockedCamera.transform.position = lockedPosition;
         UpdateCameraBoundaries();
+        UpdateEnemySpawns();
     }
 
     private void ReportInvalidMission(string message)
