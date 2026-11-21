@@ -19,6 +19,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
     [SerializeField, KoreanLabel("도착 발판 (선택)")] private BoxCollider2D destinationPlatform;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
+    [SerializeField, KoreanLabel("도착 후 콜라이더로만 지면 판정")] private bool useColliderGroundAtDestination;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
     [SerializeField, KoreanLabel("아리사만 사용")] private bool requireArisaMovement = true;
     [SerializeField, KoreanLabel("대상 레이어")] private LayerMask targetLayers = ~0;
@@ -173,7 +174,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
             }
             else
             {
-                arisaMovement.TeleportTo(destination);
+                arisaMovement.TeleportTo(destination, useFallbackGround: !useColliderGroundAtDestination);
             }
             return;
         }

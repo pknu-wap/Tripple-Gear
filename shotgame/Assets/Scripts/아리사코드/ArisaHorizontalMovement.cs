@@ -15,6 +15,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private const string DustStateName = "Dust";
     private const string WaveBoundaryLayerName = "WaveBoundary";
     private const float StopThreshold = 0.03f;
+    private const float MinimumLandingAirborneDuration = 0.08f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
     [SerializeField, KoreanLabel("달리는 맵 화면 왼쪽 여유"), Min(0f)] private float runningMapLeftPadding = 0.2f;
@@ -38,6 +39,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("관성 오버레이 렌더러")] private SpriteRenderer[] inertiaOverlayRenderers;
     [SerializeField, KoreanLabel("이동 중 렌더러")] private SpriteRenderer[] movingSpriteRenderers;
     [SerializeField, KoreanLabel("이동 충돌체")] private CapsuleCollider2D movementCollider;
+    [SerializeField, KoreanLabel("시작 시 콜라이더로만 지면 판정")] private bool useColliderGroundAtStart;
     private Rigidbody2D movementBody;
     private CameraManager cameraManager;
     private PhysicsMaterial2D frictionlessMaterial;
@@ -52,34 +54,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("앉기 지면 유지 시간")] private float crouchGroundedGraceTime = 0.08f;
     [SerializeField, KoreanLabel("일방향 발판 상단 허용 오차")] private float oneWayPlatformTopTolerance = 0.05f;
 
+    [SerializeField, KoreanLabel("제자리 점프 스프라이트")] private Sprite[] standingJumpSprites;
+    [SerializeField, KoreanLabel("달리기 점프 스프라이트")] private Sprite[] runningJumpSprites;
     [SerializeField, KoreanLabel("착지 스프라이트")] private Sprite[] landingSprites;
     [SerializeField, KoreanLabel("착지 프레임 속도"), Min(1f)] private float landingFrameRate = 16f;
     [SerializeField, KoreanLabel("착지 상체 위치 보정")] private Vector2[] landingUpperBodyOffsets;
 
-    [SerializeField, KoreanLabel("점프 준비 시간"), Min(0f)] private float jumpPreparationDuration = 0.14f;
-    [SerializeField, KoreanLabel("점프 준비 스프라이트")] private Sprite[] jumpPreparationSprites = System.Array.Empty<Sprite>();
-    [SerializeField, KoreanLabel("점프 준비 상체 위치 보정")] private Vector2[] jumpPreparationUpperBodyOffsets = System.Array.Empty<Vector2>();
-    private bool jumpPreparing;
-    private float jumpPreparationStartedAt;
-
-    public bool IsPreparingJump => enabled && jumpPreparing && isGrounded && !isCrouching;
-
-    private int JumpPreparationFrameIndex => Mathf.Clamp(
-        Mathf.FloorToInt((Time.time - jumpPreparationStartedAt)
-            / Mathf.Max(0.001f, jumpPreparationDuration) * jumpPreparationSprites.Length),
-        0, jumpPreparationSprites.Length - 1);
-
-    public Vector3 JumpPreparationUpperBodyOffset => IsPreparingJump
-        && jumpPreparationUpperBodyOffsets != null
-        && JumpPreparationFrameIndex < jumpPreparationUpperBodyOffsets.Length
-        ? (Vector3)jumpPreparationUpperBodyOffsets[JumpPreparationFrameIndex] : Vector3.zero;
-
     private float landingStartedAt = float.NegativeInfinity;
     private float airborneDuration;
-    private Sprite spriteBeforeLanding;
-    private bool landingSpriteApplied;
+    private Sprite[] activeJumpSprites;
+    private Sprite bodySpriteBeforePose;
+    private Sprite appliedBodyPose;
 
-    public bool IsLanding => enabled && !jumpPreparing && isGrounded && !isCrouching
+    private bool IsPlayingJumpPose => !isGrounded && activeJumpSprites != null && activeJumpSprites.Length > 0;
+
+    public bool IsLanding => enabled && isGrounded && !isCrouching
         && landingSprites != null && landingSprites.Length > 0
         && Time.time - landingStartedAt < landingSprites.Length / Mathf.Max(1f, landingFrameRate);
 
@@ -103,7 +92,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private float hitKnockbackSpeed;
     private float verticalSpeed;
     private float groundY;
-    private bool useFallbackGround = true;
+    private bool useFallbackGround;
     private BoxCollider2D boatDeck;
     private float boatSpeed;
     private float airborneBoatSpeed;
@@ -161,7 +150,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     public void TeleportTo(Vector3 position) => TeleportTo(position, useFallbackGround: true);
 
-    private void TeleportTo(Vector3 position, bool useFallbackGround)
+    internal void TeleportTo(Vector3 position, bool useFallbackGround)
     {
         boatDeck = null;
         boatSpeed = 0f;
@@ -174,8 +163,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         transform.position = position;
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         airborneDuration = 0f;
         groundY = position.y;
         this.useFallbackGround = useFallbackGround;
@@ -232,8 +220,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return;
         }
 
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         hitReactionEndTime = Time.time + duration;
         hitKnockbackSpeed = Mathf.Sign(horizontalDirection) * Mathf.Max(0f, distance) / duration;
         currentHorizontalSpeed = 0f;
@@ -276,6 +263,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         groundY = transform.position.y;
+        useFallbackGround = !useColliderGroundAtStart;
         isGrounded = true;
         SetMovingAnimation(false);
         SetRendererVisibility(false, false);
@@ -436,7 +424,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         RefreshGroundedState();
         UpdateJump();
         SnapToOneWayPlatform();
-        bool justLanded = !wasGrounded && isGrounded;
+        bool landedAfterAirborne = !wasGrounded && isGrounded
+            && airborneDuration >= MinimumLandingAirborneDuration;
         if (!isGrounded)
         {
             airborneDuration += Time.fixedDeltaTime;
@@ -444,7 +433,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
         else
         {
-            if (!wasGrounded && airborneDuration >= 0.08f && !IsPreparingJump && !isCrouching && !isHitReacting)
+            activeJumpSprites = null;
+            if (landedAfterAirborne && !isCrouching && !isHitReacting)
             {
                 landingStartedAt = Time.time;
             }
@@ -462,7 +452,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         {
             currentHorizontalSpeed = 0f;
         }
-        else if (justLanded)
+        else if (landedAfterAirborne)
         {
             // Preserve direction without speeding up a slower landing.
             float speedLimit = Mathf.Max(0f, landingHorizontalSpeed);
@@ -484,7 +474,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         bool hasMovementSpeed = Mathf.Abs(currentHorizontalSpeed) > 0f;
-        float horizontalSpeed = justLanded ? currentHorizontalSpeed : isHitReacting
+        float horizontalSpeed = landedAfterAirborne ? currentHorizontalSpeed : isHitReacting
             ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
             : currentHorizontalSpeed;
         horizontalSpeed = KeepInsideRunningMapScreen(horizontalSpeed);
@@ -496,7 +486,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
         bool isGunReloading = gunFire != null && gunFire.IsReloading;
-        bool shouldCoast = isGrounded && !IsLanding && !IsPreparingJump && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
+        bool shouldCoast = isGrounded && !IsLanding && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
         if (shouldCoast && !isCoasting)
         {
             inertiaStartedAt = Time.time;
@@ -509,13 +499,14 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         bool isIdleAiming = isGrounded && !hasMovementInput && !isCoasting && (fireHeld || isGunReloading);
         SetMovingAnimation(hasMovementInput);
         UpdateInertiaAnimation(isCoasting);
-        SetRendererVisibility(IsPreparingJump || IsLanding || hasMovementInput || showAirborneDriftPose || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading, isCoasting);
+        SetRendererVisibility(IsPlayingJumpPose || IsLanding || hasMovementInput || showAirborneDriftPose
+            || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading, isCoasting);
     }
 
     private void LateUpdate()
     {
         ApplyCrouchAnimationFrame();
-        ApplyLandingAnimationFrame();
+        ApplyBodyPose(GetAirPoseSprite());
     }
 
     private float ApplyBoatMovement(float horizontalSpeed, bool wasGrounded)
@@ -600,63 +591,62 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return horizontalSpeed;
     }
 
-    private void ApplyLandingAnimationFrame()
+    private Sprite GetAirPoseSprite()
     {
-        if ((!IsLanding && !IsPreparingJump) || bodySpriteRenderer == null)
+        if (IsPlayingJumpPose)
         {
-            RestoreLandingSprite();
+            float launchSpeed = Mathf.Max(0.01f, jumpSpeed);
+            float progress = Mathf.Clamp01(0.5f - 0.5f * verticalSpeed / launchSpeed);
+            int frameIndex = Mathf.Min(Mathf.FloorToInt(progress * activeJumpSprites.Length), activeJumpSprites.Length - 1);
+            return activeJumpSprites[frameIndex];
+        }
+
+        return IsLanding ? landingSprites[LandingFrameIndex] : null;
+    }
+
+    private void ApplyBodyPose(Sprite frame)
+    {
+        if (bodySpriteRenderer == null)
+        {
             return;
         }
 
-        Sprite[] frames = IsPreparingJump ? jumpPreparationSprites : landingSprites;
-        int frameIndex = IsPreparingJump ? JumpPreparationFrameIndex : LandingFrameIndex;
         Sprite current = bodySpriteRenderer.sprite;
-        // The Animator can supply a fresh running pose each frame. Keep it for restoration.
-        if (!IsJumpOrLandingSprite(current))
+        if (frame == null)
         {
-            spriteBeforeLanding = current;
+            if (appliedBodyPose != null && current == appliedBodyPose)
+            {
+                bodySpriteRenderer.sprite = bodySpriteBeforePose;
+            }
+            appliedBodyPose = null;
+            bodySpriteBeforePose = null;
+            return;
         }
-        Sprite frame = frames[frameIndex];
-        if (frame != null)
+
+        // Preserve fresh Animator frames while overriding the body sprite in the air.
+        if (appliedBodyPose == null || current != appliedBodyPose)
         {
-            bodySpriteRenderer.sprite = frame;
-            landingSpriteApplied = true;
+            bodySpriteBeforePose = current;
         }
-    }
-
-    private void RestoreLandingSprite()
-    {
-        if (landingSpriteApplied && bodySpriteRenderer != null
-            && IsJumpOrLandingSprite(bodySpriteRenderer.sprite))
-        {
-            bodySpriteRenderer.sprite = spriteBeforeLanding;
-        }
-        landingSpriteApplied = false;
-        spriteBeforeLanding = null;
-    }
-
-    private bool IsJumpOrLandingSprite(Sprite sprite)
-    {
-        return (landingSprites != null && System.Array.IndexOf(landingSprites, sprite) >= 0)
-            || (jumpPreparationSprites != null && System.Array.IndexOf(jumpPreparationSprites, sprite) >= 0);
-    }
-
-    private void CancelJumpPreparation()
-    {
-        jumpPreparing = false;
-        RestoreLandingSprite();
+        bodySpriteRenderer.sprite = frame;
+        appliedBodyPose = frame;
     }
 
     private void CancelLanding()
     {
         landingStartedAt = float.NegativeInfinity;
-        RestoreLandingSprite();
+    }
+
+    private void ClearAirPoses()
+    {
+        activeJumpSprites = null;
+        CancelLanding();
+        ApplyBodyPose(null);
     }
 
     private void OnDisable()
     {
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         airborneDuration = 0f;
         if (movementBody != null)
         {
@@ -807,32 +797,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void UpdateJump()
     {
-        bool canJump = isGrounded && !isCrouching && Time.time >= hitReactionEndTime;
-        if (jumpPreparing && !canJump)
-        {
-            CancelJumpPreparation();
-        }
-
-        if (jumpPressed && canJump && !jumpPreparing)
+        if (jumpPressed && isGrounded && !isCrouching && Time.time >= hitReactionEndTime)
         {
             CancelLanding();
-            if (jumpPreparationDuration > 0f && jumpPreparationSprites != null
-                && jumpPreparationSprites.Length > 0)
-            {
-                jumpPreparing = true;
-                jumpPreparationStartedAt = Time.time;
-            }
-            else
-            {
-                verticalSpeed = jumpSpeed;
-                isGrounded = false;
-            }
-        }
-
-        // A short tap still completes the wind-up. Holding W cannot restart it.
-        if (jumpPreparing && Time.time - jumpPreparationStartedAt >= jumpPreparationDuration)
-        {
-            CancelJumpPreparation();
+            // Choose once from actual takeoff speed. Air steering keeps the selected pose.
+            activeJumpSprites = Mathf.Abs(movementBody.linearVelocity.x) > StopThreshold
+                ? runningJumpSprites : standingJumpSprites;
             verticalSpeed = jumpSpeed;
             isGrounded = false;
         }

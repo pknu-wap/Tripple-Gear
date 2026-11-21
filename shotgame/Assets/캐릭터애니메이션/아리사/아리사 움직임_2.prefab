@@ -445,23 +445,20 @@ MonoBehaviour:
   - {fileID: 759477705297205685, guid: 3211cd5c383563842af162dc48b7f563, type: 3}
   - {fileID: 273391784822976301, guid: 3211cd5c383563842af162dc48b7f563, type: 3}
   crouchFrameRate: 20
+  standingJumpSprites:
+  - {fileID: 21300000, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
+  - {fileID: 21300002, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
+  - {fileID: 21300004, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
+  runningJumpSprites:
+  - {fileID: 21300006, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
+  - {fileID: 21300008, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
+  - {fileID: 21300010, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
   landingSprites:
   - {fileID: 21300002, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
   - {fileID: 21300004, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
   - {fileID: 21300006, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
   - {fileID: 21300000, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
   landingFrameRate: 16
-  jumpPreparationDuration: 0.14
-  jumpPreparationSprites:
-  - {fileID: 21300000, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
-  - {fileID: 21300002, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
-  - {fileID: 21300004, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
-  - {fileID: 21300006, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
-  jumpPreparationUpperBodyOffsets:
-  - {x: 0, y: 0}
-  - {x: 0, y: -0.14027}
-  - {x: 0, y: -0.34366}
-  - {x: 0, y: -0.17884}
   landingUpperBodyOffsets:
   - {x: 0, y: -0.14027}
   - {x: 0, y: -0.34366}

@@ -134,7 +134,7 @@ public sealed class ArisaMouseAim : MonoBehaviour
         ApplyInertiaDustFacing();
         ApplyBodyFacing(GetCrouchPoseOffset(crouchBodyOffsets), bodyBaseScale * GetCrouchBodyScaleMultiplier());
         Vector3 landingOffset = inputSource != null
-            ? inputSource.LandingUpperBodyOffset + inputSource.JumpPreparationUpperBodyOffset
+            ? inputSource.LandingUpperBodyOffset
             : Vector3.zero;
         Vector3 headPoseOffset = GetInertiaPoseOffset(inertiaHeadOffsets) + GetCrouchPoseOffset(crouchHeadOffsets) + landingOffset;
         Vector3 aimPoseOffset = GetInertiaPoseOffset(inertiaAimOffsets) + GetCrouchPoseOffset(crouchAimOffsets) + landingOffset;
