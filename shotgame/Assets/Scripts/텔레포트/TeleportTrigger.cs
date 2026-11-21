@@ -127,6 +127,27 @@ public sealed partial class TeleportTrigger : MonoBehaviour
             yield return fadeToUse.FadeIn(fadeInSpeed);
         }
 
+        PlaceAtDestination(subject, restorePlayerFollow);
+
+        if (musicToFadeIn != null)
+        {
+            musicToFadeIn.FadeIn(1f / fadeOutSpeed);
+        }
+        if (fadeToUse != null)
+        {
+            yield return fadeToUse.FadeOut(fadeOutSpeed);
+        }
+
+        isTeleporting = false;
+    }
+
+    internal void PlacePlayerAtDestination()
+    {
+        if (teleportSubject != null) PlaceAtDestination(teleportSubject, restorePlayerFollow: false);
+    }
+
+    private void PlaceAtDestination(Transform subject, bool restorePlayerFollow)
+    {
         TeleportSubject(subject);
         ApplyCameraArea();
         ApplyCameraFollowMode();
@@ -144,17 +165,6 @@ public sealed partial class TeleportTrigger : MonoBehaviour
                 manager.SnapToTarget();
             }
         }
-
-        if (musicToFadeIn != null)
-        {
-            musicToFadeIn.FadeIn(1f / fadeOutSpeed);
-        }
-        if (fadeToUse != null)
-        {
-            yield return fadeToUse.FadeOut(fadeOutSpeed);
-        }
-
-        isTeleporting = false;
     }
 
     private void TeleportSubject(Transform subject)

@@ -335,6 +335,12 @@ public sealed class ArisaHealth : MonoBehaviour
         }
     }
 
+    internal void ClearHitPresentation()
+    {
+        StopHitVisual();
+        if (hitSpriteRenderer != null) hitSpriteRenderer.enabled = false;
+    }
+
     private void StopHitVisual()
     {
         if (!hitVisualActive)

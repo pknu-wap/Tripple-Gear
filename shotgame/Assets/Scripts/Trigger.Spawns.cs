@@ -81,7 +81,7 @@ public partial class Trigger
     {
         bool hasPendingEnemies = false;
         double now = Time.timeAsDouble;
-        Camera view = lockedCamera != null ? lockedCamera : Camera.main;
+        Camera view = cameraLock.Camera != null ? cameraLock.Camera : Camera.main;
         foreach (RunningSpawnGroup group in runningSpawns)
         {
             for (int i = group.Alive.Count - 1; i >= 0; i--)

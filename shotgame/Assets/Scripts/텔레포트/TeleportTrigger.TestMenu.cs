@@ -124,6 +124,19 @@ public sealed partial class TeleportTrigger
             }
         }
 
+        foreach (BossTrigger trigger in FindObjectsByType<BossTrigger>(FindObjectsSortMode.None))
+        {
+            if (trigger.gameObject.scene == targetScene)
+            {
+                trigger.CancelEncounter();
+            }
+        }
+
+        foreach (AtailEntrance entrance in FindObjectsByType<AtailEntrance>(FindObjectsSortMode.None))
+        {
+            if (entrance.gameObject.scene == targetScene) entrance.CancelEntrance();
+        }
+
         if (voyage != null)
         {
             voyage.RestartForTest();

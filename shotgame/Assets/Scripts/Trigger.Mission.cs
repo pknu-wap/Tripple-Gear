@@ -130,8 +130,7 @@ public partial class Trigger
         BoatVoyage boat = boatObjective != null ? boatObjective.BattleBoat : null;
         if (missionLockCamera && boat == null)
         {
-            if (cameraManager == null || cameraManager.ManagedCamera == null || !cameraManager.ManagedCamera.orthographic
-                || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0)
+            if (!EncounterCameraLock.CanLock(cameraManager))
             {
                 ReportInvalidMission("카메라를 고정하려면 직교 카메라와 WaveBoundary 레이어가 필요합니다.");
                 return false;
@@ -150,7 +149,7 @@ public partial class Trigger
         activeMissionBoat = boat;
         if (missionLockCamera && activeMissionBoat == null)
         {
-            LockCamera();
+            cameraLock.Lock(cameraManager);
             missionOwnsCamera = true;
         }
 
@@ -234,7 +233,7 @@ public partial class Trigger
         }
 
         if (playingMissionIntro == null || !playingMissionIntro.isActiveAndEnabled
-            || (missionOwnsCamera && (lockedCamera == null || lockedManager == null)))
+            || (missionOwnsCamera && !cameraLock.IsLocked))
         {
             CancelMission();
             return;
@@ -251,9 +250,9 @@ public partial class Trigger
             return;
         }
 
-        if (missionOwnsCamera && lockedCamera != null)
+        if (missionOwnsCamera && cameraLock.Camera != null)
         {
-            lockedPosition = lockedCamera.transform.position;
+            cameraLock.Position = cameraLock.Camera.transform.position;
         }
         BeginMissionGameplay();
     }
@@ -317,7 +316,7 @@ public partial class Trigger
         // The presentation can move the camera while normal follow remains suspended.
         if (missionOwnsCamera)
         {
-            RemoveCameraBoundaries();
+            cameraLock.RemoveCameraBoundaries();
         }
 
         switch (missionPresentation)
@@ -435,14 +434,13 @@ public partial class Trigger
             UpdateEnemySpawns();
             return;
         }
-        if (lockedCamera == null || lockedManager == null)
+        if (!cameraLock.IsLocked)
         {
             CancelMission();
             return;
         }
 
-        lockedCamera.transform.position = lockedPosition;
-        UpdateCameraBoundaries();
+        cameraLock.Update();
         UpdateEnemySpawns();
     }
 

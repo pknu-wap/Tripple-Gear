@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -32,6 +33,9 @@ public sealed class BoatVoyage : MonoBehaviour
     private bool seaIsScrolling;
     private Trigger activeBattleMission;
     private bool dockedBattle;
+    private bool suspendedForBossEntrance;
+
+    internal event Action Departed;
 
     private void Awake()
     {
@@ -78,6 +82,9 @@ public sealed class BoatVoyage : MonoBehaviour
             return;
         }
 
+        suspendedForBossEntrance = false;
+        hull.enabled = true;
+        deck.enabled = true;
         wake?.Clear();
         foreach (Trigger mission in FindObjectsByType<Trigger>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
@@ -99,11 +106,12 @@ public sealed class BoatVoyage : MonoBehaviour
         cameraStartX = cameraManager.ManagedCamera.transform.position.x;
         wake?.Play();
         phase = VoyagePhase.Sailing;
+        Departed?.Invoke();
     }
 
     private void FixedUpdate()
     {
-        if (phase == VoyagePhase.Docked)
+        if (suspendedForBossEntrance || phase == VoyagePhase.Docked)
         {
             return;
         }
@@ -152,7 +160,7 @@ public sealed class BoatVoyage : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (phase == VoyagePhase.Docked || seaScrollShader == null)
+        if (suspendedForBossEntrance || phase == VoyagePhase.Docked || seaScrollShader == null)
         {
             return;
         }
@@ -208,6 +216,27 @@ public sealed class BoatVoyage : MonoBehaviour
             activeBattleMission = null;
             phase = VoyagePhase.Sailing;
         }
+    }
+
+    internal void SuspendForBossEntrance()
+    {
+        suspendedForBossEntrance = true;
+        wake?.Clear();
+        hull.enabled = false;
+        deck.enabled = false;
+    }
+
+    internal void ResumeAfterBossEntrance(bool wrecked)
+    {
+        suspendedForBossEntrance = false;
+        if (wrecked)
+        {
+            StopVoyage();
+            return;
+        }
+        hull.enabled = true;
+        deck.enabled = true;
+        if (phase != VoyagePhase.Docked) wake?.Play();
     }
 
     private void StopVoyage()

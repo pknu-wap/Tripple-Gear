@@ -150,6 +150,14 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     public void TeleportTo(Vector3 position) => TeleportTo(position, useFallbackGround: true);
 
+    internal SpriteRenderer IdleSpriteRenderer => idleSpriteRenderer;
+
+    internal void ShowIdlePresentation()
+    {
+        SetMovingAnimation(false);
+        SetRendererVisibility(false, false);
+    }
+
     internal void TeleportTo(Vector3 position, bool useFallbackGround)
     {
         boatDeck = null;
@@ -265,8 +273,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         groundY = transform.position.y;
         useFallbackGround = !useColliderGroundAtStart;
         isGrounded = true;
-        SetMovingAnimation(false);
-        SetRendererVisibility(false, false);
+        ShowIdlePresentation();
     }
 
     private void FindReferences()

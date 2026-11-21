@@ -22,9 +22,6 @@ public enum MusicTransitionTiming
 [DefaultExecutionOrder(1000)]
 public partial class Trigger : TriggerBase
 {
-    private const string CameraBoundaryLayerName = "WaveBoundary";
-    private const float CameraBoundaryThickness = 1f;
-
     public enum WaveState { Ready, Running, Completed, Cancelled }
 
     [SerializeField] private TriggerMode triggerMode = TriggerMode.InheritLegacyMode;
@@ -52,12 +49,8 @@ public partial class Trigger : TriggerBase
     public UnityEvent WaveCompleted => waveCompleted;
 
     private readonly List<GameObject> waveMonsters = new List<GameObject>();
-    private CameraManager lockedManager;
-    private Camera lockedCamera;
-    private Vector3 lockedPosition;
-    private bool cameraWasEnabled;
+    private readonly EncounterCameraLock cameraLock = new EncounterCameraLock();
     private bool reportedInvalidSetup;
-    private readonly BoxCollider2D[] cameraBoundaries = new BoxCollider2D[4];
     private bool entryTriggered;
 
     protected override void Reset()
@@ -150,7 +143,7 @@ public partial class Trigger : TriggerBase
         }
 
         State = WaveState.Running;
-        if (waveLockCamera) LockCamera();
+        if (waveLockCamera) cameraLock.Lock(cameraManager);
         StartEnemySpawns(player, false);
 
         for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
@@ -177,8 +170,7 @@ public partial class Trigger : TriggerBase
     private bool PrepareWave()
     {
         waveMonsters.Clear();
-        if (!ValidateEnemySpawns() || (waveLockCamera && (cameraManager == null || cameraManager.ManagedCamera == null
-            || !cameraManager.ManagedCamera.orthographic || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0)))
+        if (!ValidateEnemySpawns() || (waveLockCamera && !EncounterCameraLock.CanLock(cameraManager)))
         {
             return false;
         }
@@ -210,14 +202,13 @@ public partial class Trigger : TriggerBase
         }
         if (waveLockCamera)
         {
-            if (lockedCamera == null || lockedManager == null)
+            if (!cameraLock.IsLocked)
             {
                 CancelWave();
                 return;
             }
 
-            lockedCamera.transform.position = lockedPosition;
-            UpdateCameraBoundaries();
+            cameraLock.Update();
         }
         if (UpdateEnemySpawns())
         {
@@ -250,87 +241,8 @@ public partial class Trigger : TriggerBase
 
     private void RestoreCamera()
     {
-        RemoveCameraBoundaries();
-        if (lockedManager != null)
-        {
-            if (cameraWasEnabled)
-            {
-                lockedManager.ResumeFollowAfterWave();
-            }
-
-            lockedManager.enabled = cameraWasEnabled;
-        }
-        lockedManager = null;
-        lockedCamera = null;
+        cameraLock.Release();
         waveMonsters.Clear();
-    }
-
-    private void LockCamera()
-    {
-        lockedManager = cameraManager;
-        lockedCamera = cameraManager.ManagedCamera;
-        lockedPosition = lockedCamera.transform.position;
-        cameraWasEnabled = lockedManager.enabled;
-        lockedManager.enabled = false;
-        CreateCameraBoundaries();
-    }
-
-    private void CreateCameraBoundaries()
-    {
-        int boundaryLayer = LayerMask.NameToLayer(CameraBoundaryLayerName);
-        string[] names = { "Left", "Right", "Bottom", "Top" };
-
-        for (int i = 0; i < cameraBoundaries.Length; i++)
-        {
-            GameObject boundary = new GameObject("Wave Camera Boundary " + names[i]);
-            boundary.layer = boundaryLayer;
-            cameraBoundaries[i] = boundary.AddComponent<BoxCollider2D>();
-        }
-
-        UpdateCameraBoundaries();
-    }
-
-    private void UpdateCameraBoundaries()
-    {
-        if (lockedCamera == null)
-        {
-            return;
-        }
-
-        Vector3 center = lockedCamera.transform.position;
-        float halfHeight = lockedCamera.orthographicSize;
-        float halfWidth = halfHeight * lockedCamera.aspect;
-        float thickness = CameraBoundaryThickness;
-        float halfThickness = thickness * 0.5f;
-
-        SetCameraBoundary(0, center.x - halfWidth - halfThickness, center.y, thickness, halfHeight * 2f + thickness * 2f);
-        SetCameraBoundary(1, center.x + halfWidth + halfThickness, center.y, thickness, halfHeight * 2f + thickness * 2f);
-        SetCameraBoundary(2, center.x, center.y - halfHeight - halfThickness, halfWidth * 2f + thickness * 2f, thickness);
-        SetCameraBoundary(3, center.x, center.y + halfHeight + halfThickness, halfWidth * 2f + thickness * 2f, thickness);
-        Physics2D.SyncTransforms();
-    }
-
-    private void SetCameraBoundary(int index, float x, float y, float width, float height)
-    {
-        BoxCollider2D boundary = cameraBoundaries[index];
-        boundary.transform.position = new Vector3(x, y, 0f);
-        boundary.size = new Vector2(width, height);
-    }
-
-    private void RemoveCameraBoundaries()
-    {
-        for (int i = 0; i < cameraBoundaries.Length; i++)
-        {
-            BoxCollider2D boundary = cameraBoundaries[i];
-            if (boundary == null)
-            {
-                continue;
-            }
-
-            boundary.gameObject.SetActive(false);
-            Destroy(boundary.gameObject);
-            cameraBoundaries[i] = null;
-        }
     }
 
     private void OnDisable()
