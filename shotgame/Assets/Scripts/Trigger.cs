@@ -31,6 +31,7 @@ public partial class Trigger : TriggerBase
     [SerializeField, KoreanLabel("한 번만 발동")] private bool triggerOnce;
 
     [Header("웨이브")]
+    [SerializeField, KoreanLabel("웨이브 중 카메라 고정")] private bool waveLockCamera = true;
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
     [SerializeField, KoreanLabel("활성화할 몬스터")] private GameObject[] monsters;
     [SerializeField, KoreanLabel("웨이브 시작 이벤트")] private UnityEvent waveStarted = new UnityEvent();
@@ -143,13 +144,13 @@ public partial class Trigger : TriggerBase
         }
 
         // A disabled camera manager may already belong to another running wave.
-        if (!cameraManager.isActiveAndEnabled)
+        if (waveLockCamera && !cameraManager.isActiveAndEnabled)
         {
             return false;
         }
 
         State = WaveState.Running;
-        LockCamera();
+        if (waveLockCamera) LockCamera();
         StartEnemySpawns(player, false);
 
         for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
@@ -176,9 +177,8 @@ public partial class Trigger : TriggerBase
     private bool PrepareWave()
     {
         waveMonsters.Clear();
-        if (cameraManager == null || cameraManager.ManagedCamera == null
-            || !cameraManager.ManagedCamera.orthographic
-            || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0 || !ValidateEnemySpawns())
+        if (!ValidateEnemySpawns() || (waveLockCamera && (cameraManager == null || cameraManager.ManagedCamera == null
+            || !cameraManager.ManagedCamera.orthographic || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0)))
         {
             return false;
         }
@@ -191,7 +191,7 @@ public partial class Trigger : TriggerBase
             }
             if (!monster.scene.IsValid() || monster.scene != gameObject.scene
                 || transform.IsChildOf(monster.transform)
-                || cameraManager.transform.IsChildOf(monster.transform)
+                || (cameraManager != null && cameraManager.transform.IsChildOf(monster.transform))
                 || (monster.transform.parent != null && !monster.transform.parent.gameObject.activeInHierarchy))
             {
                 return false;
@@ -208,14 +208,17 @@ public partial class Trigger : TriggerBase
         {
             return;
         }
-        if (lockedCamera == null || lockedManager == null)
+        if (waveLockCamera)
         {
-            CancelWave();
-            return;
-        }
+            if (lockedCamera == null || lockedManager == null)
+            {
+                CancelWave();
+                return;
+            }
 
-        lockedCamera.transform.position = lockedPosition;
-        UpdateCameraBoundaries();
+            lockedCamera.transform.position = lockedPosition;
+            UpdateCameraBoundaries();
+        }
         if (UpdateEnemySpawns())
         {
             return;

@@ -45,6 +45,14 @@ public sealed class MonsterHealth : MonoBehaviour
         SetHp(currentHp - amount);
     }
 
+    internal void ResetForMission()
+    {
+        currentHp = MaxHp;
+        if (TryGetComponent(out MonsterDeathEffect deathEffect)) deathEffect.ResetForMission();
+        if (TryGetComponent(out NormalMonsterChase chase)) chase.ResetForMission();
+        hpChanged?.Invoke(currentHp, MaxHp);
+    }
+
     public void TakeDamage(float amount)
     {
         TakeDamage(Mathf.CeilToInt(amount));

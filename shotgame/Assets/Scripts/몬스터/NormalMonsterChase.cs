@@ -132,6 +132,15 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     public void EndEncounterApproach() => encounterSpawn = false;
 
+    internal void ResetForMission()
+    {
+        isChasing = false;
+        isMovementPaused = false;
+        isJumping = false;
+        nextJumpTime = 0f;
+        if (spriteRenderer != null) spriteRenderer.flipX = baseSpriteFlipX;
+    }
+
     public void SetMovementPaused(bool paused)
     {
         if (isMovementPaused == paused)

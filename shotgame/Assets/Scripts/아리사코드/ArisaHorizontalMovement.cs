@@ -103,6 +103,10 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private float hitKnockbackSpeed;
     private float verticalSpeed;
     private float groundY;
+    private bool useFallbackGround = true;
+    private BoxCollider2D boatDeck;
+    private float boatSpeed;
+    private float airborneBoatSpeed;
     private bool isGrounded = true;
     private bool isCrouching;
     private bool isCoasting;
@@ -112,6 +116,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private readonly RaycastHit2D[] movementCastHits = new RaycastHit2D[12];
 
     public bool IsCrouching => isCrouching;
+    public bool IsInBoatSection => boatDeck != null;
     public bool IsCoasting => isCoasting;
 
     public int CrouchFrameIndex
@@ -154,8 +159,14 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return hasMouseScreenPosition;
     }
 
-    public void TeleportTo(Vector3 position)
+    public void TeleportTo(Vector3 position) => TeleportTo(position, useFallbackGround: true);
+
+    private void TeleportTo(Vector3 position, bool useFallbackGround)
     {
+        boatDeck = null;
+        boatSpeed = 0f;
+        airborneBoatSpeed = 0f;
+
         if (movementBody != null)
         {
             movementBody.position = position;
@@ -167,6 +178,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         CancelLanding();
         airborneDuration = 0f;
         groundY = position.y;
+        this.useFallbackGround = useFallbackGround;
         currentHorizontalSpeed = 0f;
         hitReactionEndTime = 0f;
         hitKnockbackSpeed = 0f;
@@ -178,6 +190,39 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         wasCoasting = false;
         ApplyStanceCollider();
         Physics2D.SyncTransforms();
+    }
+
+    public void BoardBoat(BoxCollider2D deck)
+    {
+        LandOnPlatform(deck);
+        boatDeck = deck;
+    }
+
+    internal void LandOnPlatform(BoxCollider2D platform)
+    {
+        TeleportTo(transform.position, useFallbackGround: false);
+        Bounds feet = movementCollider.bounds;
+        Bounds platformBounds = platform.bounds;
+        Vector3 position = transform.position;
+        position.x += platformBounds.center.x - feet.center.x;
+        position.y += platformBounds.max.y - feet.min.y;
+        movementBody.position = position;
+        transform.position = position;
+        Physics2D.SyncTransforms();
+    }
+
+    public void MoveWithBoat(BoxCollider2D deck, float step)
+    {
+        if (boatDeck != deck || !isActiveAndEnabled)
+        {
+            return;
+        }
+
+        boatSpeed = step / Time.fixedDeltaTime;
+        if (step > 0f && isGrounded && IsAtBoatDeck())
+        {
+            movementBody.position += Vector2.right * step;
+        }
     }
 
     public void StartHitReaction(float horizontalDirection, float duration, float distance, float upwardSpeed)
@@ -443,6 +488,10 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
             : currentHorizontalSpeed;
         horizontalSpeed = KeepInsideRunningMapScreen(horizontalSpeed);
+        if (boatDeck != null)
+        {
+            horizontalSpeed = ApplyBoatMovement(horizontalSpeed, wasGrounded);
+        }
         ClampToFallbackGround();
         movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
@@ -467,6 +516,48 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     {
         ApplyCrouchAnimationFrame();
         ApplyLandingAnimationFrame();
+    }
+
+    private float ApplyBoatMovement(float horizontalSpeed, bool wasGrounded)
+    {
+        if (!isGrounded)
+        {
+            if (wasGrounded)
+            {
+                airborneBoatSpeed = boatSpeed;
+            }
+
+            return horizontalSpeed + airborneBoatSpeed;
+        }
+
+        airborneBoatSpeed = 0f;
+        if (!IsAtBoatDeck())
+        {
+            return horizontalSpeed;
+        }
+
+        Bounds bodyBounds = movementCollider.bounds;
+        Bounds deckBounds = boatDeck.bounds;
+        float minStep = deckBounds.min.x - bodyBounds.min.x;
+        float maxStep = deckBounds.max.x - bodyBounds.max.x;
+        float step = minStep > maxStep ? (minStep + maxStep) * 0.5f
+            : Mathf.Clamp(horizontalSpeed * Time.fixedDeltaTime, minStep, maxStep);
+        float limitedSpeed = step / Time.fixedDeltaTime;
+        if (!Mathf.Approximately(horizontalSpeed, limitedSpeed))
+        {
+            currentHorizontalSpeed = 0f;
+        }
+
+        return limitedSpeed;
+    }
+
+    private bool IsAtBoatDeck()
+    {
+        Bounds bodyBounds = movementCollider.bounds;
+        Bounds deckBounds = boatDeck.bounds;
+        float tolerance = GetCurrentGroundedCheckDistance() + GetSkinWidth();
+        return Mathf.Abs(bodyBounds.min.y - deckBounds.max.y) <= tolerance
+            && bodyBounds.max.x > deckBounds.min.x && bodyBounds.min.x < deckBounds.max.x;
     }
 
     private float KeepInsideRunningMapScreen(float horizontalSpeed)
@@ -954,7 +1045,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private bool IsOnFallbackGround()
     {
-        return transform.position.y <= groundY + GetSkinWidth();
+        return useFallbackGround && transform.position.y <= groundY + GetSkinWidth();
     }
 
     private float GetSkinWidth()

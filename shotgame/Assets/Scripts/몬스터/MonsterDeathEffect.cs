@@ -9,6 +9,8 @@ public sealed class MonsterDeathEffect : MonoBehaviour
     private MonsterHealth health;
     private bool hasHandledDeath;
 
+    internal void ResetForMission() => hasHandledDeath = false;
+
     private void Awake()
     {
         health = GetComponent<MonsterHealth>();

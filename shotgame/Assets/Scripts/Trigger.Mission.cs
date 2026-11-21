@@ -45,6 +45,35 @@ public partial class Trigger
     private PlayableDirector playingMissionTimeline;
     private PlayableDirector playingMissionIntro;
     private DirectorWrapMode missionIntroPreviousWrapMode;
+    private BoatVoyage activeMissionBoat;
+    private bool waitingForMissionStart;
+
+    internal bool IsMissionForBoat(BoatVoyage boat)
+    {
+        if (!HasMissionObjectives) return false;
+        foreach (MissionObjective objective in missionObjectives)
+        {
+            if (objective != null && objective.BattleBoat == boat) return true;
+        }
+        return false;
+    }
+
+    public void ResetMissionForRetry()
+    {
+        CancelMission();
+        StopEnemySpawns(true);
+        foreach (MissionObjective objective in missionObjectives)
+        {
+            if (objective != null && objective.Owner == null)
+            {
+                objective.ResetProgress();
+            }
+        }
+
+        currentObjectiveIndex = 0;
+        completedObjectives = 0;
+        CurrentMissionState = MissionState.Ready;
+    }
 
     private bool StartMission(ArisaHorizontalMovement player)
     {
@@ -73,6 +102,7 @@ public partial class Trigger
         }
 
         var objectives = new HashSet<MissionObjective>();
+        MissionObjective boatObjective = null;
         foreach (MissionObjective objective in missionObjectives)
         {
             if (objective == null || !objective.isActiveAndEnabled || objective.Owner != null
@@ -81,9 +111,24 @@ public partial class Trigger
                 ReportInvalidMission("목표 목록에 활성화된 미사용 목표를 각각 한 번씩 연결해 주세요.");
                 return false;
             }
+            if (!objective.HasValidTargets())
+            {
+                ReportInvalidMission("지정 몬스터 목표에는 씬에 배치된 서로 다른 몬스터를 연결해 주세요.");
+                return false;
+            }
+            if (objective.BattleBoat != null)
+            {
+                if (boatObjective != null)
+                {
+                    ReportInvalidMission("미션의 목표 목록에서 항해 전투 보트는 한 목표에만 연결해 주세요.");
+                    return false;
+                }
+                boatObjective = objective;
+            }
         }
 
-        if (missionLockCamera)
+        BoatVoyage boat = boatObjective != null ? boatObjective.BattleBoat : null;
+        if (missionLockCamera && boat == null)
         {
             if (cameraManager == null || cameraManager.ManagedCamera == null || !cameraManager.ManagedCamera.orthographic
                 || LayerMask.NameToLayer(CameraBoundaryLayerName) < 0)
@@ -95,7 +140,16 @@ public partial class Trigger
             {
                 return false;
             }
+        }
 
+        if (boat != null && !boat.PrepareBattle(this, player, boatObjective.DockBeforeBattle))
+        {
+            return false;
+        }
+
+        activeMissionBoat = boat;
+        if (missionLockCamera && activeMissionBoat == null)
+        {
             LockCamera();
             missionOwnsCamera = true;
         }
@@ -112,21 +166,34 @@ public partial class Trigger
             objective.Completed += HandleObjectiveCompleted;
         }
 
-        if (missionIntroTimeline == null)
+        if (activeMissionBoat != null && !activeMissionBoat.IsBattleReady(this))
         {
-            BeginMissionGameplay();
+            waitingForMissionStart = true;
+            CurrentMissionState = MissionState.PlayingIntro;
         }
         else
         {
-            CurrentMissionState = MissionState.PlayingIntro;
-            playingMissionIntro = missionIntroTimeline;
-            missionIntroPreviousWrapMode = playingMissionIntro.extrapolationMode;
-            // Keep the last sample until we observe completion and release the graph.
-            playingMissionIntro.extrapolationMode = DirectorWrapMode.Hold;
-            playingMissionIntro.stopped += OnMissionIntroStopped;
-            playingMissionIntro.Play();
+            StartMissionIntro();
         }
         return true;
+    }
+
+    private void StartMissionIntro()
+    {
+        waitingForMissionStart = false;
+        if (missionIntroTimeline == null)
+        {
+            BeginMissionGameplay();
+            return;
+        }
+
+        CurrentMissionState = MissionState.PlayingIntro;
+        playingMissionIntro = missionIntroTimeline;
+        missionIntroPreviousWrapMode = playingMissionIntro.extrapolationMode;
+        // Keep the last sample until we observe completion and release the graph.
+        playingMissionIntro.extrapolationMode = DirectorWrapMode.Hold;
+        playingMissionIntro.stopped += OnMissionIntroStopped;
+        playingMissionIntro.Play();
     }
 
     private void BeginMissionGameplay()
@@ -135,6 +202,7 @@ public partial class Trigger
         StartEnemySpawns(missionPlayer, true);
         missionPlayer = null;
 
+        activeMissionBoat?.BeginBattle();
         missionStarted.Invoke();
         if (CurrentMissionState == MissionState.Running)
         {
@@ -158,6 +226,13 @@ public partial class Trigger
 
     private void UpdateMissionIntro()
     {
+        if (waitingForMissionStart)
+        {
+            if (activeMissionBoat == null) CancelMission();
+            else if (activeMissionBoat.IsBattleReady(this)) StartMissionIntro();
+            return;
+        }
+
         if (playingMissionIntro == null || !playingMissionIntro.isActiveAndEnabled
             || (missionOwnsCamera && (lockedCamera == null || lockedManager == null)))
         {
@@ -275,6 +350,7 @@ public partial class Trigger
         }
 
         CurrentMissionState = MissionState.Completed;
+        activeMissionBoat?.FinishBattle();
         ReleaseMission();
         missionCompleted.Invoke();
     }
@@ -288,6 +364,7 @@ public partial class Trigger
         }
 
         CurrentMissionState = MissionState.Cancelled;
+        waitingForMissionStart = false;
         ReleaseMissionIntro(stopPlayback: true);
         StopEnemySpawns(true);
         PlayableDirector timeline = playingMissionTimeline;
@@ -314,6 +391,7 @@ public partial class Trigger
 
     private void ReleaseMission()
     {
+        activeMissionBoat = null;
         missionPlayer = null;
         if (playingMissionTimeline != null)
         {

@@ -51,6 +51,7 @@ public sealed class TriggerEditor : Editor
         }
         else if (mode == TriggerMode.Wave)
         {
+            DrawProperty("waveLockCamera");
             DrawProperty("cameraManager");
             DrawProperty("monsters");
             DrawProperty("enemySpawnGroups");

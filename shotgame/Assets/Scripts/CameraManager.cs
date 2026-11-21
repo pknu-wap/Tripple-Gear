@@ -11,6 +11,7 @@ public enum CameraFollowMode
 {
     [InspectorName("달리는 맵")] RunningMap,
     [InspectorName("떨어지는 맵")] FallingMap,
+    [InspectorName("좌우 이동 맵")] BidirectionalHorizontal,
 }
 
 [DisallowMultipleComponent]
@@ -182,6 +183,12 @@ public sealed class CameraManager : MonoBehaviour
                 }
 
                 lowestFollowY = Mathf.Min(lowestFollowY, desiredPosition.y);
+            }
+            else if (followMode == CameraFollowMode.BidirectionalHorizontal)
+            {
+                nextPosition.x = followSmoothTime > 0f
+                    ? Mathf.SmoothDamp(nextPosition.x, desiredPosition.x, ref followVelocity.x, followSmoothTime)
+                    : desiredPosition.x;
             }
             else
             {

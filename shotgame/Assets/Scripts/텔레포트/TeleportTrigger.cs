@@ -17,6 +17,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [Header("텔레포트")]
     [SerializeField, KoreanLabel("텔레포트 대상")] private Transform teleportSubject;
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
+    [SerializeField, KoreanLabel("도착 발판 (선택)")] private BoxCollider2D destinationPlatform;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
     [SerializeField, KoreanLabel("아리사만 사용")] private bool requireArisaMovement = true;
@@ -27,6 +28,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("새 카메라 영역 번호")] private int cameraAreaIndex = -1;
     [SerializeField, KoreanLabel("새 카메라 영역 이름")] private string cameraAreaName;
     [SerializeField, KoreanLabel("목적지 카메라 방식")] private CameraFollowMode destinationFollowMode = CameraFollowMode.RunningMap;
+    [SerializeField, KoreanLabel("목적지 카메라 추적 대상 (선택)")] private Transform destinationCameraTarget;
+    [SerializeField, KoreanLabel("텔레포트 대상 추적")] private bool followTeleportedPlayer;
     [SerializeField, KoreanLabel("텔레포트 후 카메라 스냅")] private bool snapCameraAfterTeleport = true;
 
     [Header("페이드")]
@@ -109,7 +112,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(teleportSubject));
     }
 
-    private IEnumerator TeleportRoutine(Transform subject)
+    private IEnumerator TeleportRoutine(Transform subject, bool restorePlayerFollow = false)
     {
         isTeleporting = true;
 
@@ -126,6 +129,11 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         TeleportSubject(subject);
         ApplyCameraArea();
         ApplyCameraFollowMode();
+
+        if (destinationCameraTarget != null || followTeleportedPlayer || restorePlayerFollow)
+        {
+            GetCameraManager()?.SetFollowTarget(destinationCameraTarget != null ? destinationCameraTarget : subject);
+        }
 
         if (snapCameraAfterTeleport)
         {
@@ -159,7 +167,14 @@ public sealed partial class TeleportTrigger : MonoBehaviour
 
         if (arisaMovement != null)
         {
-            arisaMovement.TeleportTo(destination);
+            if (destinationPlatform != null)
+            {
+                arisaMovement.LandOnPlatform(destinationPlatform);
+            }
+            else
+            {
+                arisaMovement.TeleportTo(destination);
+            }
             return;
         }
 
@@ -301,7 +316,9 @@ public sealed partial class TeleportTrigger : MonoBehaviour
 
     private void DrawDestinationGizmo()
     {
-        Vector3 destination = teleportPoint != null ? teleportPoint.position : teleportPosition;
+        Vector3 destination = destinationPlatform != null
+            ? new Vector3(destinationPlatform.bounds.center.x, destinationPlatform.bounds.max.y, destinationPlatform.transform.position.z)
+            : teleportPoint != null ? teleportPoint.position : teleportPosition;
 
         Color previousColor = Gizmos.color;
         Gizmos.color = destinationGizmoColor;

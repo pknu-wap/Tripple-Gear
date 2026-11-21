@@ -12,6 +12,7 @@ public sealed partial class TeleportTrigger
     {
         [SerializeField, InspectorName("표시 이름")] internal string label;
         [SerializeField, InspectorName("텔레포트")] internal TeleportTrigger route;
+        [SerializeField, InspectorName("보트 항해")] internal BoatVoyage voyage;
     }
 
     [Header("에디터 테스트")]
@@ -86,7 +87,7 @@ public sealed partial class TeleportTrigger
         for (int i = 0; i < temporaryDestinations.Length; i++)
         {
             TestDestination destination = temporaryDestinations[i];
-            if (destination != null && destination.route != null && GUI.Button(
+            if (destination != null && (destination.route != null || destination.voyage != null) && GUI.Button(
                 new Rect(left + 16f, top + 32f + i * rowHeight, width - 32f, 30f), $"{i + 1}. {destination.label}"))
             {
                 SelectTestDestination(i);
@@ -101,22 +102,36 @@ public sealed partial class TeleportTrigger
 
     private void SelectTestDestination(int index)
     {
-        TeleportTrigger route = temporaryDestinations[index]?.route;
-        if (route == null || !route.isActiveAndEnabled || route.teleportSubject == null || route.isTeleporting)
+        TestDestination destination = temporaryDestinations[index];
+        TeleportTrigger route = destination?.route;
+        BoatVoyage voyage = destination?.voyage;
+        bool canTravel = voyage != null
+            ? voyage.isActiveAndEnabled
+            : route != null && route.isActiveAndEnabled && route.teleportSubject != null && !route.isTeleporting;
+        if (!canTravel || GetFade().IsFading)
         {
             return;
         }
 
         SetTestMenuOpen(false);
+        var targetScene = voyage != null ? voyage.gameObject.scene : route.gameObject.scene;
         foreach (Trigger trigger in FindObjectsByType<Trigger>(FindObjectsSortMode.None))
         {
-            if (trigger.gameObject.scene == route.gameObject.scene)
+            if (trigger.gameObject.scene == targetScene)
             {
                 trigger.CancelWave();
                 trigger.CancelMission();
             }
         }
-        route.TeleportPlayer();
+
+        if (voyage != null)
+        {
+            voyage.RestartForTest();
+        }
+        else
+        {
+            route.StartCoroutine(route.TeleportRoutine(route.teleportSubject, restorePlayerFollow: true));
+        }
     }
 
     private void SetTestMenuOpen(bool open)

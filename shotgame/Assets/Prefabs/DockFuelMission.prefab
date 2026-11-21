@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MissionObjective
   goalType: 0
-  requiredCount: 5
+  requiredCount: 10
   requiredSeconds: 10
   onStarted:
     m_PersistentCalls:
