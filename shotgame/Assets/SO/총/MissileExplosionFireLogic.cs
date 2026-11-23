@@ -47,7 +47,8 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
             projectile = projectileObject.AddComponent<Projectile2D>();
         }
 
-        projectile.ConfigureHitSettings(gunData, hitPosition => Explode(gunData, hitPosition), false);
+        float damage = gunData.Damage + context.DamageBonus;
+        projectile.ConfigureHitSettings(gunData, hitPosition => ApplyExplosionDamage(hitPosition, damage), false);
         projectile.Launch(
             fireDirection,
             gunData.BulletFireSpeed,
@@ -84,12 +85,7 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
         projectile.ResolveHit(projectileObject.transform.position, true);
     }
 
-    private void Explode(GunSO gunData, Vector3 explosionPosition)
-    {
-        ApplyExplosionDamage(gunData, explosionPosition);
-    }
-
-    private void ApplyExplosionDamage(GunSO gunData, Vector3 explosionPosition)
+    private void ApplyExplosionDamage(Vector3 explosionPosition, float damage)
     {
         if (ExplosionRadius <= 0f || ExplosionTargetLayers.value == 0)
         {
@@ -116,7 +112,7 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
             {
                 if (damagedMonsters.Add(health))
                 {
-                    health.TakeDamage(gunData.Damage);
+                    health.TakeGunDamage(damage);
                 }
                 continue;
             }
@@ -135,7 +131,7 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
                 continue;
             }
 
-            hitObject.SendMessage("TakeDamage", gunData.Damage, SendMessageOptions.DontRequireReceiver);
+            hitObject.SendMessage("TakeDamage", damage, SendMessageOptions.DontRequireReceiver);
         }
     }
 }

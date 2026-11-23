@@ -1,0 +1,273 @@
+fileFormatVersion: 2
+guid: 3f6ced2f3a744a50a30d309c0731268f
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: ArisaJump_StandingLift
+  - first:
+      213: 21300002
+    second: ArisaJump_StandingApex
+  - first:
+      213: 21300004
+    second: ArisaJump_StandingFall
+  - first:
+      213: 21300006
+    second: ArisaJump_RunningLift
+  - first:
+      213: 21300008
+    second: ArisaJump_RunningApex
+  - first:
+      213: 21300010
+    second: ArisaJump_RunningFall
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 205
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ArisaJump_StandingLift
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 580
+        width: 191
+        height: 393
+      alignment: 9
+      pivot: {x: 0.44136126, y: 0.50330789}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5c09cfdfa314d8e97cf7be9b96fefe7
+      internalID: 21300000
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ArisaJump_StandingApex
+      rect:
+        serializedVersion: 2
+        x: 663
+        y: 640
+        width: 198
+        height: 337
+      alignment: 9
+      pivot: {x: 0.43080808, y: 0.42077151}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5176312d0e8247858ffb1ea2e6ee8615
+      internalID: 21300002
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ArisaJump_StandingFall
+      rect:
+        serializedVersion: 2
+        x: 1175
+        y: 578
+        width: 188
+        height: 395
+      alignment: 9
+      pivot: {x: 0.44840426, y: 0.50835443}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a16d18c92848424f8b3f10e97aa02b55
+      internalID: 21300004
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ArisaJump_RunningLift
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 74
+        width: 313
+        height: 389
+      alignment: 9
+      pivot: {x: 0.53769968, y: 0.49820051}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67a748c106f44f76b6649776596b97f5
+      internalID: 21300006
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ArisaJump_RunningApex
+      rect:
+        serializedVersion: 2
+        x: 553
+        y: 65
+        width: 364
+        height: 406
+      alignment: 9
+      pivot: {x: 0.56675824, y: 0.51921182}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32aa94dff9dd4a64bcdb1d3cca0a9000
+      internalID: 21300008
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ArisaJump_RunningFall
+      rect:
+        serializedVersion: 2
+        x: 1112
+        y: 72
+        width: 292
+        height: 395
+      alignment: 9
+      pivot: {x: 0.51130137, y: 0.50582278}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a7ecc51f2bb04cee826b0fa775bf2157
+      internalID: 21300010
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID:
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ArisaJump_StandingLift: 21300000
+      ArisaJump_StandingApex: 21300002
+      ArisaJump_StandingFall: 21300004
+      ArisaJump_RunningLift: 21300006
+      ArisaJump_RunningApex: 21300008
+      ArisaJump_RunningFall: 21300010
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

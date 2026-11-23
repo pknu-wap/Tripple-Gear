@@ -15,7 +15,6 @@ public sealed class BossMonsterController : MonoBehaviour
     [SerializeField, KoreanLabel("공격 모션")] private BossAttackVisual attackVisual;
     [SerializeField, KoreanLabel("선 머티리얼")] private Material lineMaterial;
     [SerializeField, KoreanLabel("자동 전투 시작")] private bool autoStart = true;
-    [SerializeField, KoreanLabel("보스 웨이브 매니저")] private WaveManager bossWaveManager;
     [SerializeField, KoreanLabel("처치 후 텔레포트")] private TeleportTrigger defeatTeleport;
 
     [Header("보스 발밑 기준 전투 영역")]
@@ -462,7 +461,6 @@ public sealed class BossMonsterController : MonoBehaviour
         EndEncounter("보스 처치");
         foreach (Collider2D collider in GetComponentsInChildren<Collider2D>()) collider.enabled = false;
         foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>()) renderer.color = new Color(0.35f, 0.35f, 0.35f);
-        if (bossWaveManager != null) bossWaveManager.CancelWave();
         if (defeatTeleport != null) defeatTeleport.TeleportPlayer();
     }
 

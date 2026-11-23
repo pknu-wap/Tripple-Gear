@@ -13,6 +13,10 @@ public sealed class SkillLogicDrawer : PropertyDrawer
         new("DashLogic", typeof(DashSkillLogic)),
         new("InvincibleLogic", typeof(InvincibleSkillLogic)),
         new("HealLogic", typeof(HealSkillLogic)),
+        new("GrenadeLogic", typeof(GrenadeSkillLogic)),
+        new("DamageBoostLogic", typeof(DamageBoostSkillLogic)),
+        new("UnlimitedAmmoLogic", typeof(UnlimitedAmmoSkillLogic)),
+        new("SkillRefillLogic", typeof(SkillRefillLogic)),
     };
 
     private static readonly Dictionary<Type, Dictionary<string, GUIContent>> LabelCache = new();

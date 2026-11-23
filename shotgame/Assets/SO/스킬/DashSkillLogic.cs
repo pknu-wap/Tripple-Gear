@@ -105,8 +105,9 @@ public sealed class DashSkillLogic : SkillLogic
                 continue;
             }
 
-            snapshots.Add(new AnimatorSpeedSnapshot(animator, animator.speed));
-            animator.speed *= speedMultiplier;
+            float speed = RobotStun.GetAnimationSpeed(animator);
+            snapshots.Add(new AnimatorSpeedSnapshot(animator, speed));
+            RobotStun.SetAnimationSpeed(animator, speed * speedMultiplier);
         }
 
         return snapshots;
@@ -277,7 +278,7 @@ public sealed class DashSkillLogic : SkillLogic
         {
             if (Animator != null)
             {
-                Animator.speed = Speed;
+                RobotStun.SetAnimationSpeed(Animator, Speed);
             }
         }
     }

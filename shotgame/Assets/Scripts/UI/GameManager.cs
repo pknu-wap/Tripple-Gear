@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     private bool chapterCleared;
     private bool isGameOver = false;
 
+    internal bool IsGameOver => isGameOver;
+
     private void Awake()
     {
         Instance = this;

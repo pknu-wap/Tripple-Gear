@@ -18,6 +18,7 @@ public sealed class MonsterSpawner : MonoBehaviour
     private float delayBetweenBatches = 5f;
 
     private MonsterHealth health;
+    private MonsterGroundMotion groundMotion;
     private Animator summonAnimator;
     private bool hasEnteredCamera;
     private bool waitingForSpawnEvent;
@@ -29,6 +30,14 @@ public sealed class MonsterSpawner : MonoBehaviour
     {
         health = GetComponent<MonsterHealth>();
         summonAnimator = GetComponent<Animator>();
+        if (TryGetComponent(out BoxCollider2D body)) groundMotion = new MonsterGroundMotion(body);
+    }
+
+    private void OnEnable() => groundMotion?.Reset();
+
+    private void FixedUpdate()
+    {
+        if (!health.IsDead) groundMotion?.Step();
     }
 
     private void LateUpdate()

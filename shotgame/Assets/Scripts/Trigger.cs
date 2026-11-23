@@ -1,0 +1,283 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Events;
+
+public enum TriggerMode
+{
+    Wave,
+    Mission,
+    Story,
+    InheritLegacyMode = -1,
+}
+
+public enum MusicTransitionTiming
+{
+    [InspectorName("차례대로")]
+    Sequential,
+    [InspectorName("동시에")]
+    Crossfade,
+}
+
+[DefaultExecutionOrder(1000)]
+public partial class Trigger : TriggerBase
+{
+    public enum WaveState { Ready, Running, Completed, Cancelled }
+
+    [SerializeField] private TriggerMode triggerMode = TriggerMode.InheritLegacyMode;
+    [SerializeField, KoreanLabel("한 번만 발동")] private bool triggerOnce;
+
+    [Header("웨이브")]
+    [SerializeField, KoreanLabel("웨이브 중 카메라 고정")] private bool waveLockCamera = true;
+    [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
+    [SerializeField, KoreanLabel("활성화할 몬스터")] private GameObject[] monsters;
+    [SerializeField, KoreanLabel("웨이브 시작 이벤트")] private UnityEvent waveStarted = new UnityEvent();
+    [SerializeField, KoreanLabel("웨이브 완료 이벤트")] private UnityEvent waveCompleted = new UnityEvent();
+
+    [Header("배경음악")]
+    [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
+    [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
+    [SerializeField, KoreanLabel("음악 페이드 시간"), Min(0f)] private float musicFadeDuration = 0.5f;
+    [SerializeField, KoreanLabel("곡 전환 방식")] private MusicTransitionTiming musicTransitionTiming;
+
+    public TriggerMode Mode => ResolveMode(Manager);
+
+    public WaveState State { get; private set; }
+    public bool HasStarted => State != WaveState.Ready;
+    public bool IsCompleted => State == WaveState.Completed;
+    public UnityEvent WaveStarted => waveStarted;
+    public UnityEvent WaveCompleted => waveCompleted;
+
+    private readonly List<GameObject> waveMonsters = new List<GameObject>();
+    private readonly EncounterCameraLock cameraLock = new EncounterCameraLock();
+    private bool reportedInvalidSetup;
+    private bool entryTriggered;
+
+    protected override void Reset()
+    {
+        base.Reset();
+        triggerMode = TriggerMode.Wave;
+    }
+
+    private TriggerMode ResolveMode(TriggerManager manager)
+    {
+        if (triggerMode != TriggerMode.InheritLegacyMode)
+        {
+            return triggerMode;
+        }
+
+        return manager != null ? manager.LegacyMode : TriggerMode.Wave;
+    }
+
+    protected void OnTriggerStay2D(Collider2D other)
+    {
+        if (HasStarted)
+        {
+            return;
+        }
+
+        TriggerManager manager = Manager;
+        TriggerMode mode = ResolveMode(manager);
+        if (mode == TriggerMode.Wave || (mode == TriggerMode.Mission && HasMissionObjectives && CurrentMissionState == MissionState.Ready))
+        {
+            TryActivate(other, manager);
+        }
+    }
+
+    public bool TryStartWave()
+    {
+        TriggerManager manager = Manager;
+        return ResolveMode(manager) == TriggerMode.Wave && TryActivate(manager);
+    }
+
+    internal sealed override bool Activate(TriggerManager manager, ArisaHorizontalMovement player)
+    {
+        TriggerMode mode = ResolveMode(manager);
+        switch (mode)
+        {
+            case TriggerMode.Wave:
+                return StartWave(player);
+            case TriggerMode.Mission:
+                return HasMissionObjectives ? StartMission(player) : manager != null && TryActivateEntry(mode);
+            case TriggerMode.Story:
+                return manager != null && TryActivateEntry(mode);
+            default:
+                return false;
+        }
+    }
+
+    private bool TryActivateEntry(TriggerMode mode)
+    {
+        if (triggerOnce && entryTriggered)
+        {
+            return false;
+        }
+
+        entryTriggered = true;
+        Debug.Log($"[{mode}Trigger] {name}에 플레이어가 진입했습니다.", this);
+        return true;
+    }
+
+    private bool StartWave(ArisaHorizontalMovement player)
+    {
+        if (HasStarted || CurrentMissionState == MissionState.Running || CurrentMissionState == MissionState.PlayingClear
+            || CurrentMissionState == MissionState.PlayingIntro || runningSpawns.Count > 0)
+        {
+            return false;
+        }
+
+        if (!PrepareWave())
+        {
+            if (!reportedInvalidSetup)
+            {
+                Debug.LogWarning("Trigger: 직교 카메라, WaveBoundary 레이어, 씬의 몬스터를 확인하고 몬스터의 부모를 활성화해 주세요.", this);
+                reportedInvalidSetup = true;
+            }
+            return false;
+        }
+
+        // A disabled camera manager may already belong to another running wave.
+        if (waveLockCamera && !cameraManager.isActiveAndEnabled)
+        {
+            return false;
+        }
+
+        State = WaveState.Running;
+        if (waveLockCamera) cameraLock.Lock(cameraManager);
+        StartEnemySpawns(player, false);
+
+        for (int i = 0; State == WaveState.Running && i < waveMonsters.Count; i++)
+        {
+            GameObject monster = waveMonsters[i];
+            if (monster != null)
+            {
+                monster.SetActive(true);
+            }
+        }
+
+        if (State == WaveState.Running)
+        {
+            waveStarted.Invoke();
+        }
+
+        if (gameObject.activeInHierarchy)
+        {
+            PlayMusicTransition();
+        }
+        return true;
+    }
+
+    private bool PrepareWave()
+    {
+        waveMonsters.Clear();
+        if (!ValidateEnemySpawns() || (waveLockCamera && !EncounterCameraLock.CanLock(cameraManager)))
+        {
+            return false;
+        }
+
+        foreach (GameObject monster in monsters ?? System.Array.Empty<GameObject>())
+        {
+            if (monster == null || waveMonsters.Contains(monster))
+            {
+                continue;
+            }
+            if (!monster.scene.IsValid() || monster.scene != gameObject.scene
+                || transform.IsChildOf(monster.transform)
+                || (cameraManager != null && cameraManager.transform.IsChildOf(monster.transform))
+                || (monster.transform.parent != null && !monster.transform.parent.gameObject.activeInHierarchy))
+            {
+                return false;
+            }
+            waveMonsters.Add(monster);
+        }
+        return waveMonsters.Count > 0 || HasEnemySpawns;
+    }
+
+    private void LateUpdate()
+    {
+        UpdateMission();
+        if (State != WaveState.Running)
+        {
+            return;
+        }
+        if (waveLockCamera)
+        {
+            if (!cameraLock.IsLocked)
+            {
+                CancelWave();
+                return;
+            }
+
+            cameraLock.Update();
+        }
+        if (UpdateEnemySpawns())
+        {
+            return;
+        }
+        foreach (GameObject monster in waveMonsters)
+        {
+            if (monster != null && monster.activeInHierarchy)
+            {
+                return;
+            }
+        }
+
+        State = WaveState.Completed;
+        StopEnemySpawns(false);
+        RestoreCamera();
+        waveCompleted.Invoke();
+    }
+
+    public void CancelWave()
+    {
+        if (State != WaveState.Running)
+        {
+            return;
+        }
+        State = WaveState.Cancelled;
+        StopEnemySpawns(true);
+        RestoreCamera();
+    }
+
+    private void RestoreCamera()
+    {
+        cameraLock.Release();
+        waveMonsters.Clear();
+    }
+
+    private void OnDisable()
+    {
+        CancelWave();
+        CancelMission();
+        StopEnemySpawns(true);
+    }
+
+    private void PlayMusicTransition()
+    {
+        if (musicToFadeOut != null && musicToFadeOut != musicToFadeIn)
+        {
+            musicToFadeOut.FadeOut(musicFadeDuration);
+        }
+        if (musicToFadeIn != null && musicToFadeIn != musicToFadeOut)
+        {
+            if (musicToFadeOut != null && musicTransitionTiming == MusicTransitionTiming.Sequential
+                && musicFadeDuration > 0f)
+            {
+                StartCoroutine(FadeInAfterOut());
+            }
+            else
+            {
+                musicToFadeIn.FadeIn(musicFadeDuration);
+            }
+        }
+    }
+
+    private IEnumerator FadeInAfterOut()
+    {
+        yield return new WaitForSecondsRealtime(musicFadeDuration);
+        if (musicToFadeIn != null)
+        {
+            musicToFadeIn.FadeIn(musicFadeDuration);
+        }
+    }
+}

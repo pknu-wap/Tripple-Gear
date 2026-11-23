@@ -26,7 +26,7 @@ public sealed class Projectile2D : MonoBehaviour
 
     public bool HasHit => hasHit;
 
-    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null, bool damageEnemyOnHit = true)
+    public void ConfigureHitSettings(GunSO gunData, Action<Vector2> onHit = null, bool damageEnemyOnHit = true, float damageBonus = 0f)
     {
         if (gunData == null)
         {
@@ -39,7 +39,7 @@ public sealed class Projectile2D : MonoBehaviour
         hitEffectLifetime = gunData.HitEffectLifetime;
         destroyOnHit = gunData.DestroyProjectileOnHit;
         hitCallback = onHit;
-        hitDamage = gunData.Damage;
+        hitDamage = gunData.Damage + damageBonus;
         this.damageEnemyOnHit = damageEnemyOnHit;
         ApplyDefaultHitTargetLayerIfEmpty();
     }

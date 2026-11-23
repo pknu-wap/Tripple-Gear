@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 #if ENABLE_INPUT_SYSTEM
@@ -11,34 +12,36 @@ using UnityEngine.InputSystem;
 public sealed class ArisaHorizontalMovement : MonoBehaviour
 {
     private static readonly int IsMovingParameter = Animator.StringToHash("IsMoving");
-    private const string InertiaStateName = "Inertia";
-    private const string DustStateName = "Dust";
     private const string WaveBoundaryLayerName = "WaveBoundary";
+    private const string EnemyLayerName = "Enemy";
     private const float StopThreshold = 0.03f;
+    private const float MinimumLandingAirborneDuration = 0.08f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
     [SerializeField, KoreanLabel("달리는 맵 화면 왼쪽 여유"), Min(0f)] private float runningMapLeftPadding = 0.2f;
-    [SerializeField, KoreanLabel("착지 시 남길 최대 수평 속도"), Min(0f)] private float landingHorizontalSpeed = 0f;
-    [SerializeField, KoreanLabel("가속도")] private float acceleration = 18f;
-    [SerializeField, KoreanLabel("감속도")] private float deceleration = 12f;
     [SerializeField, KoreanLabel("점프 속도")] private float jumpSpeed = 6f;
-    [SerializeField, KoreanLabel("중력")] private float gravity = 18f;
-    [SerializeField, KoreanLabel("하강 중력 배율"), Min(1f)] private float fallGravityMultiplier = 1.7f;
-    [SerializeField, KoreanLabel("관성 프레임 속도")] private float inertiaFrameRate = 12f;
-    [SerializeField, KoreanLabel("관성 프레임 수")] private int inertiaFrameCount = 4;
+    [SerializeField, KoreanLabel("중력")] private float gravity = DefaultGravity;
+    [SerializeField, KoreanLabel("하강 중력 배율"), Min(1f)] private float fallGravityMultiplier = DefaultFallGravityMultiplier;
     [SerializeField, KoreanLabel("애니메이터")] private Animator animator;
     [SerializeField, KoreanLabel("대기 스프라이트 렌더러")] private SpriteRenderer idleSpriteRenderer;
     [SerializeField, KoreanLabel("몸 스프라이트 렌더러")] private SpriteRenderer bodySpriteRenderer;
     [SerializeField, KoreanLabel("앉기 스프라이트")] private Sprite[] crouchSprites;
     [SerializeField, KoreanLabel("앉기 프레임 속도")] private float crouchFrameRate = 12f;
     [SerializeField, KoreanLabel("관성 스프라이트 렌더러")] private SpriteRenderer inertiaSpriteRenderer;
-    [SerializeField, KoreanLabel("관성 애니메이터")] private Animator inertiaAnimator;
     [SerializeField, KoreanLabel("관성 먼지 스프라이트 렌더러")] private SpriteRenderer inertiaDustSpriteRenderer;
-    [SerializeField, KoreanLabel("관성 먼지 애니메이터")] private Animator inertiaDustAnimator;
     [SerializeField, KoreanLabel("관성 오버레이 렌더러")] private SpriteRenderer[] inertiaOverlayRenderers;
     [SerializeField, KoreanLabel("이동 중 렌더러")] private SpriteRenderer[] movingSpriteRenderers;
     [SerializeField, KoreanLabel("이동 충돌체")] private CapsuleCollider2D movementCollider;
+    [SerializeField, KoreanLabel("시작 시 콜라이더로만 지면 판정")] private bool useColliderGroundAtStart;
     private Rigidbody2D movementBody;
+    private float windCenterX;
+    private float windPullSpeed;
+
+    internal void SetWindPull(float centerX, float speed)
+    {
+        windCenterX = centerX;
+        windPullSpeed = speed;
+    }
     private CameraManager cameraManager;
     private PhysicsMaterial2D frictionlessMaterial;
     [SerializeField, KoreanLabel("자세 충돌체")] private ArisaStanceCollider stanceCollider;
@@ -52,34 +55,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("앉기 지면 유지 시간")] private float crouchGroundedGraceTime = 0.08f;
     [SerializeField, KoreanLabel("일방향 발판 상단 허용 오차")] private float oneWayPlatformTopTolerance = 0.05f;
 
+    [SerializeField, KoreanLabel("제자리 점프 스프라이트")] private Sprite[] standingJumpSprites;
+    [SerializeField, KoreanLabel("달리기 점프 스프라이트")] private Sprite[] runningJumpSprites;
     [SerializeField, KoreanLabel("착지 스프라이트")] private Sprite[] landingSprites;
     [SerializeField, KoreanLabel("착지 프레임 속도"), Min(1f)] private float landingFrameRate = 16f;
     [SerializeField, KoreanLabel("착지 상체 위치 보정")] private Vector2[] landingUpperBodyOffsets;
 
-    [SerializeField, KoreanLabel("점프 준비 시간"), Min(0f)] private float jumpPreparationDuration = 0.14f;
-    [SerializeField, KoreanLabel("점프 준비 스프라이트")] private Sprite[] jumpPreparationSprites = System.Array.Empty<Sprite>();
-    [SerializeField, KoreanLabel("점프 준비 상체 위치 보정")] private Vector2[] jumpPreparationUpperBodyOffsets = System.Array.Empty<Vector2>();
-    private bool jumpPreparing;
-    private float jumpPreparationStartedAt;
-
-    public bool IsPreparingJump => enabled && jumpPreparing && isGrounded && !isCrouching;
-
-    private int JumpPreparationFrameIndex => Mathf.Clamp(
-        Mathf.FloorToInt((Time.time - jumpPreparationStartedAt)
-            / Mathf.Max(0.001f, jumpPreparationDuration) * jumpPreparationSprites.Length),
-        0, jumpPreparationSprites.Length - 1);
-
-    public Vector3 JumpPreparationUpperBodyOffset => IsPreparingJump
-        && jumpPreparationUpperBodyOffsets != null
-        && JumpPreparationFrameIndex < jumpPreparationUpperBodyOffsets.Length
-        ? (Vector3)jumpPreparationUpperBodyOffsets[JumpPreparationFrameIndex] : Vector3.zero;
-
     private float landingStartedAt = float.NegativeInfinity;
     private float airborneDuration;
-    private Sprite spriteBeforeLanding;
-    private bool landingSpriteApplied;
+    private Sprite[] activeJumpSprites;
+    private Sprite bodySpriteBeforePose;
+    private Sprite appliedBodyPose;
 
-    public bool IsLanding => enabled && !jumpPreparing && isGrounded && !isCrouching
+    private bool IsPlayingJumpPose => !isGrounded && activeJumpSprites != null && activeJumpSprites.Length > 0;
+
+    public bool IsLanding => enabled && isGrounded && !isCrouching
         && landingSprites != null && landingSprites.Length > 0
         && Time.time - landingStartedAt < landingSprites.Length / Mathf.Max(1f, landingFrameRate);
 
@@ -98,21 +88,23 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private bool crouchHeld;
     private bool hasMouseScreenPosition;
     private Vector2 mouseScreenPosition;
-    private float currentHorizontalSpeed;
     private float hitReactionEndTime;
     private float hitKnockbackSpeed;
     private float verticalSpeed;
+    private bool isLaunchedUpward;
     private float groundY;
+    private bool useFallbackGround;
+    private BoxCollider2D boatDeck;
+    private float boatSpeed;
+    private float airborneBoatSpeed;
     private bool isGrounded = true;
     private bool isCrouching;
-    private bool isCoasting;
     private float crouchStartedAt;
-    private float inertiaStartedAt;
-    private bool wasCoasting;
     private readonly RaycastHit2D[] movementCastHits = new RaycastHit2D[12];
+    private readonly List<Vector2> platformOutline = new List<Vector2>();
 
     public bool IsCrouching => isCrouching;
-    public bool IsCoasting => isCoasting;
+    public bool IsInBoatSection => boatDeck != null;
 
     public int CrouchFrameIndex
     {
@@ -134,19 +126,6 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
     }
 
-    public int InertiaFrameIndex
-    {
-        get
-        {
-            if (!isCoasting || inertiaFrameCount <= 0)
-            {
-                return 0;
-            }
-
-            float elapsed = Mathf.Max(0f, Time.time - inertiaStartedAt);
-            return Mathf.FloorToInt(elapsed * inertiaFrameRate) % inertiaFrameCount;
-        }
-    }
 
     public bool TryGetMouseScreenPosition(out Vector2 screenPosition)
     {
@@ -154,8 +133,22 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return hasMouseScreenPosition;
     }
 
-    public void TeleportTo(Vector3 position)
+    public void TeleportTo(Vector3 position) => TeleportTo(position, useFallbackGround: true);
+
+    internal SpriteRenderer IdleSpriteRenderer => idleSpriteRenderer;
+
+    internal void ShowIdlePresentation()
     {
+        SetMovingAnimation(false);
+        SetRendererVisibility(false);
+    }
+
+    internal void TeleportTo(Vector3 position, bool useFallbackGround)
+    {
+        boatDeck = null;
+        boatSpeed = 0f;
+        airborneBoatSpeed = 0f;
+
         if (movementBody != null)
         {
             movementBody.position = position;
@@ -163,21 +156,53 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         transform.position = position;
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         airborneDuration = 0f;
         groundY = position.y;
-        currentHorizontalSpeed = 0f;
+        this.useFallbackGround = useFallbackGround;
         hitReactionEndTime = 0f;
         hitKnockbackSpeed = 0f;
         verticalSpeed = 0f;
+        isLaunchedUpward = false;
         jumpPressed = false;
         isGrounded = true;
         isCrouching = false;
-        isCoasting = false;
-        wasCoasting = false;
         ApplyStanceCollider();
         Physics2D.SyncTransforms();
+    }
+
+    public void BoardBoat(BoxCollider2D deck)
+    {
+        LandOnPlatform(deck);
+        boatDeck = deck;
+    }
+
+    internal void LandOnPlatform(Collider2D platform)
+    {
+        TeleportTo(transform.position, useFallbackGround: false);
+        Bounds feet = movementCollider.bounds;
+        Bounds platformBounds = platform.bounds;
+        Vector3 position = transform.position;
+        position.x += platformBounds.center.x - feet.center.x;
+        float surface = GetPlatformSurface(platform, platformBounds.center.x);
+        position.y += (float.IsNegativeInfinity(surface) ? platformBounds.max.y : surface) - feet.min.y;
+        movementBody.position = position;
+        transform.position = position;
+        Physics2D.SyncTransforms();
+    }
+
+    public void MoveWithBoat(BoxCollider2D deck, float step)
+    {
+        if (boatDeck != deck || !isActiveAndEnabled)
+        {
+            return;
+        }
+
+        boatSpeed = step / Time.fixedDeltaTime;
+        if (step > 0f && isGrounded && IsAtBoatDeck())
+        {
+            movementBody.position += Vector2.right * step;
+        }
     }
 
     public void StartHitReaction(float horizontalDirection, float duration, float distance, float upwardSpeed)
@@ -187,13 +212,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return;
         }
 
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         hitReactionEndTime = Time.time + duration;
         hitKnockbackSpeed = Mathf.Sign(horizontalDirection) * Mathf.Max(0f, distance) / duration;
-        currentHorizontalSpeed = 0f;
         if (upwardSpeed > 0f)
         {
+            isLaunchedUpward = true;
             verticalSpeed = Mathf.Max(verticalSpeed, upwardSpeed);
             if (movementBody != null)
             {
@@ -202,9 +226,6 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             }
             isGrounded = false;
         }
-
-        isCoasting = false;
-        wasCoasting = false;
     }
 
     private void Reset()
@@ -231,9 +252,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         groundY = transform.position.y;
+        useFallbackGround = !useColliderGroundAtStart;
         isGrounded = true;
-        SetMovingAnimation(false);
-        SetRendererVisibility(false, false);
+        ShowIdlePresentation();
     }
 
     private void FindReferences()
@@ -311,11 +332,6 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             }
         }
 
-        if (inertiaAnimator == null && inertiaSpriteRenderer != null)
-        {
-            inertiaAnimator = inertiaSpriteRenderer.GetComponent<Animator>();
-        }
-
         if (inertiaDustSpriteRenderer == null)
         {
             Transform dustSprite = transform.Find("InertiaDust/DustSprite");
@@ -328,11 +344,6 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             {
                 inertiaDustSpriteRenderer = dustSprite.GetComponentInChildren<SpriteRenderer>(true);
             }
-        }
-
-        if (inertiaDustAnimator == null && inertiaDustSpriteRenderer != null)
-        {
-            inertiaDustAnimator = inertiaDustSpriteRenderer.GetComponent<Animator>();
         }
 
         if (inertiaOverlayRenderers == null || inertiaOverlayRenderers.Length == 0)
@@ -391,7 +402,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         RefreshGroundedState();
         UpdateJump();
         SnapToOneWayPlatform();
-        bool justLanded = !wasGrounded && isGrounded;
+        bool landedAfterAirborne = !wasGrounded && isGrounded
+            && airborneDuration >= MinimumLandingAirborneDuration;
         if (!isGrounded)
         {
             airborneDuration += Time.fixedDeltaTime;
@@ -399,7 +411,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
         else
         {
-            if (!wasGrounded && airborneDuration >= 0.08f && !IsPreparingJump && !isCrouching && !isHitReacting)
+            activeJumpSprites = null;
+            if (landedAfterAirborne && !isCrouching && !isHitReacting)
             {
                 landingStartedAt = Time.time;
             }
@@ -412,61 +425,72 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         jumpPressed = false;
 
         bool hasMovementInput = !isCrouching && !Mathf.Approximately(horizontalInput, 0f);
-        float targetHorizontalSpeed = horizontalInput * moveSpeed;
-        if (isHitReacting || isCrouching)
-        {
-            currentHorizontalSpeed = 0f;
-        }
-        else if (justLanded)
-        {
-            // Preserve direction without speeding up a slower landing.
-            float speedLimit = Mathf.Max(0f, landingHorizontalSpeed);
-            currentHorizontalSpeed = Mathf.Clamp(currentHorizontalSpeed, -speedLimit, speedLimit);
-        }
-        else
-        {
-            float speedChange = hasMovementInput ? acceleration : GetCurrentDeceleration();
-            currentHorizontalSpeed = Mathf.MoveTowards(
-                currentHorizontalSpeed,
-                targetHorizontalSpeed,
-                speedChange * Time.fixedDeltaTime
-            );
-        }
-
-        if (Mathf.Abs(currentHorizontalSpeed) < StopThreshold)
-        {
-            currentHorizontalSpeed = 0f;
-        }
-
-        bool hasMovementSpeed = Mathf.Abs(currentHorizontalSpeed) > 0f;
-        float horizontalSpeed = justLanded ? currentHorizontalSpeed : isHitReacting
+        float inputSpeed = hasMovementInput ? horizontalInput * moveSpeed : 0f;
+        float horizontalSpeed = isHitReacting && !landedAfterAirborne
             ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
-            : currentHorizontalSpeed;
+            : inputSpeed;
+        if (windPullSpeed > 0f)
+        {
+            float gap = windCenterX - movementBody.position.x;
+            if (horizontalInput * gap >= 0f)
+                horizontalSpeed += Mathf.Clamp(gap / Time.fixedDeltaTime, -windPullSpeed, windPullSpeed);
+        }
         horizontalSpeed = KeepInsideRunningMapScreen(horizontalSpeed);
+        if (boatDeck != null)
+        {
+            horizontalSpeed = ApplyBoatMovement(horizontalSpeed, wasGrounded);
+        }
         ClampToFallbackGround();
         movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
         bool isGunReloading = gunFire != null && gunFire.IsReloading;
-        bool shouldCoast = isGrounded && !IsLanding && !IsPreparingJump && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
-        if (shouldCoast && !isCoasting)
-        {
-            inertiaStartedAt = Time.time;
-        }
-
-        isCoasting = shouldCoast;
-
-        bool showAirborneDriftPose = !isGrounded && !hasMovementInput && hasMovementSpeed;
         bool isAirborneAiming = !isGrounded && !isCrouching && (fireHeld || isGunReloading);
-        bool isIdleAiming = isGrounded && !hasMovementInput && !isCoasting && (fireHeld || isGunReloading);
+        bool isIdleAiming = isGrounded && !hasMovementInput && (fireHeld || isGunReloading);
         SetMovingAnimation(hasMovementInput);
-        UpdateInertiaAnimation(isCoasting);
-        SetRendererVisibility(IsPreparingJump || IsLanding || hasMovementInput || showAirborneDriftPose || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading, isCoasting);
+        SetRendererVisibility(IsPlayingJumpPose || IsLanding || hasMovementInput
+            || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading);
     }
 
     private void LateUpdate()
     {
         ApplyCrouchAnimationFrame();
-        ApplyLandingAnimationFrame();
+        ApplyBodyPose(GetAirPoseSprite());
+    }
+
+    private float ApplyBoatMovement(float horizontalSpeed, bool wasGrounded)
+    {
+        if (!isGrounded)
+        {
+            if (wasGrounded)
+            {
+                airborneBoatSpeed = boatSpeed;
+            }
+
+            return horizontalSpeed + airborneBoatSpeed;
+        }
+
+        airborneBoatSpeed = 0f;
+        if (!IsAtBoatDeck())
+        {
+            return horizontalSpeed;
+        }
+
+        Bounds bodyBounds = movementCollider.bounds;
+        Bounds deckBounds = boatDeck.bounds;
+        float minStep = deckBounds.min.x - bodyBounds.min.x;
+        float maxStep = deckBounds.max.x - bodyBounds.max.x;
+        float step = minStep > maxStep ? (minStep + maxStep) * 0.5f
+            : Mathf.Clamp(horizontalSpeed * Time.fixedDeltaTime, minStep, maxStep);
+        return step / Time.fixedDeltaTime;
+    }
+
+    private bool IsAtBoatDeck()
+    {
+        Bounds bodyBounds = movementCollider.bounds;
+        Bounds deckBounds = boatDeck.bounds;
+        float tolerance = GetCurrentGroundedCheckDistance() + GetSkinWidth();
+        return Mathf.Abs(bodyBounds.min.y - deckBounds.max.y) <= tolerance
+            && bodyBounds.max.x > deckBounds.min.x && bodyBounds.min.x < deckBounds.max.x;
     }
 
     private float KeepInsideRunningMapScreen(float horizontalSpeed)
@@ -497,83 +521,76 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         if (horizontalSpeed < 0f)
         {
-            float limitedSpeed = Mathf.Max(horizontalSpeed, -distanceToEdge / Time.fixedDeltaTime);
-            if (limitedSpeed > horizontalSpeed)
-            {
-                currentHorizontalSpeed = 0f;
-            }
-
-            return limitedSpeed;
+            return Mathf.Max(horizontalSpeed, -distanceToEdge / Time.fixedDeltaTime);
         }
 
         return horizontalSpeed;
     }
 
-    private void ApplyLandingAnimationFrame()
+    private Sprite GetAirPoseSprite()
     {
-        if ((!IsLanding && !IsPreparingJump) || bodySpriteRenderer == null)
+        if (IsPlayingJumpPose)
         {
-            RestoreLandingSprite();
+            float launchSpeed = Mathf.Max(0.01f, jumpSpeed);
+            float progress = Mathf.Clamp01(0.5f - 0.5f * verticalSpeed / launchSpeed);
+            int frameIndex = Mathf.Min(Mathf.FloorToInt(progress * activeJumpSprites.Length), activeJumpSprites.Length - 1);
+            return activeJumpSprites[frameIndex];
+        }
+
+        return IsLanding ? landingSprites[LandingFrameIndex] : null;
+    }
+
+    private void ApplyBodyPose(Sprite frame)
+    {
+        if (bodySpriteRenderer == null)
+        {
             return;
         }
 
-        Sprite[] frames = IsPreparingJump ? jumpPreparationSprites : landingSprites;
-        int frameIndex = IsPreparingJump ? JumpPreparationFrameIndex : LandingFrameIndex;
         Sprite current = bodySpriteRenderer.sprite;
-        // The Animator can supply a fresh running pose each frame. Keep it for restoration.
-        if (!IsJumpOrLandingSprite(current))
+        if (frame == null)
         {
-            spriteBeforeLanding = current;
+            if (appliedBodyPose != null && current == appliedBodyPose)
+            {
+                bodySpriteRenderer.sprite = bodySpriteBeforePose;
+            }
+            appliedBodyPose = null;
+            bodySpriteBeforePose = null;
+            return;
         }
-        Sprite frame = frames[frameIndex];
-        if (frame != null)
+
+        // Preserve fresh Animator frames while overriding the body sprite in the air.
+        if (appliedBodyPose == null || current != appliedBodyPose)
         {
-            bodySpriteRenderer.sprite = frame;
-            landingSpriteApplied = true;
+            bodySpriteBeforePose = current;
         }
-    }
-
-    private void RestoreLandingSprite()
-    {
-        if (landingSpriteApplied && bodySpriteRenderer != null
-            && IsJumpOrLandingSprite(bodySpriteRenderer.sprite))
-        {
-            bodySpriteRenderer.sprite = spriteBeforeLanding;
-        }
-        landingSpriteApplied = false;
-        spriteBeforeLanding = null;
-    }
-
-    private bool IsJumpOrLandingSprite(Sprite sprite)
-    {
-        return (landingSprites != null && System.Array.IndexOf(landingSprites, sprite) >= 0)
-            || (jumpPreparationSprites != null && System.Array.IndexOf(jumpPreparationSprites, sprite) >= 0);
-    }
-
-    private void CancelJumpPreparation()
-    {
-        jumpPreparing = false;
-        RestoreLandingSprite();
+        bodySpriteRenderer.sprite = frame;
+        appliedBodyPose = frame;
     }
 
     private void CancelLanding()
     {
         landingStartedAt = float.NegativeInfinity;
-        RestoreLandingSprite();
+    }
+
+    private void ClearAirPoses()
+    {
+        activeJumpSprites = null;
+        CancelLanding();
+        ApplyBodyPose(null);
     }
 
     private void OnDisable()
     {
-        CancelJumpPreparation();
-        CancelLanding();
+        ClearAirPoses();
         airborneDuration = 0f;
         if (movementBody != null)
         {
             movementBody.linearVelocity = Vector2.zero;
         }
 
-        currentHorizontalSpeed = 0f;
         verticalSpeed = 0f;
+        isLaunchedUpward = false;
         horizontalInput = 0f;
         jumpHeld = false;
         crouchHeld = false;
@@ -652,26 +669,6 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         animator.SetBool(IsMovingParameter, isMoving);
     }
 
-    private void UpdateInertiaAnimation(bool isCoasting)
-    {
-        if (isCoasting && !wasCoasting && inertiaAnimator != null)
-        {
-            inertiaAnimator.Play(InertiaStateName, 0, 0f);
-        }
-
-        if (isCoasting && !wasCoasting && inertiaDustAnimator != null)
-        {
-            inertiaDustAnimator.Play(DustStateName, 0, 0f);
-        }
-
-        wasCoasting = isCoasting;
-    }
-
-    private float GetCurrentDeceleration()
-    {
-        return isGrounded ? deceleration : 0f;
-    }
-
     private void UpdateCrouchState()
     {
         bool shouldCrouch = isGrounded && crouchHeld;
@@ -693,7 +690,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void RefreshGroundedState()
     {
-        if (verticalSpeed > 0f)
+        // Uphill contacts can add upward velocity without launching the player.
+        isLaunchedUpward = isLaunchedUpward && verticalSpeed > 0f;
+        if (isLaunchedUpward)
         {
             isGrounded = false;
             return;
@@ -716,43 +715,36 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void UpdateJump()
     {
-        bool canJump = isGrounded && !isCrouching && Time.time >= hitReactionEndTime;
-        if (jumpPreparing && !canJump)
-        {
-            CancelJumpPreparation();
-        }
-
-        if (jumpPressed && canJump && !jumpPreparing)
+        if (jumpPressed && isGrounded && !isCrouching && Time.time >= hitReactionEndTime)
         {
             CancelLanding();
-            if (jumpPreparationDuration > 0f && jumpPreparationSprites != null
-                && jumpPreparationSprites.Length > 0)
-            {
-                jumpPreparing = true;
-                jumpPreparationStartedAt = Time.time;
-            }
-            else
-            {
-                verticalSpeed = jumpSpeed;
-                isGrounded = false;
-            }
-        }
-
-        // A short tap still completes the wind-up. Holding W cannot restart it.
-        if (jumpPreparing && Time.time - jumpPreparationStartedAt >= jumpPreparationDuration)
-        {
-            CancelJumpPreparation();
+            // Choose once from actual takeoff speed. Air steering keeps the selected pose.
+            activeJumpSprites = Mathf.Abs(movementBody.linearVelocity.x) > StopThreshold
+                ? runningJumpSprites : standingJumpSprites;
             verticalSpeed = jumpSpeed;
+            isLaunchedUpward = true;
             isGrounded = false;
         }
 
         if (!isGrounded)
         {
-            float currentGravity = verticalSpeed <= 0f
-                ? gravity * Mathf.Max(1f, fallGravityMultiplier)
-                : gravity;
-            verticalSpeed -= currentGravity * Time.fixedDeltaTime;
+            verticalSpeed = ApplyGravity(verticalSpeed, this);
         }
+    }
+
+    private const float DefaultGravity = 18f;
+    private const float DefaultFallGravityMultiplier = 1.7f;
+
+    internal static float GetGravity(ArisaHorizontalMovement source) => source != null ? source.gravity : DefaultGravity;
+
+    internal static float ApplyGravity(float speed, ArisaHorizontalMovement source)
+    {
+        float acceleration = GetGravity(source);
+        if (speed <= 0f)
+        {
+            acceleration *= source != null ? Mathf.Max(1f, source.fallGravityMultiplier) : DefaultFallGravityMultiplier;
+        }
+        return speed - acceleration * Time.fixedDeltaTime;
     }
 
     private void ApplyCrouchAnimationFrame()
@@ -791,7 +783,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
                 continue;
             }
 
-            float top = hit.collider.bounds.max.y;
+            float top = GetOneWaySurface(hit, feetY);
             if (top <= feetY + oneWayPlatformTopTolerance
                 && top >= feetY - distance - GetSkinWidth())
             {
@@ -818,7 +810,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         Physics2D.SyncTransforms();
-        int hitCount = CastMovementCollider(Vector2.down, Mathf.Max(0f, distance) + GetSkinWidth(), GetGroundLayers());
+        LayerMask groundCandidates = GetGroundLayers() | LayerMask.GetMask(EnemyLayerName);
+        int hitCount = CastMovementCollider(Vector2.down,
+            Mathf.Max(0f, distance) + GetSkinWidth(), groundCandidates);
         for (int i = 0; i < hitCount; i++)
         {
             if (IsGroundHit(movementCastHits[i], distance))
@@ -868,12 +862,16 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         int hitLayer = hit.collider.gameObject.layer;
-        if (IsInLayerMask(hitLayer, oneWayPlatformLayers) && !CanLandOnOneWayPlatform(hit.collider))
+        if (IsInLayerMask(hitLayer, oneWayPlatformLayers)
+            && GetOneWaySurface(hit, movementCollider.bounds.min.y) > movementCollider.bounds.min.y + oneWayPlatformTopTolerance)
         {
             return false;
         }
 
-        if (!IsInLayerMask(hitLayer, GetGroundLayers()))
+        bool isSolidSpawner = !hit.collider.isTrigger
+            && hitLayer == LayerMask.NameToLayer(EnemyLayerName)
+            && hit.collider.TryGetComponent<MonsterSpawner>(out _);
+        if (!isSolidSpawner && !IsInLayerMask(hitLayer, GetGroundLayers()))
         {
             return false;
         }
@@ -886,9 +884,44 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return IsColliderBelowFeet(hit.collider, checkDistance);
     }
 
-    private bool CanLandOnOneWayPlatform(Collider2D platformCollider)
+    private float GetOneWaySurface(RaycastHit2D hit, float feetY)
     {
-        return movementCollider.bounds.min.y >= platformCollider.bounds.max.y - oneWayPlatformTopTolerance;
+        if (hit.collider is PolygonCollider2D && hit.distance > 0.0001f)
+        {
+            return feetY - hit.distance;
+        }
+
+        float surface = GetPlatformSurface(hit.collider, movementCollider.bounds.center.x);
+        return float.IsNegativeInfinity(surface) ? float.PositiveInfinity : surface;
+    }
+
+    private float GetPlatformSurface(Collider2D platform, float x)
+    {
+        if (platform is not PolygonCollider2D polygon)
+        {
+            return platform.bounds.max.y;
+        }
+
+        float top = float.NegativeInfinity;
+        for (int path = 0; path < polygon.pathCount; path++)
+        {
+            polygon.GetPath(path, platformOutline);
+            if (platformOutline.Count == 0) continue;
+
+            Vector2 previous = polygon.transform.TransformPoint(platformOutline[platformOutline.Count - 1] + polygon.offset);
+            foreach (Vector2 point in platformOutline)
+            {
+                Vector2 next = polygon.transform.TransformPoint(point + polygon.offset);
+                if (x >= Mathf.Min(previous.x, next.x) && x <= Mathf.Max(previous.x, next.x))
+                {
+                    float surface = Mathf.Approximately(previous.x, next.x) ? Mathf.Max(previous.y, next.y)
+                        : Mathf.Lerp(previous.y, next.y, Mathf.InverseLerp(previous.x, next.x, x));
+                    top = Mathf.Max(top, surface);
+                }
+                previous = next;
+            }
+        }
+        return top;
     }
 
     private bool IsColliderBelowFeet(Collider2D otherCollider, float checkDistance)
@@ -954,7 +987,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private bool IsOnFallbackGround()
     {
-        return transform.position.y <= groundY + GetSkinWidth();
+        return useFallbackGround && transform.position.y <= groundY + GetSkinWidth();
     }
 
     private float GetSkinWidth()
@@ -962,21 +995,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         return Mathf.Max(0f, collisionSkinWidth);
     }
 
-    private void SetRendererVisibility(bool showLayeredRenderers, bool showInertiaRenderer)
+    private void SetRendererVisibility(bool showLayeredRenderers)
     {
         if (idleSpriteRenderer != null)
         {
-            idleSpriteRenderer.enabled = !showLayeredRenderers && !showInertiaRenderer;
+            idleSpriteRenderer.enabled = !showLayeredRenderers;
         }
 
         if (inertiaSpriteRenderer != null)
         {
-            inertiaSpriteRenderer.enabled = showInertiaRenderer;
+            inertiaSpriteRenderer.enabled = false;
         }
 
         if (inertiaDustSpriteRenderer != null)
         {
-            inertiaDustSpriteRenderer.enabled = showInertiaRenderer;
+            inertiaDustSpriteRenderer.enabled = false;
         }
 
         if (movingSpriteRenderers == null)
@@ -1001,7 +1034,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         {
             if (inertiaOverlayRenderers[i] != null)
             {
-                inertiaOverlayRenderers[i].enabled = showLayeredRenderers || showInertiaRenderer;
+                inertiaOverlayRenderers[i].enabled = showLayeredRenderers;
             }
         }
     }

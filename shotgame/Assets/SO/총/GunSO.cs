@@ -7,13 +7,15 @@ public readonly struct GunFireContext
         Vector3 muzzlePosition,
         Vector2 direction,
         Camera camera,
-        MonoBehaviour coroutineRunner
+        MonoBehaviour coroutineRunner,
+        float damageBonus = 0f
     )
     {
         MuzzlePosition = muzzlePosition;
         Direction = direction;
         Camera = camera;
         CoroutineRunner = coroutineRunner;
+        DamageBonus = damageBonus;
         Owner = coroutineRunner != null ? coroutineRunner.transform : null;
     }
 
@@ -22,6 +24,7 @@ public readonly struct GunFireContext
     public Camera Camera { get; }
     public MonoBehaviour CoroutineRunner { get; }
     public Transform Owner { get; }
+    public float DamageBonus { get; }
 }
 
 [CreateAssetMenu(fileName = "총SO", menuName = "Shotgame/총/공통 총")]

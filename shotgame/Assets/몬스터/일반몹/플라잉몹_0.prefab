@@ -211,6 +211,7 @@ MonoBehaviour:
   offscreenDisableDelay: 2
   followTarget: {fileID: 0}
   jumpOverObstacles: 1
+  useGroundGravity: 0
   jumpHeight: 3.5
   jumpDuration: 2.2
   jumpMoveSpeedMultiplier: 2.2

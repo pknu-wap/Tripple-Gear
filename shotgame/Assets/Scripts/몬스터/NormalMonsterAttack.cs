@@ -50,6 +50,8 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void Update()
     {
+        if (health != null && health.IsStunned) return;
+
         if (MonsterData == null || health.IsDead)
         {
             ClearPlayerContact();
@@ -127,7 +129,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     public void ApplyAttackHit()
     {
-        if (!isActiveAndEnabled || !hasPendingHit || MonsterData == null || health.IsDead)
+        if (!isActiveAndEnabled || !hasPendingHit || MonsterData == null || health.IsDead || health.IsStunned)
         {
             return;
         }
@@ -145,7 +147,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
 
     private void TryStartPlayerContact(Collider2D other)
     {
-        if (MonsterData == null || health.IsDead)
+        if (MonsterData == null || health.IsDead || health.IsStunned)
         {
             return;
         }

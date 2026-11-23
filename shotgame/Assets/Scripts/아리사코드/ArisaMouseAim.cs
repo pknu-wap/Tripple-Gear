@@ -9,13 +9,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
 {
     [SerializeField, KoreanLabel("대기 그래픽")] private Transform idleGraphic;
     [SerializeField, KoreanLabel("대기 그래픽 기본 왼쪽 방향")] private bool idleGraphicFacesLeftByDefault = true;
-    [SerializeField, KoreanLabel("관성 그래픽")] private Transform inertiaGraphic;
-    [SerializeField, KoreanLabel("관성 그래픽 기본 왼쪽 방향")] private bool inertiaGraphicFacesLeftByDefault;
-    [SerializeField, KoreanLabel("왼쪽 관성 그래픽 위치 보정")] private Vector2 leftInertiaGraphicPositionOffset;
-    [SerializeField, KoreanLabel("관성 먼지")] private Transform inertiaDust;
-    [SerializeField, KoreanLabel("왼쪽 관성 먼지 위치 보정")] private Vector2 leftInertiaDustPositionOffset;
-    [SerializeField, KoreanLabel("관성 머리 위치 보정")] private Vector2[] inertiaHeadOffsets = new Vector2[4];
-    [SerializeField, KoreanLabel("관성 조준 위치 보정")] private Vector2[] inertiaAimOffsets = new Vector2[4];
     [SerializeField, KoreanLabel("앉기 몸 위치 보정")] private Vector2[] crouchBodyOffsets =
     {
         new Vector2(0f, -0.02f),
@@ -54,8 +47,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
     private const float MinFireShakeCycles = 0.5f;
 
     private Vector3 bodyBasePosition;
-    private Vector3 inertiaGraphicBasePosition;
-    private Vector3 inertiaDustBasePosition;
     private Vector3 oppositeArmPivotBasePosition;
     private Vector3 oppositeArmBasePosition;
     private Vector3 headPivotBasePosition;
@@ -73,8 +64,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
     private Vector3 bodyBaseScale;
     private Vector3 idleGraphicBaseScale;
-    private Vector3 inertiaGraphicBaseScale;
-    private Vector3 inertiaDustBaseScale;
     private Vector3 oppositeArmBaseScale;
     private Vector3 headGraphicBaseScale;
     private Vector3 aimGraphicBaseScale;
@@ -130,14 +119,12 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
         UpdateFacing(mouseLocalPosition);
         ApplyIdleFacing();
-        ApplyInertiaFacing();
-        ApplyInertiaDustFacing();
         ApplyBodyFacing(GetCrouchPoseOffset(crouchBodyOffsets), bodyBaseScale * GetCrouchBodyScaleMultiplier());
         Vector3 landingOffset = inputSource != null
-            ? inputSource.LandingUpperBodyOffset + inputSource.JumpPreparationUpperBodyOffset
+            ? inputSource.LandingUpperBodyOffset
             : Vector3.zero;
-        Vector3 headPoseOffset = GetInertiaPoseOffset(inertiaHeadOffsets) + GetCrouchPoseOffset(crouchHeadOffsets) + landingOffset;
-        Vector3 aimPoseOffset = GetInertiaPoseOffset(inertiaAimOffsets) + GetCrouchPoseOffset(crouchAimOffsets) + landingOffset;
+        Vector3 headPoseOffset = GetCrouchPoseOffset(crouchHeadOffsets) + landingOffset;
+        Vector3 aimPoseOffset = GetCrouchPoseOffset(crouchAimOffsets) + landingOffset;
         float fireShakeOffset = GetFireShakeAngleOffset();
         RotateGraphicToward(
             headPivot,
@@ -186,16 +173,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
             idleGraphic = transform.Find("IdleSprite");
         }
 
-        if (inertiaGraphic == null)
-        {
-            inertiaGraphic = transform.Find("InertiaSprite");
-        }
-
-        if (inertiaDust == null)
-        {
-            inertiaDust = transform.Find("InertiaDust");
-        }
-
         if (bodyGraphic == null)
         {
             bodyGraphic = transform.Find("BodyLegs");
@@ -235,8 +212,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
     private void CacheBasePose()
     {
         bodyBasePosition = GetLocalPosition(bodyGraphic);
-        inertiaGraphicBasePosition = GetLocalPosition(inertiaGraphic);
-        inertiaDustBasePosition = GetLocalPosition(inertiaDust);
         oppositeArmPivotBasePosition = GetLocalPosition(oppositeArmPivot);
         oppositeArmBasePosition = GetLocalPosition(oppositeArmGraphic);
         headPivotBasePosition = GetLocalPosition(headPivot);
@@ -254,8 +229,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
         bodyBaseScale = GetLocalScale(bodyGraphic);
         idleGraphicBaseScale = GetLocalScale(idleGraphic);
-        inertiaGraphicBaseScale = GetLocalScale(inertiaGraphic);
-        inertiaDustBaseScale = GetLocalScale(inertiaDust);
         oppositeArmBaseScale = GetLocalScale(oppositeArmGraphic);
         headGraphicBaseScale = GetLocalScale(headGraphic);
         aimGraphicBaseScale = GetLocalScale(aimGraphic);
@@ -288,65 +261,6 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
         bool flipIdleScale = idleGraphicFacesLeftByDefault ? !facingLeft : facingLeft;
         idleGraphic.localScale = MirrorScale(idleGraphicBaseScale, flipIdleScale);
-    }
-
-    private void ApplyInertiaFacing()
-    {
-        if (inertiaGraphic == null)
-        {
-            return;
-        }
-
-        bool flipInertiaScale = inertiaGraphicFacesLeftByDefault ? !facingLeft : facingLeft;
-        inertiaGraphic.localPosition = GetInertiaGraphicPosition();
-        inertiaGraphic.localScale = MirrorScale(inertiaGraphicBaseScale, flipInertiaScale);
-    }
-
-    private void ApplyInertiaDustFacing()
-    {
-        if (inertiaDust == null)
-        {
-            return;
-        }
-
-        inertiaDust.localPosition = GetInertiaDustPosition();
-        inertiaDust.localScale = MirrorScale(inertiaDustBaseScale);
-    }
-
-    private Vector3 GetInertiaGraphicPosition()
-    {
-        if (!facingLeft)
-        {
-            return inertiaGraphicBasePosition;
-        }
-
-        Vector3 leftPosition = MirrorPosition(inertiaGraphicBasePosition);
-        leftPosition += new Vector3(leftInertiaGraphicPositionOffset.x, leftInertiaGraphicPositionOffset.y, 0f);
-        return leftPosition;
-    }
-
-    private Vector3 GetInertiaDustPosition()
-    {
-        if (!facingLeft)
-        {
-            return inertiaDustBasePosition;
-        }
-
-        Vector3 leftPosition = MirrorPosition(inertiaDustBasePosition);
-        leftPosition += new Vector3(leftInertiaDustPositionOffset.x, leftInertiaDustPositionOffset.y, 0f);
-        return leftPosition;
-    }
-
-    private Vector3 GetInertiaPoseOffset(Vector2[] offsets)
-    {
-        if (inputSource == null || !inputSource.IsCoasting || offsets == null || offsets.Length == 0)
-        {
-            return Vector3.zero;
-        }
-
-        int frameIndex = Mathf.Clamp(inputSource.InertiaFrameIndex, 0, offsets.Length - 1);
-        Vector2 offset = offsets[frameIndex];
-        return new Vector3(offset.x, offset.y, 0f);
     }
 
     private Vector3 GetCrouchPoseOffset(Vector2[] offsets)

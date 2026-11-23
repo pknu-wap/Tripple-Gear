@@ -34,12 +34,16 @@ public readonly struct SkillContext
 [CreateAssetMenu(fileName = "스킬SO", menuName = "Shotgame/스킬/스킬")]
 public sealed class SkillSO : ScriptableObject
 {
+    [SerializeField, KoreanLabel("표시 이름")] private string displayName;
+    [SerializeField, KoreanLabel("HUD 아이콘")] private Sprite hudIcon;
     [SerializeField, KoreanLabel("사용 가능 횟수"), Min(1)] private int 사용가능횟수 = 1;
     [SerializeField, KoreanLabel("쿨타임"), Min(0f)] private float 쿨타임 = 1f;
     [SerializeField, KoreanLabel("스킬 중 무적")] private bool 스킬중무적;
     [SerializeReference, KoreanLabel("스킬 로직")] private SkillLogic 스킬로직 = new DashSkillLogic();
 
     public int MaxUseCount => Mathf.Max(1, 사용가능횟수);
+    public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
+    public Sprite HudIcon => hudIcon;
     public float Cooldown => Mathf.Max(0f, 쿨타임);
     public bool IsInvincibleWhileActive => 스킬중무적;
     public bool HasLogic => 스킬로직 != null;
@@ -55,6 +59,11 @@ public sealed class SkillSO : ScriptableObject
     public bool TryApplyOnPickup(ArisaHealth health)
     {
         return 스킬로직 != null && 스킬로직.TryApplyOnPickup(health);
+    }
+
+    internal bool TryApplyOnPickup(ArisaSkillController controller)
+    {
+        return ActivatesOnPickup && 스킬로직.TryApplyOnPickup(controller);
     }
 
     private void OnValidate()

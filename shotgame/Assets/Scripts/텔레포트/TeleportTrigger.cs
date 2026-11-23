@@ -1,10 +1,6 @@
 using System.Collections;
 using UnityEngine;
 
-#if UNITY_EDITOR && ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
-
 public enum TeleportGizmoKind
 {
     WireBox,
@@ -16,15 +12,15 @@ public enum TeleportGizmoKind
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BoxCollider2D))]
-public sealed class TeleportTrigger : MonoBehaviour
+public sealed partial class TeleportTrigger : MonoBehaviour
 {
     [Header("텔레포트")]
     [SerializeField, KoreanLabel("텔레포트 대상")] private Transform teleportSubject;
-#if UNITY_EDITOR
-    [SerializeField, KoreanLabel("임시 테스트용 F1 이동")] private bool temporaryF1Shortcut;
-#endif
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
+    [SerializeField, KoreanLabel("도착 발판 (선택)")] private Collider2D destinationPlatform;
+    [SerializeField, KoreanLabel("물에 빠지면 게임오버 (아테일)")] private AtailBossController atailArena;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
+    [SerializeField, KoreanLabel("도착 후 콜라이더로만 지면 판정")] private bool useColliderGroundAtDestination;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
     [SerializeField, KoreanLabel("아리사만 사용")] private bool requireArisaMovement = true;
     [SerializeField, KoreanLabel("대상 레이어")] private LayerMask targetLayers = ~0;
@@ -34,6 +30,8 @@ public sealed class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("새 카메라 영역 번호")] private int cameraAreaIndex = -1;
     [SerializeField, KoreanLabel("새 카메라 영역 이름")] private string cameraAreaName;
     [SerializeField, KoreanLabel("목적지 카메라 방식")] private CameraFollowMode destinationFollowMode = CameraFollowMode.RunningMap;
+    [SerializeField, KoreanLabel("목적지 카메라 추적 대상 (선택)")] private Transform destinationCameraTarget;
+    [SerializeField, KoreanLabel("텔레포트 대상 추적")] private bool followTeleportedPlayer;
     [SerializeField, KoreanLabel("텔레포트 후 카메라 스냅")] private bool snapCameraAfterTeleport = true;
 
     [Header("페이드")]
@@ -84,25 +82,16 @@ public sealed class TeleportTrigger : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
-    private void Update()
-    {
-        if (!temporaryF1Shortcut) return;
-
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current?.f1Key.wasPressedThisFrame == true)
-            TeleportPlayer();
-#elif ENABLE_LEGACY_INPUT_MANAGER
-        if (Input.GetKeyDown(KeyCode.F1))
-            TeleportPlayer();
-#endif
-    }
-#endif
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (isTeleporting || !CanTeleport(other))
         {
+            return;
+        }
+
+        if (atailArena != null)
+        {
+            if (other.GetComponentInParent<ArisaHealth>() != null) atailArena.PlayerFellIntoWater();
             return;
         }
 
@@ -115,23 +104,25 @@ public sealed class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(subject));
     }
 
-    public void TeleportPlayer()
+    public void TeleportPlayer() => StartPlayerTeleport();
+
+    internal Coroutine StartPlayerTeleport(System.Action onArrival = null)
     {
         if (isTeleporting || !isActiveAndEnabled)
         {
-            return;
+            return null;
         }
 
         if (teleportSubject == null)
         {
             Debug.LogWarning("보스 처치 텔레포트를 사용하려면 텔레포트 대상을 연결해 주세요.", this);
-            return;
+            return null;
         }
 
-        StartCoroutine(TeleportRoutine(teleportSubject));
+        return StartCoroutine(TeleportRoutine(teleportSubject, onArrival: onArrival));
     }
 
-    private IEnumerator TeleportRoutine(Transform subject)
+    private IEnumerator TeleportRoutine(Transform subject, bool restorePlayerFollow = false, System.Action onArrival = null)
     {
         isTeleporting = true;
 
@@ -145,18 +136,8 @@ public sealed class TeleportTrigger : MonoBehaviour
             yield return fadeToUse.FadeIn(fadeInSpeed);
         }
 
-        TeleportSubject(subject);
-        ApplyCameraArea();
-        ApplyCameraFollowMode();
-
-        if (snapCameraAfterTeleport)
-        {
-            CameraManager manager = GetCameraManager();
-            if (manager != null)
-            {
-                manager.SnapToTarget();
-            }
-        }
+        PlaceAtDestination(subject, restorePlayerFollow);
+        onArrival?.Invoke();
 
         if (musicToFadeIn != null)
         {
@@ -170,6 +151,32 @@ public sealed class TeleportTrigger : MonoBehaviour
         isTeleporting = false;
     }
 
+    internal void PlacePlayerAtDestination()
+    {
+        if (teleportSubject != null) PlaceAtDestination(teleportSubject, restorePlayerFollow: false);
+    }
+
+    private void PlaceAtDestination(Transform subject, bool restorePlayerFollow)
+    {
+        TeleportSubject(subject);
+        ApplyCameraArea();
+        ApplyCameraFollowMode();
+
+        if (destinationCameraTarget != null || followTeleportedPlayer || restorePlayerFollow)
+        {
+            GetCameraManager()?.SetFollowTarget(destinationCameraTarget != null ? destinationCameraTarget : subject);
+        }
+
+        if (snapCameraAfterTeleport)
+        {
+            CameraManager manager = GetCameraManager();
+            if (manager != null)
+            {
+                manager.SnapToTarget();
+            }
+        }
+    }
+
     private void TeleportSubject(Transform subject)
     {
         Vector3 destination = GetTeleportPosition(subject);
@@ -181,7 +188,14 @@ public sealed class TeleportTrigger : MonoBehaviour
 
         if (arisaMovement != null)
         {
-            arisaMovement.TeleportTo(destination);
+            if (destinationPlatform != null)
+            {
+                arisaMovement.LandOnPlatform(destinationPlatform);
+            }
+            else
+            {
+                arisaMovement.TeleportTo(destination, useFallbackGround: !useColliderGroundAtDestination);
+            }
             return;
         }
 
@@ -323,7 +337,9 @@ public sealed class TeleportTrigger : MonoBehaviour
 
     private void DrawDestinationGizmo()
     {
-        Vector3 destination = teleportPoint != null ? teleportPoint.position : teleportPosition;
+        Vector3 destination = destinationPlatform != null
+            ? new Vector3(destinationPlatform.bounds.center.x, destinationPlatform.bounds.max.y, destinationPlatform.transform.position.z)
+            : teleportPoint != null ? teleportPoint.position : teleportPosition;
 
         Color previousColor = Gizmos.color;
         Gizmos.color = destinationGizmoColor;

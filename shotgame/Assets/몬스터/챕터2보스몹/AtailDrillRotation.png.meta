@@ -1,0 +1,533 @@
+fileFormatVersion: 2
+guid: 3aa837224a9d43299f89ebdcf16cb130
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: Drill_00
+  - first:
+      213: 21300002
+    second: Drill_01
+  - first:
+      213: 21300004
+    second: Drill_02
+  - first:
+      213: 21300006
+    second: Drill_03
+  - first:
+      213: 21300008
+    second: Drill_04
+  - first:
+      213: 21300010
+    second: Drill_05
+  - first:
+      213: 21300012
+    second: Drill_06
+  - first:
+      213: 21300014
+    second: Drill_07
+  - first:
+      213: 21300016
+    second: Drill_08
+  - first:
+      213: 21300018
+    second: Drill_09
+  - first:
+      213: 21300020
+    second: Drill_10
+  - first:
+      213: 21300022
+    second: Drill_11
+  - first:
+      213: 21300024
+    second: Drill_12
+  - first:
+      213: 21300026
+    second: Drill_13
+  - first:
+      213: 21300028
+    second: Drill_14
+  - first:
+      213: 21300030
+    second: Drill_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 275
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Drill_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1308
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000000
+      internalID: 21300000
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_01
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 1308
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000001
+      internalID: 21300002
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_02
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 1308
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000002
+      internalID: 21300004
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_03
+      rect:
+        serializedVersion: 2
+        x: 2904
+        y: 1308
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000003
+      internalID: 21300006
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_04
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 872
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000004
+      internalID: 21300008
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_05
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 872
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000005
+      internalID: 21300010
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_06
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 872
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000006
+      internalID: 21300012
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_07
+      rect:
+        serializedVersion: 2
+        x: 2904
+        y: 872
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000007
+      internalID: 21300014
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_08
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 436
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000008
+      internalID: 21300016
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_09
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 436
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a700003200000009
+      internalID: 21300018
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_10
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 436
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000a
+      internalID: 21300020
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_11
+      rect:
+        serializedVersion: 2
+        x: 2904
+        y: 436
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000b
+      internalID: 21300022
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000c
+      internalID: 21300024
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_13
+      rect:
+        serializedVersion: 2
+        x: 968
+        y: 0
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000d
+      internalID: 21300026
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_14
+      rect:
+        serializedVersion: 2
+        x: 1936
+        y: 0
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000e
+      internalID: 21300028
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Drill_15
+      rect:
+        serializedVersion: 2
+        x: 2904
+        y: 0
+        width: 965
+        height: 433
+      alignment: 9
+      pivot: {x: 0.017, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bcdbd10cc8b4d48a70000320000000f
+      internalID: 21300030
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID:
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Drill_00: 21300000
+      Drill_01: 21300002
+      Drill_02: 21300004
+      Drill_03: 21300006
+      Drill_04: 21300008
+      Drill_05: 21300010
+      Drill_06: 21300012
+      Drill_07: 21300014
+      Drill_08: 21300016
+      Drill_09: 21300018
+      Drill_10: 21300020
+      Drill_11: 21300022
+      Drill_12: 21300024
+      Drill_13: 21300026
+      Drill_14: 21300028
+      Drill_15: 21300030
+  mipmapLimitGroupName:
+  pSDRemoveMatte: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:
