@@ -131,6 +131,16 @@ public sealed class WaveManager : MonoBehaviour
             }
         }
 
+        CompleteWave();
+    }
+
+    public void CompleteWave()
+    {
+        if (State != WaveState.Running)
+        {
+            return;
+        }
+
         State = WaveState.Completed;
         RestoreCamera();
         waveCompleted.Invoke();
