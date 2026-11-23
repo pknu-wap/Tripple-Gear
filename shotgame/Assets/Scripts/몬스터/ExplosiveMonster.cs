@@ -27,7 +27,8 @@ public sealed class ExplosiveMonster : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Rigidbody2D body;
     private BoxCollider2D contactCollider;
-    private Vector2 patrolOrigin;
+    private MonsterGroundMotion groundMotion;
+    private float patrolOriginX;
     private Color patrolColor;
     private Phase phase;
     private float patrolElapsed;
@@ -39,13 +40,16 @@ public sealed class ExplosiveMonster : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         body = GetComponent<Rigidbody2D>();
         contactCollider = GetComponent<BoxCollider2D>();
-        patrolOrigin = body.position;
+        groundMotion = new MonsterGroundMotion(contactCollider);
+        patrolOriginX = body.position.x;
         patrolColor = spriteRenderer.color;
     }
 
+    private void OnEnable() => groundMotion.Reset();
+
     private void LateUpdate()
     {
-        if (phase != Phase.Idle || health.IsDead)
+        if (phase != Phase.Idle || health.IsDead || health.IsStunned)
         {
             return;
         }
@@ -70,6 +74,13 @@ public sealed class ExplosiveMonster : MonoBehaviour
             return;
         }
 
+        if (health.IsStunned)
+        {
+            if (phase == Phase.Fuse) fuseEndsAt += Time.fixedDeltaTime;
+            return;
+        }
+
+        groundMotion.Step();
         double now = Time.fixedTimeAsDouble;
         switch (phase)
         {
@@ -105,7 +116,8 @@ public sealed class ExplosiveMonster : MonoBehaviour
         float interval = Mathf.Max(0.1f, turnInterval);
         patrolElapsed = Mathf.Repeat(patrolElapsed + Time.fixedDeltaTime, 2f * interval);
         float distance = Mathf.PingPong(patrolElapsed, interval) * health.Data.MoveSpeed;
-        body.MovePosition(patrolOrigin + Vector2.left * distance);
+        Vector2 position = body.position;
+        body.MovePosition(new Vector2(patrolOriginX - distance, position.y));
     }
 
     private void Explode()

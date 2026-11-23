@@ -40,12 +40,12 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
         Vector2 fireDirection = context.Direction.normalized;
         Quaternion rotation = GetRotation(fireDirection);
         Vector3 hitboxCenter = GetHitboxCenter(context.MuzzlePosition, fireDirection);
-        var damaged = new System.Collections.Generic.HashSet<MonsterHealth>();
+        HashSet<MonsterHealth> damaged = new HashSet<MonsterHealth>();
         float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
         foreach (Collider2D targetCollider in Physics2D.OverlapBoxAll(hitboxCenter, HitboxSize, angle, gunData.HitTargetLayers))
         {
             MonsterHealth target = targetCollider.GetComponentInParent<MonsterHealth>();
-            if (target != null && damaged.Add(target)) target.TakeDamage(gunData.Damage);
+            if (target != null && damaged.Add(target)) target.TakeGunDamage(gunData.Damage + context.DamageBonus);
         }
 
         GameObject hitboxObject = new GameObject(gunData.name + " Shotgun Hitbox");
@@ -65,11 +65,12 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
         rigidbody2D.bodyType = RigidbodyType2D.Kinematic;
         rigidbody2D.gravityScale = 0f;
 
-        DamageEnemiesInHitbox(gunData, hitboxCenter, rotation);
+        DamageEnemiesInHitbox(gunData, hitboxCenter, rotation, damaged, context.DamageBonus);
         UnityEngine.Object.Destroy(hitboxObject, HitboxLifetime);
     }
 
-    private void DamageEnemiesInHitbox(GunSO gunData, Vector3 center, Quaternion rotation)
+    private void DamageEnemiesInHitbox(GunSO gunData, Vector3 center, Quaternion rotation,
+        HashSet<MonsterHealth> directHits, float damageBonus)
     {
         Physics2D.SyncTransforms();
         Collider2D[] hits = Physics2D.OverlapBoxAll(center, HitboxSize, rotation.eulerAngles.z, gunData.HitTargetLayers);
@@ -80,7 +81,7 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
             MonsterHealth health = GunDamage.GetEnemyHealth(hit);
             if (health != null && damagedMonsters.Add(health))
             {
-                health.TakeDamage(gunData.Damage);
+                health.TakeGunDamage(gunData.Damage + (directHits.Contains(health) ? 0f : damageBonus));
             }
         }
     }

@@ -13,6 +13,9 @@ public sealed class MonsterSO : ScriptableObject
     [SerializeField, KoreanLabel("공격력"), Min(0)] private int attackDamage = 1;
     [SerializeField, KoreanLabel("공격 간격"), Min(0.1f)] private float attackInterval = 2f;
 
+    [Header("피격 효과")]
+    [SerializeField, KoreanLabel("벽 피격 효과 사용")] private bool useWallHitFlash;
+
     [Header("아이템 드롭")]
     [SerializeField, KoreanLabel("드롭 아이템 프리팹")] private GameObject dropPrefab;
     [SerializeField, KoreanLabel("드롭 확률 (1 = 100%)"), Range(0f, 1f)] private float dropChance;
@@ -23,6 +26,7 @@ public sealed class MonsterSO : ScriptableObject
     public float MoveSpeed => Mathf.Max(0f, moveSpeed);
     public int AttackDamage => Mathf.Max(0, attackDamage);
     public float AttackInterval => Mathf.Max(0.1f, attackInterval);
+    public bool UseWallHitFlash => useWallHitFlash;
 
     private void OnValidate()
     {

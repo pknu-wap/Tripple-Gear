@@ -22,6 +22,14 @@ public sealed class AtailEntrance : MonoBehaviour
     [SerializeField] private GameObject impactPlatform;
     [SerializeField, Min(0.1f)] private float arenaCameraSize = 7f;
     [SerializeField] private UnityEvent battleReady = new UnityEvent();
+#if UNITY_EDITOR
+    [SerializeField, InspectorName("F1 보스 진입 미션 위치")] private Transform testLaunchPoint;
+
+    internal bool CanPlayFromTestMenu => isActiveAndEnabled && boat != null && boat.isActiveAndEnabled
+        && testLaunchPoint != null;
+
+    internal void PlayFromTestMenu() => boat.PreviewBossEntrance(testLaunchPoint.position.x, PlayEntrance);
+#endif
 
     private struct RendererState
     {

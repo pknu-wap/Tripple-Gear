@@ -13,10 +13,17 @@ public sealed class SkillRuntime : MonoBehaviour
 
     public void Play(IEnumerator routine, Action cleanup)
     {
+        if (routine == null) return;
+
         StopPlaying();
         activeRoutine = routine;
         activeCleanup = cleanup;
-        activeCoroutine = StartCoroutine(PlayRoutine(routine));
+        Coroutine coroutine = StartCoroutine(PlayRoutine(routine));
+        // Instant skills can finish during their first MoveNext.
+        if (activeRoutine == routine)
+        {
+            activeCoroutine = coroutine;
+        }
     }
 
     public void StopPlaying()

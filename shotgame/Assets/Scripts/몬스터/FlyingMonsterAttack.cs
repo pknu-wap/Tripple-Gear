@@ -33,6 +33,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     private Animator animator;
     private RuntimeAnimatorController movementController;
     private Collider2D playerCollider;
+    private Transform projectileParent;
     private Phase phase;
     private Vector3 retreatDestination;
     private Vector3 approachStartPosition;
@@ -48,6 +49,8 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     private static readonly int RangedAttackState = Animator.StringToHash("Base Layer.RangedAttack");
 
     private MonsterSO Data => health != null ? health.Data : null;
+
+    public void SetProjectileParent(Transform parent) => projectileParent = parent;
 
     private void Reset()
     {
@@ -93,6 +96,8 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
     private void Update()
     {
+        if (health != null && health.IsStunned) return;
+
         if (chase == null || Data == null || health.IsDead || !chase.IsChasing)
         {
             return;
@@ -273,7 +278,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
         direction.Normalize();
         Vector3 spawnPosition = transform.position + (Vector3)(direction * projectileSpawnOffset);
-        MonsterProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        MonsterProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity, projectileParent);
         projectile.Launch(direction, projectileSpeed, projectileLifetime, Data.AttackDamage, player);
     }
 

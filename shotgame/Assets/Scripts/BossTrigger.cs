@@ -28,6 +28,18 @@ public sealed class BossTrigger : TriggerBase
     private DirectorWrapMode previousWrapMode;
     private bool reportedInvalidSetup;
 
+    public void StartEncounter(ArisaHorizontalMovement player)
+    {
+        if (player != null) TryActivate(Manager, player);
+    }
+
+    internal void ResetEncounter()
+    {
+        CancelEncounter();
+        if (boss != null) boss.gameObject.SetActive(false);
+        state = EncounterState.Ready;
+    }
+
     private void OnTriggerStay2D(Collider2D other)
     {
         if (state == EncounterState.Ready)

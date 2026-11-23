@@ -13,6 +13,8 @@ public sealed partial class TeleportTrigger
         [SerializeField, InspectorName("표시 이름")] internal string label;
         [SerializeField, InspectorName("텔레포트")] internal TeleportTrigger route;
         [SerializeField, InspectorName("보트 항해")] internal BoatVoyage voyage;
+        [SerializeField, InspectorName("아테일 등장 연출")] internal AtailEntrance atailEntrance;
+        [SerializeField, InspectorName("이동 시 다시 시작할 보스")] internal BossTrigger resetBoss;
     }
 
     [Header("에디터 테스트")]
@@ -87,7 +89,8 @@ public sealed partial class TeleportTrigger
         for (int i = 0; i < temporaryDestinations.Length; i++)
         {
             TestDestination destination = temporaryDestinations[i];
-            if (destination != null && (destination.route != null || destination.voyage != null) && GUI.Button(
+            if (destination != null && (destination.route != null || destination.voyage != null
+                || destination.atailEntrance != null) && GUI.Button(
                 new Rect(left + 16f, top + 32f + i * rowHeight, width - 32f, 30f), $"{i + 1}. {destination.label}"))
             {
                 SelectTestDestination(i);
@@ -105,8 +108,9 @@ public sealed partial class TeleportTrigger
         TestDestination destination = temporaryDestinations[index];
         TeleportTrigger route = destination?.route;
         BoatVoyage voyage = destination?.voyage;
-        bool canTravel = voyage != null
-            ? voyage.isActiveAndEnabled
+        AtailEntrance atailEntrance = destination?.atailEntrance;
+        bool canTravel = atailEntrance != null ? atailEntrance.CanPlayFromTestMenu
+            : voyage != null ? voyage.isActiveAndEnabled
             : route != null && route.isActiveAndEnabled && route.teleportSubject != null && !route.isTeleporting;
         if (!canTravel || GetFade().IsFading)
         {
@@ -114,7 +118,8 @@ public sealed partial class TeleportTrigger
         }
 
         SetTestMenuOpen(false);
-        var targetScene = voyage != null ? voyage.gameObject.scene : route.gameObject.scene;
+        var targetScene = atailEntrance != null ? atailEntrance.gameObject.scene
+            : voyage != null ? voyage.gameObject.scene : route.gameObject.scene;
         foreach (Trigger trigger in FindObjectsByType<Trigger>(FindObjectsSortMode.None))
         {
             if (trigger.gameObject.scene == targetScene)
@@ -137,7 +142,23 @@ public sealed partial class TeleportTrigger
             if (entrance.gameObject.scene == targetScene) entrance.CancelEntrance();
         }
 
-        if (voyage != null)
+        foreach (AtailBossController battle in FindObjectsByType<AtailBossController>(FindObjectsSortMode.None))
+        {
+            if (battle.gameObject.scene == targetScene) battle.CancelDefeatSequence();
+        }
+
+        foreach (SummitAirshipBoss boss in FindObjectsByType<SummitAirshipBoss>(FindObjectsSortMode.None))
+        {
+            if (boss.gameObject.scene == targetScene) boss.CancelBoardingSequence();
+        }
+
+        if (destination.resetBoss != null) destination.resetBoss.ResetEncounter();
+
+        if (atailEntrance != null)
+        {
+            atailEntrance.PlayFromTestMenu();
+        }
+        else if (voyage != null)
         {
             voyage.RestartForTest();
         }

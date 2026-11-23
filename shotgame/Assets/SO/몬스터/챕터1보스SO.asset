@@ -16,3 +16,4 @@ MonoBehaviour:
   moveSpeed: 0
   attackDamage: 1
   attackInterval: 1.8
+  useWallHitFlash: 1

@@ -145,7 +145,7 @@ internal static class GunDamage
         MonsterHealth health = GetEnemyHealth(hitCollider);
         if (health != null)
         {
-            health.TakeDamage(damage);
+            health.TakeGunDamage(damage);
         }
     }
 }

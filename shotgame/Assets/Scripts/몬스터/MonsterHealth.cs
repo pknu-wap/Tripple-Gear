@@ -20,8 +20,13 @@ public sealed class MonsterHealth : MonoBehaviour
     public int MaxHp => monsterData != null ? monsterData.MaxHp : 0;
     public int CurrentHp => currentHp;
     public bool IsDead => currentHp <= 0;
+    internal bool IsStunned { get; private set; }
+
+    internal void SetStunned(bool stunned) => IsStunned = stunned;
     public UnityEvent<int, int> HpChanged => hpChanged;
     public UnityEvent Defeated => defeated;
+    internal MissionObjective RequiredDamageObjective { get; set; }
+    internal bool DefeatedByGun { get; private set; }
 
     private void Awake()
     {
@@ -37,17 +42,30 @@ public sealed class MonsterHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        if (amount <= 0 || IsDead)
+        ApplyDamage(amount, false);
+    }
+
+    internal void TakeGunDamage(float amount)
+    {
+        ApplyDamage(Mathf.CeilToInt(amount), true);
+    }
+
+    private void ApplyDamage(int amount, bool fromGun)
+    {
+        if (amount <= 0 || IsDead || (RequiredDamageObjective != null && !RequiredDamageObjective.IsRunning))
         {
             return;
         }
 
-        SetHp(currentHp - amount);
+        SetHp(currentHp - amount, fromGun);
     }
 
     internal void ResetForMission()
     {
+        if (TryGetComponent(out RobotStun stun)) stun.End();
         currentHp = MaxHp;
+        DefeatedByGun = false;
+        if (TryGetComponent(out MonsterHitFlash hitFlash)) hitFlash.enabled = false;
         if (TryGetComponent(out MonsterDeathEffect deathEffect)) deathEffect.ResetForMission();
         if (TryGetComponent(out NormalMonsterChase chase)) chase.ResetForMission();
         hpChanged?.Invoke(currentHp, MaxHp);
@@ -68,13 +86,19 @@ public sealed class MonsterHealth : MonoBehaviour
         SetHp(amount >= MaxHp - currentHp ? MaxHp : currentHp + amount);
     }
 
-    private void SetHp(int hp)
+    private void SetHp(int hp, bool fromGun = false)
     {
         int previousHp = currentHp;
         currentHp = Mathf.Clamp(hp, 0, MaxHp);
         if (currentHp == previousHp)
         {
             return;
+        }
+
+        DefeatedByGun = IsDead && fromGun;
+        if (fromGun)
+        {
+            MonsterHitFlash.Play(gameObject, monsterData.UseWallHitFlash);
         }
 
         hpChanged?.Invoke(currentHp, MaxHp);

@@ -17,7 +17,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [Header("텔레포트")]
     [SerializeField, KoreanLabel("텔레포트 대상")] private Transform teleportSubject;
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
-    [SerializeField, KoreanLabel("도착 발판 (선택)")] private BoxCollider2D destinationPlatform;
+    [SerializeField, KoreanLabel("도착 발판 (선택)")] private Collider2D destinationPlatform;
+    [SerializeField, KoreanLabel("물에 빠지면 게임오버 (아테일)")] private AtailBossController atailArena;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
     [SerializeField, KoreanLabel("도착 후 콜라이더로만 지면 판정")] private bool useColliderGroundAtDestination;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
@@ -88,6 +89,12 @@ public sealed partial class TeleportTrigger : MonoBehaviour
             return;
         }
 
+        if (atailArena != null)
+        {
+            if (other.GetComponentInParent<ArisaHealth>() != null) atailArena.PlayerFellIntoWater();
+            return;
+        }
+
         Transform subject = GetTeleportSubject(other);
         if (subject == null)
         {
@@ -97,23 +104,25 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(subject));
     }
 
-    public void TeleportPlayer()
+    public void TeleportPlayer() => StartPlayerTeleport();
+
+    internal Coroutine StartPlayerTeleport(System.Action onArrival = null)
     {
         if (isTeleporting || !isActiveAndEnabled)
         {
-            return;
+            return null;
         }
 
         if (teleportSubject == null)
         {
             Debug.LogWarning("보스 처치 텔레포트를 사용하려면 텔레포트 대상을 연결해 주세요.", this);
-            return;
+            return null;
         }
 
-        StartCoroutine(TeleportRoutine(teleportSubject));
+        return StartCoroutine(TeleportRoutine(teleportSubject, onArrival: onArrival));
     }
 
-    private IEnumerator TeleportRoutine(Transform subject, bool restorePlayerFollow = false)
+    private IEnumerator TeleportRoutine(Transform subject, bool restorePlayerFollow = false, System.Action onArrival = null)
     {
         isTeleporting = true;
 
@@ -128,6 +137,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         }
 
         PlaceAtDestination(subject, restorePlayerFollow);
+        onArrival?.Invoke();
 
         if (musicToFadeIn != null)
         {

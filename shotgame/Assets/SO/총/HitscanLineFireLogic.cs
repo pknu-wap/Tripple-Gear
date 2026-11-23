@@ -30,7 +30,8 @@ public sealed class HitscanLineFireLogic : GunFireLogic
         if (hit.collider != null)
         {
             MonsterHealth target = hit.collider.GetComponentInParent<MonsterHealth>();
-            if (target != null) target.TakeDamage(gunData.Damage);
+            // The direct hit carries the bonus once. The existing Enemy-layer hit uses base damage.
+            if (target != null) target.TakeGunDamage(gunData.Damage + context.DamageBonus);
         }
 
         if (hit.collider != null)

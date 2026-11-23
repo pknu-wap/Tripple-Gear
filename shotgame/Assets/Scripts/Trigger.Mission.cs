@@ -48,6 +48,8 @@ public partial class Trigger
     private BoatVoyage activeMissionBoat;
     private bool waitingForMissionStart;
 
+    internal ArisaHealth MissionPlayerHealth => missionPlayerHealth;
+
     internal bool IsMissionForBoat(BoatVoyage boat)
     {
         if (!HasMissionObjectives) return false;

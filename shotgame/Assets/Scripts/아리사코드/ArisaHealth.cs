@@ -148,6 +148,13 @@ public sealed class ArisaHealth : MonoBehaviour
             return;
         }
 
+        ApplyDamage(1, sourcePosition);
+    }
+
+    internal void TakeFatalDamage() => ApplyDamage(maxHp, null);
+
+    private void ApplyDamage(int amount, Vector2? sourcePosition)
+    {
         // 스킬 컴포넌트가 Awake 이후에 무적 컴포넌트를 추가할 수도 있다.
         FindReferences();
         if (Time.time < hitProtectionEndTime
@@ -163,6 +170,8 @@ public sealed class ArisaHealth : MonoBehaviour
     {
         TakeDamage(Mathf.CeilToInt(amount));
     }
+
+    internal void Defeat() => SetHp(0);
 
     public void Heal(int amount)
     {
@@ -253,7 +262,7 @@ public sealed class ArisaHealth : MonoBehaviour
         if (currentHp < previousHp)
         {
             hitProtectionEndTime = Time.time + hitDisplayDuration;
-            PlayHitVisual();
+            PlayHitPresentation(hitDisplayDuration);
             PlayHitReaction(sourcePosition);
         }
 
@@ -283,7 +292,7 @@ public sealed class ArisaHealth : MonoBehaviour
         movement.StartHitReaction(knockbackDirection, hitStunDuration, hitKnockbackDistance, hitKnockbackUpSpeed);
     }
 
-    private void PlayHitVisual()
+    internal void PlayHitPresentation(float duration)
     {
         if (hitSpriteRenderer == null)
         {
@@ -308,7 +317,7 @@ public sealed class ArisaHealth : MonoBehaviour
 
         hitVisualActive = true;
         hitVisualStartTime = Time.time;
-        hitVisualEndTime = Time.time + hitDisplayDuration;
+        hitVisualEndTime = Time.time + duration;
         hitSpriteRenderer.flipX = aim != null && aim.IsFacingLeft;
         hitSpriteRenderer.enabled = true;
         if (hitAnimator != null)

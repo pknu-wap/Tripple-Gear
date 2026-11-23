@@ -16,6 +16,8 @@ public sealed class MissionInteractable : MonoBehaviour
     private readonly List<Collider2D> nearbyColliders = new List<Collider2D>();
     private BoxCollider2D interactionArea;
 
+    internal static int LastKeyboardInteractionFrame { get; private set; } = -1;
+
     private void Reset() => GetComponent<BoxCollider2D>().isTrigger = true;
 
     private void Awake()
@@ -26,25 +28,27 @@ public sealed class MissionInteractable : MonoBehaviour
 
     private void Update()
     {
-        if (InteractPressed())
+        if (InteractPressed() && TryInteract())
         {
-            Interact();
+            LastKeyboardInteractionFrame = Time.frameCount;
         }
     }
 
-    public void Interact()
+    public void Interact() => TryInteract();
+
+    private bool TryInteract()
     {
         if (!isActiveAndEnabled || objective == null || objective.RemainingCount <= 0 || !PlayerIsInRange())
         {
-            return;
+            return false;
         }
 
         int added = resource != null ? resource.Withdraw(objective.RemainingCount) : 1;
-        if (added > 0)
-        {
-            objective.AddProgress(added);
-            onInteracted.Invoke();
-        }
+        if (added <= 0) return false;
+
+        objective.AddProgress(added);
+        onInteracted.Invoke();
+        return true;
     }
 
     private bool PlayerIsInRange()

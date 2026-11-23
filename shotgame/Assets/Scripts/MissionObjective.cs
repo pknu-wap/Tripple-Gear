@@ -23,6 +23,7 @@ public sealed class MissionObjective : MonoBehaviour
     [SerializeField, KoreanLabel("목표 수량"), Min(1)] private int requiredCount = 1;
     [SerializeField, KoreanLabel("버틸 시간 (초)"), Min(0.01f)] private float requiredSeconds = 10f;
     [SerializeField, KoreanLabel("지정 몬스터 (씬 오브젝트)")] private MonsterHealth[] targetMonsters;
+    [SerializeField, KoreanLabel("미션 시작 전에도 대상 표시")] private bool keepTargetsVisibleBeforeStart;
     [SerializeField, KoreanLabel("항해 전투 보트")] private BoatVoyage missionBoat;
     [SerializeField, KoreanLabel("항해 전투 방식")] private BoatBattleMode boatBattleMode;
     [SerializeField, KoreanLabel("목표 시작 이벤트")] private UnityEvent onStarted = new UnityEvent();
@@ -54,9 +55,15 @@ public sealed class MissionObjective : MonoBehaviour
         targetPoses = new (Vector3, Quaternion, Vector3)[targetMonsters.Length];
         for (int i = 0; i < targetMonsters.Length; i++)
         {
-            if (targetMonsters[i] == null) continue;
-            Transform target = targetMonsters[i].transform;
-            targetPoses[i] = (target.localPosition, target.localRotation, target.localScale);
+            MonsterHealth target = targetMonsters[i];
+            if (target == null) continue;
+            Transform targetTransform = target.transform;
+            targetPoses[i] = (targetTransform.localPosition, targetTransform.localRotation, targetTransform.localScale);
+            if (keepTargetsVisibleBeforeStart)
+            {
+                target.RequiredDamageObjective = this;
+                target.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -91,12 +98,13 @@ public sealed class MissionObjective : MonoBehaviour
         {
             MonsterHealth target = targetMonsters[i];
             if (target == null) continue;
-            target.gameObject.SetActive(false);
+            if (!keepTargetsVisibleBeforeStart) target.gameObject.SetActive(false);
             var pose = targetPoses[i];
             target.transform.localPosition = pose.position;
             target.transform.localRotation = pose.rotation;
             target.transform.localScale = pose.scale;
             target.ResetForMission();
+            if (keepTargetsVisibleBeforeStart) target.gameObject.SetActive(true);
         }
     }
 
@@ -129,7 +137,7 @@ public sealed class MissionObjective : MonoBehaviour
         }
 
         IsRunning = false;
-        StopTrackingTargets(hideTargets: !IsCompleted);
+        StopTrackingTargets(hideTargets: !IsCompleted && !keepTargetsVisibleBeforeStart);
         onEnded.Invoke();
     }
 

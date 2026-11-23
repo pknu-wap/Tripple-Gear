@@ -377,21 +377,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   idleGraphic: {fileID: 6145685957078924377}
   idleGraphicFacesLeftByDefault: 1
-  inertiaGraphic: {fileID: 4335601002625367716}
-  inertiaGraphicFacesLeftByDefault: 0
-  leftInertiaGraphicPositionOffset: {x: 0, y: 0}
-  inertiaDust: {fileID: 2739241782845582534}
-  leftInertiaDustPositionOffset: {x: 0, y: 0}
-  inertiaHeadOffsets:
-  - {x: 0.04, y: -0.22}
-  - {x: 0.03, y: -0.14}
-  - {x: 0.01, y: -0.06}
-  - {x: 0, y: 0}
-  inertiaAimOffsets:
-  - {x: 0.06, y: -0.2}
-  - {x: 0.05, y: -0.13}
-  - {x: 0.02, y: -0.05}
-  - {x: 0, y: 0}
   crouchBodyOffsets:
   - {x: 0.6, y: -0.5}
   - {x: 0.6, y: -0.5}
@@ -430,14 +415,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 7
-  landingHorizontalSpeed: 0
-  acceleration: 15
-  deceleration: 7
   jumpSpeed: 10
   gravity: 18
   fallGravityMultiplier: 1.7
-  inertiaFrameRate: 12
-  inertiaFrameCount: 4
   animator: {fileID: 6458455707057984966}
   idleSpriteRenderer: {fileID: 1413779818896276445}
   bodySpriteRenderer: {fileID: 6796997444090711213}
@@ -450,8 +430,6 @@ MonoBehaviour:
   - {fileID: 21300002, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
   - {fileID: 21300004, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
   runningJumpSprites:
-  - {fileID: 21300006, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
-  - {fileID: 21300008, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
   - {fileID: 21300010, guid: 3f6ced2f3a744a50a30d309c0731268f, type: 3}
   landingSprites:
   - {fileID: 21300002, guid: 490ec17de72942a8b9990e64273fb673, type: 3}
@@ -465,9 +443,7 @@ MonoBehaviour:
   - {x: 0, y: -0.17884}
   - {x: 0, y: 0}
   inertiaSpriteRenderer: {fileID: 6033805962797859765}
-  inertiaAnimator: {fileID: 7335342971788207954}
   inertiaDustSpriteRenderer: {fileID: 68233175928987197}
-  inertiaDustAnimator: {fileID: 125608035217106940}
   inertiaOverlayRenderers:
   - {fileID: 6837424505087146462}
   - {fileID: 1949585202604632812}

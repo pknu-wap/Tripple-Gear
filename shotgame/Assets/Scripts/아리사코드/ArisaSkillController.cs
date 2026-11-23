@@ -12,6 +12,20 @@ using UnityEditor;
 [DefaultExecutionOrder(120)]
 public sealed class ArisaSkillController : MonoBehaviour
 {
+    private struct SkillSlot
+    {
+        internal SkillSO Data;
+        internal int Uses;
+        internal float CooldownEndsAt;
+
+        internal SkillSlot(SkillSO data)
+        {
+            Data = data;
+            Uses = data.MaxUseCount;
+            CooldownEndsAt = 0f;
+        }
+    }
+
     private const float MinDirectionSqrMagnitude = 0.0001f;
 #if UNITY_EDITOR
     private const string DefaultSkillPath = "Assets/SO/스킬/대쉬스킬SO 1.asset";
@@ -24,63 +38,67 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private SkillRuntime runtime;
     private ArisaInvincibility invincibility;
-    private SkillSO currentSkillData;
-    private int remainingUseCount;
-    private float cooldownCompleteTime;
-    private bool skillConsumed;
+    private SkillSlot activeSkill;
+    private SkillSlot storedSkill;
 
 #if ENABLE_INPUT_SYSTEM
     private InputAction skillAction;
     private InputAction pointerPositionAction;
 #endif
 
-    public SkillSO SkillData => 스킬데이터;
-    public int RemainingUseCount => remainingUseCount;
+    public SkillSO SkillData => activeSkill.Data;
+    public SkillSO StoredSkillData => storedSkill.Data;
+    public int RemainingUseCount => activeSkill.Uses;
+    public int StoredUseCount => storedSkill.Uses;
     public event System.Action<int> RemainingUseCountChanged;
-    public float CooldownRemaining => IsCoolingDown ? Mathf.Max(0f, cooldownCompleteTime - Time.time) : 0f;
-    public bool IsCoolingDown => 스킬데이터 != null && Time.time < cooldownCompleteTime;
+    public event System.Action SkillSlotsChanged;
+    public float CooldownRemaining => IsCoolingDown ? activeSkill.CooldownEndsAt - Time.time : 0f;
+    public bool IsCoolingDown => SkillData != null && Time.time < activeSkill.CooldownEndsAt;
 
-    public bool TryAcquireSkill(SkillSO skillData)
+    internal bool TryAddSkillUses(int amount)
     {
-        if (skillData == null)
+        if (amount <= 0 || SkillData == null || RemainingUseCount <= 0)
         {
             return false;
         }
 
-        runtime?.StopPlaying();
-        스킬데이터 = skillData;
-        currentSkillData = null;
-        cooldownCompleteTime = 0f;
-        skillConsumed = false;
+        int previousCount = RemainingUseCount;
+        activeSkill.Uses += Mathf.Min(amount, int.MaxValue - previousCount);
+        NotifySkillSlotsChanged(previousCount);
+        return true;
+    }
 
-        FindReferences();
-        RefreshSkillState();
+    public bool TryAcquireSkill(SkillSO skillData)
+    {
+        if (skillData == null || !skillData.HasLogic || skillData.ActivatesOnPickup || storedSkill.Data != null)
+        {
+            return false;
+        }
+
+        int previousCount = RemainingUseCount;
+        if (activeSkill.Data == null) activeSkill = new SkillSlot(skillData);
+        else storedSkill = new SkillSlot(skillData);
+        NotifySkillSlotsChanged(previousCount);
         return true;
     }
 
     private void Reset()
     {
-        FindReferences();
-        RefreshSkillState();
+        스킬데이터 ??= LoadDefaultSkill();
+        이동컴포넌트 = GetComponent<ArisaHorizontalMovement>();
     }
 
     private void Awake()
     {
-        if (startWithoutSkill)
-        {
-            스킬데이터 = null;
-            skillConsumed = true;
-        }
-
         FindReferences();
-        RefreshSkillState();
+        if (!startWithoutSkill)
+        {
+            TryAcquireSkill(스킬데이터 != null ? 스킬데이터 : LoadDefaultSkill());
+        }
     }
 
     private void OnEnable()
     {
-        FindReferences();
-        RefreshSkillState();
-
 #if ENABLE_INPUT_SYSTEM
         skillAction ??= new InputAction("Skill", InputActionType.Button, "<Mouse>/rightButton");
         pointerPositionAction ??= new InputAction("PointerPosition", InputActionType.Value, "<Pointer>/position");
@@ -101,31 +119,25 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void Update()
     {
-        RefreshSkillState();
-
-        if (!ReadSkillPressed())
+        if (Time.timeScale == 0f) return;
+        if (storedSkill.Data != null && ReadSwapPressed()
+            && MissionInteractable.LastKeyboardInteractionFrame != Time.frameCount
+            && DialogueManager.LastAdvanceFrame != Time.frameCount)
         {
-            return;
+            int previousCount = RemainingUseCount;
+            SkillSlot previous = activeSkill;
+            activeSkill = storedSkill;
+            storedSkill = previous;
+            NotifySkillSlotsChanged(previousCount);
         }
 
-        TryUseSkill();
+        if (ReadSkillPressed()) TryUseSkill();
     }
 
     private bool TryUseSkill()
     {
-        if (스킬데이터 == null || !스킬데이터.HasLogic || runtime == null || runtime.IsPlaying)
-        {
-            return false;
-        }
-
-        RefreshSkillState();
-        if (remainingUseCount <= 0)
-        {
-            RemoveSkillFromArisa();
-            return false;
-        }
-
-        if (IsCoolingDown)
+        SkillSO skillToUse = SkillData;
+        if (skillToUse == null || runtime == null || runtime.IsPlaying || IsCoolingDown)
         {
             return false;
         }
@@ -143,13 +155,10 @@ public sealed class ArisaSkillController : MonoBehaviour
             direction = mouseWorldPosition - transform.position;
         }
 
-        if (스킬데이터.RequiresAimDirection && (!hasMouseWorldPosition || direction.sqrMagnitude <= MinDirectionSqrMagnitude))
+        if (skillToUse.RequiresAimDirection && (!hasMouseWorldPosition || direction.sqrMagnitude <= MinDirectionSqrMagnitude))
         {
             return false;
         }
-
-        SkillSO skillToUse = 스킬데이터;
-        ConsumeSkillUse(skillToUse);
 
         SkillContext context = new SkillContext(
             transform,
@@ -161,6 +170,12 @@ public sealed class ArisaSkillController : MonoBehaviour
             invincibility
         );
 
+        if (!skillToUse.Logic.CanExecute(context))
+        {
+            return false;
+        }
+
+        ConsumeSkillUse(skillToUse);
         bool shouldMakeInvincible = skillToUse.IsInvincibleWhileActive && invincibility != null;
         if (shouldMakeInvincible)
         {
@@ -183,11 +198,6 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void FindReferences()
     {
-        if (스킬데이터 == null)
-        {
-            스킬데이터 = skillConsumed ? null : LoadDefaultSkill();
-        }
-
         if (이동컴포넌트 == null)
         {
             이동컴포넌트 = GetComponent<ArisaHorizontalMovement>();
@@ -212,56 +222,29 @@ public sealed class ArisaSkillController : MonoBehaviour
         }
     }
 
-    private void RefreshSkillState()
-    {
-        if (스킬데이터 == null)
-        {
-            currentSkillData = null;
-            SetRemainingUseCount(0);
-            cooldownCompleteTime = 0f;
-            return;
-        }
-
-        if (스킬데이터 != currentSkillData)
-        {
-            currentSkillData = 스킬데이터;
-            SetRemainingUseCount(스킬데이터.MaxUseCount);
-            cooldownCompleteTime = 0f;
-            skillConsumed = false;
-        }
-    }
-
     private void ConsumeSkillUse(SkillSO skillToUse)
     {
-        SetRemainingUseCount(remainingUseCount - 1);
-        if (remainingUseCount <= 0)
+        int previousCount = RemainingUseCount;
+        activeSkill.Uses--;
+        if (activeSkill.Uses == 0)
         {
-            RemoveSkillFromArisa();
-            return;
+            activeSkill = storedSkill;
+            storedSkill = default;
         }
-
-        cooldownCompleteTime = Time.time + skillToUse.Cooldown;
+        else
+        {
+            activeSkill.CooldownEndsAt = Time.time + skillToUse.Cooldown;
+        }
+        NotifySkillSlotsChanged(previousCount);
     }
 
-    private void RemoveSkillFromArisa()
+    private void NotifySkillSlotsChanged(int previousCount)
     {
-        skillConsumed = true;
-        스킬데이터 = null;
-        currentSkillData = null;
-        SetRemainingUseCount(0);
-        cooldownCompleteTime = 0f;
-    }
-
-    private void SetRemainingUseCount(int count)
-    {
-        count = Mathf.Max(0, count);
-        if (remainingUseCount == count)
+        if (previousCount != RemainingUseCount)
         {
-            return;
+            RemainingUseCountChanged?.Invoke(RemainingUseCount);
         }
-
-        remainingUseCount = count;
-        RemainingUseCountChanged?.Invoke(remainingUseCount);
+        SkillSlotsChanged?.Invoke();
     }
 
     private Camera GetCamera()
@@ -319,6 +302,17 @@ public sealed class ArisaSkillController : MonoBehaviour
 
 #if ENABLE_LEGACY_INPUT_MANAGER
         return Input.GetMouseButtonDown(1);
+#else
+        return false;
+#endif
+    }
+
+    private static bool ReadSwapPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        return Keyboard.current?.eKey.wasPressedThisFrame == true;
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return Input.GetKeyDown(KeyCode.E);
 #else
         return false;
 #endif

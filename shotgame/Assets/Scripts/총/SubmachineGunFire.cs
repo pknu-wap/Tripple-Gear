@@ -37,6 +37,12 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     private float nextShotTime;
     private int currentBulletCount;
+    private float damageBoostEndsAt;
+    private float damageBonus;
+    private GameObject damageBoostEffect;
+    private float unlimitedAmmoEndsAt;
+    private GameObject unlimitedAmmoEffect;
+    private bool showingUnlimitedAmmo;
     private bool isReloading;
     private bool isWaitingBetweenSequentialReloads;
     private float reloadStartedTime;
@@ -56,10 +62,30 @@ public sealed class SubmachineGunFire : MonoBehaviour
 #endif
 
     public bool IsReloading => isReloading;
+    internal bool InputSuppressed { get; set; }
     public int CurrentBulletCount => currentBulletCount;
     public int MaxBulletCount => GetMaxBulletCount();
+    public bool HasUnlimitedAmmo => Time.time < unlimitedAmmoEndsAt;
     public event System.Action<int, int> AmmoChanged;
     public event System.Action ShotFired;
+
+    internal void StartDamageBoost(float bonus, float duration, GameObject effect)
+    {
+        damageBonus = bonus;
+        damageBoostEndsAt = Time.time + duration;
+        Destroy(damageBoostEffect);
+        damageBoostEffect = effect;
+    }
+
+    internal void StartUnlimitedAmmo(float duration, GameObject effect)
+    {
+        unlimitedAmmoEndsAt = Time.time + duration;
+        Destroy(unlimitedAmmoEffect);
+        unlimitedAmmoEffect = effect;
+        CancelReload();
+        showingUnlimitedAmmo = true;
+        NotifyAmmoChanged();
+    }
 
     private void Reset()
     {
@@ -106,7 +132,15 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (showingUnlimitedAmmo && !HasUnlimitedAmmo)
+        {
+            showingUnlimitedAmmo = false;
+            NotifyAmmoChanged();
+            if (currentBulletCount <= 0) BeginReload();
+        }
+
         UpdateReload();
+        if (InputSuppressed) return;
 
         if (ReadReloadPressed())
         {
@@ -133,7 +167,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
             return;
         }
 
-        if (currentBulletCount <= 0)
+        if (!HasUnlimitedAmmo && currentBulletCount <= 0)
         {
             BeginReload();
             return;
@@ -161,7 +195,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         FireProjectile(spawnPosition, direction.normalized, cameraToUse);
-        ConsumeBullet();
+        if (!HasUnlimitedAmmo) ConsumeBullet();
         nextShotTime = Time.time + GetShotInterval();
         ShotFired?.Invoke();
     }
@@ -264,7 +298,8 @@ public sealed class SubmachineGunFire : MonoBehaviour
             return;
         }
 
-        gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this));
+        float shotBonus = Time.time < damageBoostEndsAt ? damageBonus : 0f;
+        gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this, shotBonus));
         PlayFireSound();
         arisaAim?.PlayFireShake(gunData.FireShakeAngle, gunData.FireShakeDuration, gunData.FireShakeCycles);
     }
@@ -339,7 +374,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     private void BeginReload()
     {
-        if (isReloading || gunData == null || currentBulletCount >= GetMaxBulletCount())
+        if (HasUnlimitedAmmo || isReloading || gunData == null || currentBulletCount >= GetMaxBulletCount())
         {
             return;
         }

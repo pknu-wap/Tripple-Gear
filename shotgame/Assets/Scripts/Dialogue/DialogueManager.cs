@@ -31,6 +31,8 @@ public class DialogueManager : MonoBehaviour
     private int currentIndex = 0;
     private bool isDialogueActive = false;
 
+    internal static int LastAdvanceFrame { get; private set; } = -1;
+
     private void Start()
     {
         dialoguePanel.SetActive(false);
@@ -40,6 +42,7 @@ public class DialogueManager : MonoBehaviour
     {
         if (isDialogueActive && AdvancePressed())
         {
+            LastAdvanceFrame = Time.frameCount;
             NextDialogue();
         }
     }

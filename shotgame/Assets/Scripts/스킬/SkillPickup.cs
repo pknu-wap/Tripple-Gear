@@ -40,8 +40,7 @@ public sealed class SkillPickup : MonoBehaviour
 
         if (skillData.ActivatesOnPickup)
         {
-            ArisaHealth health = skillController.GetComponent<ArisaHealth>();
-            if (!skillData.TryApplyOnPickup(health))
+            if (!skillData.TryApplyOnPickup(skillController))
             {
                 return;
             }

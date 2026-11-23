@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public sealed class NormalMonsterChase : MonoBehaviour
 {
-    private const float CollisionSkinWidth = 0.02f;
+    private const float CollisionSkinWidth = MonsterGroundMotion.SkinWidth;
     private readonly RaycastHit2D[] obstacleHits = new RaycastHit2D[16];
 
     [Header("감지")]
@@ -17,6 +17,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     [Header("추적")]
     [SerializeField, KoreanLabel("플레이어")] private Transform followTarget;
+    [SerializeField, KoreanLabel("지상 중력 사용")] private bool useGroundGravity = true;
 
     [Header("장애물 점프")]
     [SerializeField, KoreanLabel("장애물 점프 사용")] private bool jumpOverObstacles = true;
@@ -38,6 +39,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
     private bool baseFacesRight;
     private MonsterHealth health;
     private BoxCollider2D movementCollider;
+    private MonsterGroundMotion groundMotion;
     private float startingY;
     private float jumpStartY;
     private float jumpStartTime;
@@ -48,8 +50,8 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     public bool IsChasing => isChasing;
     public bool IsMovementPaused => isMovementPaused;
-    public bool IsJumping => isJumping;
-    public float MovementSpeedMultiplier => isJumping ? jumpMoveSpeedMultiplier : 1f;
+    public bool IsJumping => groundMotion?.IsJumping ?? isJumping;
+    public float MovementSpeedMultiplier => IsJumping ? jumpMoveSpeedMultiplier : 1f;
 
     private void Reset()
     {
@@ -63,11 +65,21 @@ public sealed class NormalMonsterChase : MonoBehaviour
         baseSpriteFlipX = spriteRenderer != null && spriteRenderer.flipX;
         baseFacesRight = IsFacingRight();
         startingY = transform.position.y;
+        if (useGroundGravity) groundMotion = new MonsterGroundMotion(movementCollider);
     }
 
     private void OnEnable()
     {
         offscreenSince = -1f;
+        groundMotion?.Reset();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!health.IsDead && !health.IsStunned)
+        {
+            groundMotion?.Step();
+        }
     }
 
     private void OnValidate()
@@ -84,12 +96,14 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void Update()
     {
+        if (health != null && health.IsStunned) return;
+
         if (MonsterData == null || health.IsDead)
         {
             return;
         }
 
-        UpdateJumpMotion();
+        if (groundMotion == null) UpdateJumpMotion();
 
         if (!isChasing)
         {
@@ -137,6 +151,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
         isChasing = false;
         isMovementPaused = false;
         isJumping = false;
+        groundMotion?.Reset();
         nextJumpTime = 0f;
         if (spriteRenderer != null) spriteRenderer.flipX = baseSpriteFlipX;
     }
@@ -222,7 +237,8 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void TryBeginJump(Collider2D obstacle)
     {
-        if (!jumpOverObstacles || isJumping || Time.time < nextJumpTime || obstacle == null)
+        if (!jumpOverObstacles || IsJumping || Time.time < nextJumpTime || obstacle == null
+            || (groundMotion != null && !groundMotion.IsGrounded))
         {
             return;
         }
@@ -233,9 +249,15 @@ public sealed class NormalMonsterChase : MonoBehaviour
             return;
         }
 
+        nextJumpTime = Time.time + jumpDuration + 0.3f;
+        if (groundMotion != null)
+        {
+            groundMotion.Jump(jumpHeight);
+            return;
+        }
+
         jumpStartY = transform.position.y;
         jumpStartTime = Time.time;
-        nextJumpTime = Time.time + jumpDuration + 0.3f;
         isJumping = true;
     }
 

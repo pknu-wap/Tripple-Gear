@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // 직접 충돌을 검사하므로 anti 레이어 접촉 피해와 중복되지 않는다.
@@ -12,12 +13,14 @@ public sealed class EnemyProjectile2D : MonsterProjectile
     [SerializeField, KoreanLabel("폭발 크기 배율"), Min(0.1f)] private float explosionScale = 1f;
 
     private readonly RaycastHit2D[] hits = new RaycastHit2D[32];
-    private Vector2 direction;
-    private float speed;
+    private Vector2 velocity;
+    private float gravity;
+    private float liquidSurface;
     private int damage;
     private float expiresAt;
     private bool launched;
     private bool resolved;
+    internal event Action<Vector2> ShotDown;
 
     public override void Launch(Vector2 direction, float speed, float lifetime, int damage, ArisaHealth player)
     {
@@ -29,8 +32,9 @@ public sealed class EnemyProjectile2D : MonsterProjectile
         float collisionRadius, float lifetime, GameObject explosionPrefab = null,
         float explosionRadius = 0f, float explosionLifetime = 1f, float explosionScale = 1f)
     {
-        this.direction = direction.sqrMagnitude > 0f ? direction.normalized : Vector2.left;
-        this.speed = Mathf.Max(0f, speed);
+        velocity = (direction.sqrMagnitude > 0f ? direction.normalized : Vector2.left) * Mathf.Max(0f, speed);
+        gravity = 0f;
+        liquidSurface = float.NegativeInfinity;
         this.damage = Mathf.Max(0, damage);
         this.groundLayers = groundLayers;
         this.collisionRadius = Mathf.Max(0.02f, collisionRadius);
@@ -41,22 +45,39 @@ public sealed class EnemyProjectile2D : MonsterProjectile
         expiresAt = Time.time + Mathf.Max(0.1f, lifetime);
         launched = true;
         resolved = false;
-        transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(this.direction.y, this.direction.x) * Mathf.Rad2Deg);
+        Face(direction.sqrMagnitude > 0f ? direction : Vector2.left);
+    }
+
+    internal void LaunchArc(Vector2 initialVelocity, float acceleration, float waterY, int damage, ArisaHealth player)
+    {
+        Launch(initialVelocity, initialVelocity.magnitude, 8f, damage, player);
+        gravity = acceleration;
+        liquidSurface = waterY;
     }
 
     private void Update()
     {
         if (!launched || resolved) return;
-        float distance = speed * Time.deltaTime;
+        float delta = Time.deltaTime;
+        Vector2 falling = Vector2.down * (gravity * delta);
+        Vector2 movement = (velocity + falling * 0.5f) * delta;
+        velocity += falling;
+        float distance = movement.magnitude;
+        Vector2 direction = distance > 0f ? movement / distance : (Vector2)transform.right;
+        if (gravity > 0f) Face(direction);
+        Vector2 start = transform.position;
         ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
-        int count = Physics2D.CircleCast(transform.position, collisionRadius, direction, filter, hits, distance);
+        bool enteringWater = movement.y < 0f && start.y + movement.y <= liquidSurface;
+        if (enteringWater) distance *= Mathf.Clamp01((liquidSurface - start.y) / movement.y);
+        int count = Physics2D.CircleCast(start, collisionRadius, direction, filter, hits, distance);
         RaycastHit2D closest = default;
         ArisaHealth directHit = null;
         for (int i = 0; i < count; i++)
         {
             Collider2D collider = hits[i].collider;
             ArisaHealth player = collider.GetComponentInParent<ArisaHealth>();
-            bool isGround = !collider.isTrigger && (groundLayers.value & (1 << collider.gameObject.layer)) != 0;
+            bool passingUp = gravity > 0f && movement.y > 0f && collider.usedByEffector;
+            bool isGround = !passingUp && !collider.isTrigger && (groundLayers.value & (1 << collider.gameObject.layer)) != 0;
             if (player == null && !isGround) continue;
             if (closest.collider != null && hits[i].distance >= closest.distance) continue;
             closest = hits[i];
@@ -70,8 +91,16 @@ public sealed class EnemyProjectile2D : MonsterProjectile
             return;
         }
         transform.position += (Vector3)(direction * distance);
+        if (enteringWater)
+        {
+            Impact(null);
+            return;
+        }
         if (Time.time >= expiresAt) Destroy(gameObject);
     }
+
+    private void Face(Vector2 direction) =>
+        transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
 
     private void Impact(ArisaHealth directHit)
     {
@@ -94,6 +123,20 @@ public sealed class EnemyProjectile2D : MonsterProjectile
             directHit.TakeDamage(damage);
         }
 
+        FinishImpact();
+    }
+
+    public void BreakApart()
+    {
+        if (resolved) return;
+        resolved = true;
+        if (TryGetComponent(out Collider2D hitbox)) hitbox.enabled = false;
+        ShotDown?.Invoke(transform.position);
+        FinishImpact();
+    }
+
+    private void FinishImpact()
+    {
         if (explosionPrefab != null)
         {
             GameObject effect = Instantiate(explosionPrefab, transform.position, Quaternion.identity, transform.parent);

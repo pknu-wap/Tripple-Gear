@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -52,6 +53,19 @@ public sealed class BoatVoyage : MonoBehaviour
 
 #if UNITY_EDITOR
     public void RestartForTest() => BeginDeparture(fromMission: false);
+
+    internal void PreviewBossEntrance(float deckCenterX, Action playEntrance)
+    {
+        if (!TryPrepareDeparture()) return;
+        StartCoroutine(PreviewBossEntranceRoutine(deckCenterX, playEntrance));
+    }
+
+    private IEnumerator PreviewBossEntranceRoutine(float deckCenterX, Action playEntrance)
+    {
+        bool boarded = false;
+        yield return TeleportDirectionalFade.GetOrCreate().Play(() => boarded = BoardForVoyage(deckCenterX), 2f, 2f);
+        if (boarded) playEntrance();
+    }
 #endif
 
     public void Depart()
@@ -64,22 +78,29 @@ public sealed class BoatVoyage : MonoBehaviour
 
     private void BeginDeparture(bool fromMission)
     {
+        if (!TryPrepareDeparture()) return;
+
+        departureRequested |= fromMission;
+        StartCoroutine(TeleportDirectionalFade.GetOrCreate().Play(() => BoardForVoyage(), 2f, 2f));
+    }
+
+    private bool TryPrepareDeparture()
+    {
         if (!isActiveAndEnabled || player == null || deck == null
             || cameraManager == null || hull == null || !TryGetSeaBounds(out seaBounds))
         {
-            return;
+            return false;
         }
 
-        departureRequested |= fromMission;
         playerHealth = player.GetComponent<ArisaHealth>();
-        StartCoroutine(TeleportDirectionalFade.GetOrCreate().Play(BoardAndDepart, 2f, 2f));
+        return true;
     }
 
-    private void BoardAndDepart()
+    private bool BoardForVoyage(float? deckCenterX = null)
     {
         if (player == null || (playerHealth != null && playerHealth.IsDead))
         {
-            return;
+            return false;
         }
 
         suspendedForBossEntrance = false;
@@ -98,15 +119,21 @@ public sealed class BoatVoyage : MonoBehaviour
         transform.localPosition = startPosition;
         speed = 0f;
         Physics2D.SyncTransforms();
+        if (deckCenterX.HasValue)
+        {
+            transform.position += Vector3.right * (deckCenterX.Value - deck.bounds.center.x);
+            Physics2D.SyncTransforms();
+        }
         player.BoardBoat(deck);
         cameraManager.SetOrthographicSize(Mathf.Min(cameraManager.OrthographicSize, seaBounds.extents.y));
         cameraManager.SetCameraArea(seaBounds);
         cameraManager.SetFollowMode(CameraFollowMode.RunningMap);
         cameraManager.SetFollowTarget(transform, true);
         cameraStartX = cameraManager.ManagedCamera.transform.position.x;
-        wake?.Play();
-        phase = VoyagePhase.Sailing;
+        phase = deckCenterX.HasValue ? VoyagePhase.Docked : VoyagePhase.Sailing;
+        if (phase == VoyagePhase.Sailing) wake?.Play();
         Departed?.Invoke();
+        return true;
     }
 
     private void FixedUpdate()
@@ -125,7 +152,7 @@ public sealed class BoatVoyage : MonoBehaviour
 
         if (player.transform.position.y < seaBounds.min.y - 2f && playerHealth != null)
         {
-            playerHealth.TakeDamage(playerHealth.MaxHp);
+            playerHealth.TakeFatalDamage();
         }
 
         Camera currentCamera = cameraManager.ManagedCamera;
