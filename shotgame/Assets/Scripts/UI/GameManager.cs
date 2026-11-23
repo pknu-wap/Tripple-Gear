@@ -1,4 +1,5 @@
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,8 +11,21 @@ public class GameManager : MonoBehaviour
     private GameObject gameOverUI;
 
     [SerializeField]
-    private string lobbySceneName = "�κ�";
+    private string lobbySceneName = "로비";
 
+    [Header("Chapter Clear")]
+    [SerializeField] private WaveManager bossWave;
+    [SerializeField] private GunSelectionUI gunSelectionPrefab;
+    [SerializeField] private Canvas gameplayCanvas;
+    [SerializeField] private MouseReticleController mouseReticle;
+    [SerializeField] private SubmachineGunFire playerGun;
+    [SerializeField] private TeleportTrigger nextChapterTeleport;
+
+    private GunSelectionUI gunSelection;
+    private float gameplayTimeScale;
+    private bool ownsChapterPause;
+    private bool restoreMouseReticle;
+    private bool chapterCleared;
     private bool isGameOver = false;
 
     internal bool IsGameOver => isGameOver;
@@ -28,6 +42,83 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        RestoreGameplay();
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
+
+    public void OnBossCleared()
+    {
+        if (chapterCleared || isGameOver)
+        {
+            return;
+        }
+
+        if (gunSelectionPrefab == null || gameplayCanvas == null || playerGun == null
+            || nextChapterTeleport == null || !nextChapterTeleport.isActiveAndEnabled)
+        {
+            Debug.LogError("챕터 클리어에 필요한 UI, 플레이어 무기, 텔레포트를 연결해 주세요.", this);
+            return;
+        }
+
+        chapterCleared = true;
+        if (bossWave != null)
+        {
+            bossWave.CompleteWave();
+        }
+
+        gunSelection = Instantiate(gunSelectionPrefab, gameplayCanvas.transform, false);
+        gameplayTimeScale = Time.timeScale;
+        ownsChapterPause = true;
+        Time.timeScale = 0f;
+
+        restoreMouseReticle = mouseReticle != null && mouseReticle.enabled;
+        if (restoreMouseReticle)
+        {
+            mouseReticle.enabled = false;
+        }
+    }
+
+    public void SelectGun(GunSO gun)
+    {
+        if (gunSelection == null || isGameOver || gun == null || !gun.CanFire)
+        {
+            return;
+        }
+
+        GameObject selectionPanel = gunSelection.gameObject;
+        gunSelection = null;
+        selectionPanel.SetActive(false);
+        Destroy(selectionPanel);
+        playerGun.EquipGun(gun);
+        StartCoroutine(MoveToNextChapter());
+    }
+
+    private IEnumerator MoveToNextChapter()
+    {
+        yield return nextChapterTeleport.TeleportPlayer();
+        RestoreGameplay();
+    }
+
+    private void RestoreGameplay()
+    {
+        if (!ownsChapterPause)
+        {
+            return;
+        }
+
+        ownsChapterPause = false;
+        Time.timeScale = gameplayTimeScale;
+        if (restoreMouseReticle && mouseReticle != null)
+        {
+            mouseReticle.enabled = true;
+        }
+    }
+
     public void GameOver()
     {
         if (isGameOver) return;
@@ -38,14 +129,14 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    // ���� ���� �ٽ� ����
+    // 현재 게임 다시 시작
     public void Retry()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    // �κ�� �̵�
+    // 로비로 이동
     public void GoToLobby()
     {
         Time.timeScale = 1f;
