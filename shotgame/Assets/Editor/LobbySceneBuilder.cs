@@ -13,6 +13,7 @@ public static class LobbySceneBuilder
     private const string InGameSampleScenePath = "Assets/Scenes/인게임샘플.unity";
     private const string TestBattleScenePath = "Assets/Scenes/테스트 배틀씬.unity";
     private const string TestBattleSceneName = "테스트 배틀씬";
+    private const string CinematicSampleSceneName = "시네마틱샘플";
 
     public static void BuildLobbyAndBattleScenes()
     {
@@ -65,7 +66,7 @@ public static class LobbySceneBuilder
         Button quitButton = CreateButton(canvas.transform, "QuitButton", "종료", new Vector2(0f, -120f));
 
         SerializedObject controllerObject = new SerializedObject(controller);
-        controllerObject.FindProperty("newGameSceneName").stringValue = TestBattleSceneName;
+        controllerObject.FindProperty("newGameSceneName").stringValue = CinematicSampleSceneName;
         controllerObject.FindProperty("newGameButton").objectReferenceValue = newGameButton;
         controllerObject.FindProperty("loadGameButton").objectReferenceValue = loadGameButton;
         controllerObject.FindProperty("optionsButton").objectReferenceValue = optionsButton;
@@ -213,6 +214,7 @@ public static class LobbySceneBuilder
             "Assets/Scenes/아리사움직임.unity",
             InGameSampleScenePath,
             TestBattleScenePath,
+            $"Assets/Scenes/{CinematicSampleSceneName}.unity",
         };
 
         EditorBuildSettingsScene[] scenes = new EditorBuildSettingsScene[scenePaths.Length];

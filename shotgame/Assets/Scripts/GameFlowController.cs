@@ -11,7 +11,8 @@ public sealed class GameFlowController : MonoBehaviour
     [Header("게임 시작")]
     [SerializeField, KoreanLabel("인트로 타임라인")] private PlayableDirector introTimeline;
     [SerializeField, KoreanLabel("컷신 중 입력을 막을 플레이어")] private Transform gameplayPlayer;
-    [SerializeField, KoreanLabel("컷신 시작 신호 씬")] private string cutsceneSignalSourceSceneName = "로비";
+    [SerializeField, KoreanLabel("시작 신호를 보낼 씬 (선택)"), Tooltip("비워 두면 어느 씬에서 보낸 전환 신호든 받습니다.")]
+    private string cutsceneSignalSourceSceneName;
     [SerializeField, KoreanLabel("게임 시작 버튼")] private Button startButton;
     [SerializeField, KoreanLabel("재생하면 버튼 숨기기")] private bool hideStartButtonOnPlay = true;
 
@@ -30,7 +31,6 @@ public sealed class GameFlowController : MonoBehaviour
     private readonly List<Behaviour> suspendedGameplayInput = new List<Behaviour>();
 
     private double completionTime = -1d;
-    private bool hasCutsceneStartSignal;
     private bool isTimelinePlaying;
     private bool isTimelineCompleted;
 
@@ -66,7 +66,6 @@ public sealed class GameFlowController : MonoBehaviour
         string currentSceneName = gameObject.scene.name;
         if (SceneTransitionSignalReceiver.TryConsumeSceneTransition(cutsceneSignalSourceSceneName, currentSceneName))
         {
-            hasCutsceneStartSignal = true;
             StartGame();
         }
     }
@@ -97,31 +96,29 @@ public sealed class GameFlowController : MonoBehaviour
 
     public void StartGame()
     {
-        if (!hasCutsceneStartSignal)
-        {
-            Debug.Log("로비의 새게임 신호가 없어 컷신을 재생하지 않습니다.", this);
-            return;
-        }
-
-        if (isTimelinePlaying)
+        if (!isActiveAndEnabled || isTimelinePlaying || isTimelineCompleted)
         {
             return;
         }
-
-        FindReferences();
 
         if (introTimeline == null)
         {
-            Debug.LogWarning("게임 시작 타임라인이 연결되지 않았습니다.", this);
+            isTimelineCompleted = true;
+            SetStartButtonVisible(false);
+            onTimelineCompleted?.Invoke();
             return;
         }
 
-        hasCutsceneStartSignal = false;
+        if (introTimeline.playableAsset == null)
+        {
+            Debug.LogWarning("인트로 타임라인에 재생할 에셋이 연결되지 않았습니다.", this);
+            return;
+        }
+
         CacheAnimatorsToFreeze();
         SetAnimatorsEnabled(true);
         completionTime = GetCompletionTime();
         isTimelinePlaying = true;
-        isTimelineCompleted = false;
         SetStartButtonVisible(false);
         SuspendGameplayInput();
 
@@ -419,23 +416,9 @@ public sealed class GameFlowController : MonoBehaviour
             introTimeline = GetComponentInChildren<PlayableDirector>();
         }
 
-        if (introTimeline == null)
-        {
-            introTimeline = FindTimelineInScene();
-        }
-
         if (startButton == null)
         {
             startButton = GetComponentInChildren<Button>(true);
         }
-    }
-
-    private static PlayableDirector FindTimelineInScene()
-    {
-#if UNITY_2023_1_OR_NEWER
-        return Object.FindFirstObjectByType<PlayableDirector>();
-#else
-        return Object.FindObjectOfType<PlayableDirector>();
-#endif
     }
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 public sealed class BossAttackSO : ScriptableObject
 {
     [Header("공통")]
-    [SerializeField, KoreanLabel("첫 공격 대기"), Min(0f)] private float initialDelay = 2f;
     [SerializeField, KoreanLabel("패턴 사이 대기"), Min(0.1f)] private float recoveryTime = 1.8f;
     [SerializeField, KoreanLabel("공격 예고 시간"), Min(0.1f)] private float warningTime = 0.8f;
     [SerializeField, KoreanLabel("지형 레이어")] private LayerMask groundLayers;
@@ -40,7 +39,6 @@ public sealed class BossAttackSO : ScriptableObject
     [SerializeField, KoreanLabel("원거리 몹 프리팹")] private GameObject rangedMonsterPrefab;
     [SerializeField, KoreanLabel("소환 수"), Range(1, 4)] private int summonCount = 2;
 
-    public float InitialDelay => Mathf.Max(0f, initialDelay);
     public float RecoveryTime => Mathf.Max(0.1f, recoveryTime);
     public float WarningTime => Mathf.Max(0.1f, warningTime);
     public LayerMask GroundLayers => groundLayers.value != 0 ? groundLayers : LayerMask.GetMask("Box", "Stair");

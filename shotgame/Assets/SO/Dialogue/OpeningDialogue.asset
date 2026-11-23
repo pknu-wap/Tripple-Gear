@@ -12,4 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4626535ac33ff934280728c50096b119, type: 3}
   m_Name: OpeningDialogue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
-  dialogueLines: []
+  dialogueLines:
+  - characterName: test
+    dialogueText: test1
+    characterImage: {fileID: 0}
+  - characterName: test2
+    dialogueText: test2
+    characterImage: {fileID: 0}

@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 public sealed class ArisaHorizontalMovement : MonoBehaviour
 {
@@ -17,10 +17,13 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     private const float StopThreshold = 0.03f;
 
     [SerializeField, KoreanLabel("이동 속도")] private float moveSpeed = 3f;
+    [SerializeField, KoreanLabel("달리는 맵 화면 왼쪽 여유"), Min(0f)] private float runningMapLeftPadding = 0.2f;
+    [SerializeField, KoreanLabel("착지 시 남길 최대 수평 속도"), Min(0f)] private float landingHorizontalSpeed = 0f;
     [SerializeField, KoreanLabel("가속도")] private float acceleration = 18f;
     [SerializeField, KoreanLabel("감속도")] private float deceleration = 12f;
     [SerializeField, KoreanLabel("점프 속도")] private float jumpSpeed = 6f;
     [SerializeField, KoreanLabel("중력")] private float gravity = 18f;
+    [SerializeField, KoreanLabel("하강 중력 배율"), Min(1f)] private float fallGravityMultiplier = 1.7f;
     [SerializeField, KoreanLabel("관성 프레임 속도")] private float inertiaFrameRate = 12f;
     [SerializeField, KoreanLabel("관성 프레임 수")] private int inertiaFrameCount = 4;
     [SerializeField, KoreanLabel("애니메이터")] private Animator animator;
@@ -34,8 +37,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("관성 먼지 애니메이터")] private Animator inertiaDustAnimator;
     [SerializeField, KoreanLabel("관성 오버레이 렌더러")] private SpriteRenderer[] inertiaOverlayRenderers;
     [SerializeField, KoreanLabel("이동 중 렌더러")] private SpriteRenderer[] movingSpriteRenderers;
-    [SerializeField, KoreanLabel("이동 충돌체")] private BoxCollider2D movementCollider;
+    [SerializeField, KoreanLabel("이동 충돌체")] private CapsuleCollider2D movementCollider;
     private Rigidbody2D movementBody;
+    private CameraManager cameraManager;
     private PhysicsMaterial2D frictionlessMaterial;
     [SerializeField, KoreanLabel("자세 충돌체")] private ArisaStanceCollider stanceCollider;
     [SerializeField, KoreanLabel("총 발사")] private SubmachineGunFire gunFire;
@@ -47,6 +51,45 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
     [SerializeField, KoreanLabel("앉기 지면 확인 거리")] private float crouchGroundedCheckDistance = 0.3f;
     [SerializeField, KoreanLabel("앉기 지면 유지 시간")] private float crouchGroundedGraceTime = 0.08f;
     [SerializeField, KoreanLabel("일방향 발판 상단 허용 오차")] private float oneWayPlatformTopTolerance = 0.05f;
+
+    [SerializeField, KoreanLabel("착지 스프라이트")] private Sprite[] landingSprites;
+    [SerializeField, KoreanLabel("착지 프레임 속도"), Min(1f)] private float landingFrameRate = 16f;
+    [SerializeField, KoreanLabel("착지 상체 위치 보정")] private Vector2[] landingUpperBodyOffsets;
+
+    [SerializeField, KoreanLabel("점프 준비 시간"), Min(0f)] private float jumpPreparationDuration = 0.14f;
+    [SerializeField, KoreanLabel("점프 준비 스프라이트")] private Sprite[] jumpPreparationSprites = System.Array.Empty<Sprite>();
+    [SerializeField, KoreanLabel("점프 준비 상체 위치 보정")] private Vector2[] jumpPreparationUpperBodyOffsets = System.Array.Empty<Vector2>();
+    private bool jumpPreparing;
+    private float jumpPreparationStartedAt;
+
+    public bool IsPreparingJump => enabled && jumpPreparing && isGrounded && !isCrouching;
+
+    private int JumpPreparationFrameIndex => Mathf.Clamp(
+        Mathf.FloorToInt((Time.time - jumpPreparationStartedAt)
+            / Mathf.Max(0.001f, jumpPreparationDuration) * jumpPreparationSprites.Length),
+        0, jumpPreparationSprites.Length - 1);
+
+    public Vector3 JumpPreparationUpperBodyOffset => IsPreparingJump
+        && jumpPreparationUpperBodyOffsets != null
+        && JumpPreparationFrameIndex < jumpPreparationUpperBodyOffsets.Length
+        ? (Vector3)jumpPreparationUpperBodyOffsets[JumpPreparationFrameIndex] : Vector3.zero;
+
+    private float landingStartedAt = float.NegativeInfinity;
+    private float airborneDuration;
+    private Sprite spriteBeforeLanding;
+    private bool landingSpriteApplied;
+
+    public bool IsLanding => enabled && !jumpPreparing && isGrounded && !isCrouching
+        && landingSprites != null && landingSprites.Length > 0
+        && Time.time - landingStartedAt < landingSprites.Length / Mathf.Max(1f, landingFrameRate);
+
+    private int LandingFrameIndex => Mathf.Clamp(
+        Mathf.FloorToInt((Time.time - landingStartedAt) * Mathf.Max(1f, landingFrameRate)),
+        0, landingSprites.Length - 1);
+
+    public Vector3 LandingUpperBodyOffset => IsLanding && landingUpperBodyOffsets != null
+        && LandingFrameIndex < landingUpperBodyOffsets.Length
+        ? (Vector3)landingUpperBodyOffsets[LandingFrameIndex] : Vector3.zero;
 
     private float horizontalInput;
     private bool fireHeld;
@@ -120,6 +163,9 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         transform.position = position;
+        CancelJumpPreparation();
+        CancelLanding();
+        airborneDuration = 0f;
         groundY = position.y;
         currentHorizontalSpeed = 0f;
         hitReactionEndTime = 0f;
@@ -141,6 +187,8 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return;
         }
 
+        CancelJumpPreparation();
+        CancelLanding();
         hitReactionEndTime = Time.time + duration;
         hitKnockbackSpeed = Mathf.Sign(horizontalDirection) * Mathf.Max(0f, distance) / duration;
         currentHorizontalSpeed = 0f;
@@ -197,12 +245,21 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         if (movementCollider == null)
         {
-            movementCollider = GetComponent<BoxCollider2D>();
+            movementCollider = GetComponent<CapsuleCollider2D>();
         }
 
         if (movementBody == null)
         {
             movementBody = GetComponent<Rigidbody2D>();
+        }
+
+        if (cameraManager == null)
+        {
+#if UNITY_2023_1_OR_NEWER
+            cameraManager = Object.FindFirstObjectByType<CameraManager>();
+#else
+            cameraManager = Object.FindObjectOfType<CameraManager>();
+#endif
         }
 
         if (stanceCollider == null)
@@ -328,11 +385,30 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             jumpPressed = false;
         }
 
+        bool wasGrounded = isGrounded;
         UpdateCrouchState();
         ApplyStanceCollider();
         RefreshGroundedState();
         UpdateJump();
         SnapToOneWayPlatform();
+        bool justLanded = !wasGrounded && isGrounded;
+        if (!isGrounded)
+        {
+            airborneDuration += Time.fixedDeltaTime;
+            CancelLanding();
+        }
+        else
+        {
+            if (!wasGrounded && airborneDuration >= 0.08f && !IsPreparingJump && !isCrouching && !isHitReacting)
+            {
+                landingStartedAt = Time.time;
+            }
+            airborneDuration = 0f;
+        }
+        if (isCrouching || isHitReacting)
+        {
+            CancelLanding();
+        }
         jumpPressed = false;
 
         bool hasMovementInput = !isCrouching && !Mathf.Approximately(horizontalInput, 0f);
@@ -340,6 +416,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         if (isHitReacting || isCrouching)
         {
             currentHorizontalSpeed = 0f;
+        }
+        else if (justLanded)
+        {
+            // Preserve direction without speeding up a slower landing.
+            float speedLimit = Mathf.Max(0f, landingHorizontalSpeed);
+            currentHorizontalSpeed = Mathf.Clamp(currentHorizontalSpeed, -speedLimit, speedLimit);
         }
         else
         {
@@ -357,14 +439,15 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         }
 
         bool hasMovementSpeed = Mathf.Abs(currentHorizontalSpeed) > 0f;
-        float horizontalSpeed = isHitReacting
+        float horizontalSpeed = justLanded ? currentHorizontalSpeed : isHitReacting
             ? hitKnockbackSpeed * Mathf.Clamp01((hitReactionEndTime - Time.time) / Time.fixedDeltaTime)
             : currentHorizontalSpeed;
+        horizontalSpeed = KeepInsideRunningMapScreen(horizontalSpeed);
         ClampToFallbackGround();
         movementBody.linearVelocity = new Vector2(horizontalSpeed, verticalSpeed);
 
         bool isGunReloading = gunFire != null && gunFire.IsReloading;
-        bool shouldCoast = isGrounded && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
+        bool shouldCoast = isGrounded && !IsLanding && !IsPreparingJump && !isCrouching && !isGunReloading && !hasMovementInput && hasMovementSpeed;
         if (shouldCoast && !isCoasting)
         {
             inertiaStartedAt = Time.time;
@@ -377,16 +460,113 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         bool isIdleAiming = isGrounded && !hasMovementInput && !isCoasting && (fireHeld || isGunReloading);
         SetMovingAnimation(hasMovementInput);
         UpdateInertiaAnimation(isCoasting);
-        SetRendererVisibility(hasMovementInput || showAirborneDriftPose || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading, isCoasting);
+        SetRendererVisibility(IsPreparingJump || IsLanding || hasMovementInput || showAirborneDriftPose || isAirborneAiming || isIdleAiming || isCrouching || isGunReloading, isCoasting);
     }
 
     private void LateUpdate()
     {
         ApplyCrouchAnimationFrame();
+        ApplyLandingAnimationFrame();
+    }
+
+    private float KeepInsideRunningMapScreen(float horizontalSpeed)
+    {
+        if (cameraManager == null || cameraManager.FollowMode != CameraFollowMode.RunningMap
+            || cameraManager.FollowTarget != transform || movementCollider == null)
+        {
+            return horizontalSpeed;
+        }
+
+        Camera cameraToUse = cameraManager.ManagedCamera;
+        if (cameraToUse == null || !cameraToUse.orthographic)
+        {
+            return horizontalSpeed;
+        }
+
+        float leftEdge = cameraToUse.transform.position.x
+            - cameraToUse.orthographicSize * cameraToUse.aspect + runningMapLeftPadding;
+        float distanceToEdge = movementCollider.bounds.min.x - leftEdge;
+        if (distanceToEdge < 0f)
+        {
+            Vector2 position = movementBody.position;
+            position.x -= distanceToEdge;
+            movementBody.position = position;
+            Physics2D.SyncTransforms();
+            distanceToEdge = 0f;
+        }
+
+        if (horizontalSpeed < 0f)
+        {
+            float limitedSpeed = Mathf.Max(horizontalSpeed, -distanceToEdge / Time.fixedDeltaTime);
+            if (limitedSpeed > horizontalSpeed)
+            {
+                currentHorizontalSpeed = 0f;
+            }
+
+            return limitedSpeed;
+        }
+
+        return horizontalSpeed;
+    }
+
+    private void ApplyLandingAnimationFrame()
+    {
+        if ((!IsLanding && !IsPreparingJump) || bodySpriteRenderer == null)
+        {
+            RestoreLandingSprite();
+            return;
+        }
+
+        Sprite[] frames = IsPreparingJump ? jumpPreparationSprites : landingSprites;
+        int frameIndex = IsPreparingJump ? JumpPreparationFrameIndex : LandingFrameIndex;
+        Sprite current = bodySpriteRenderer.sprite;
+        // The Animator can supply a fresh running pose each frame. Keep it for restoration.
+        if (!IsJumpOrLandingSprite(current))
+        {
+            spriteBeforeLanding = current;
+        }
+        Sprite frame = frames[frameIndex];
+        if (frame != null)
+        {
+            bodySpriteRenderer.sprite = frame;
+            landingSpriteApplied = true;
+        }
+    }
+
+    private void RestoreLandingSprite()
+    {
+        if (landingSpriteApplied && bodySpriteRenderer != null
+            && IsJumpOrLandingSprite(bodySpriteRenderer.sprite))
+        {
+            bodySpriteRenderer.sprite = spriteBeforeLanding;
+        }
+        landingSpriteApplied = false;
+        spriteBeforeLanding = null;
+    }
+
+    private bool IsJumpOrLandingSprite(Sprite sprite)
+    {
+        return (landingSprites != null && System.Array.IndexOf(landingSprites, sprite) >= 0)
+            || (jumpPreparationSprites != null && System.Array.IndexOf(jumpPreparationSprites, sprite) >= 0);
+    }
+
+    private void CancelJumpPreparation()
+    {
+        jumpPreparing = false;
+        RestoreLandingSprite();
+    }
+
+    private void CancelLanding()
+    {
+        landingStartedAt = float.NegativeInfinity;
+        RestoreLandingSprite();
     }
 
     private void OnDisable()
     {
+        CancelJumpPreparation();
+        CancelLanding();
+        airborneDuration = 0f;
         if (movementBody != null)
         {
             movementBody.linearVelocity = Vector2.zero;
@@ -536,15 +716,42 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void UpdateJump()
     {
-        if (jumpPressed && isGrounded && !isCrouching)
+        bool canJump = isGrounded && !isCrouching && Time.time >= hitReactionEndTime;
+        if (jumpPreparing && !canJump)
         {
+            CancelJumpPreparation();
+        }
+
+        if (jumpPressed && canJump && !jumpPreparing)
+        {
+            CancelLanding();
+            if (jumpPreparationDuration > 0f && jumpPreparationSprites != null
+                && jumpPreparationSprites.Length > 0)
+            {
+                jumpPreparing = true;
+                jumpPreparationStartedAt = Time.time;
+            }
+            else
+            {
+                verticalSpeed = jumpSpeed;
+                isGrounded = false;
+            }
+        }
+
+        // A short tap still completes the wind-up. Holding W cannot restart it.
+        if (jumpPreparing && Time.time - jumpPreparationStartedAt >= jumpPreparationDuration)
+        {
+            CancelJumpPreparation();
             verticalSpeed = jumpSpeed;
             isGrounded = false;
         }
 
         if (!isGrounded)
         {
-            verticalSpeed -= gravity * Time.fixedDeltaTime;
+            float currentGravity = verticalSpeed <= 0f
+                ? gravity * Mathf.Max(1f, fallGravityMultiplier)
+                : gravity;
+            verticalSpeed -= currentGravity * Time.fixedDeltaTime;
         }
     }
 
@@ -630,34 +837,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             return 0;
         }
 
-        return Physics2D.BoxCast(
-            GetMovementColliderWorldCenter(),
-            GetMovementColliderWorldSize(),
-            GetMovementColliderWorldAngle(),
-            direction,
-            CreateContactFilter(layerMask),
-            movementCastHits,
-            distance
-        );
-    }
-
-    private Vector2 GetMovementColliderWorldCenter()
-    {
-        return movementCollider.transform.TransformPoint(movementCollider.offset);
-    }
-
-    private Vector2 GetMovementColliderWorldSize()
-    {
-        Vector3 scale = movementCollider.transform.lossyScale;
-        return new Vector2(
-            Mathf.Abs(movementCollider.size.x * scale.x),
-            Mathf.Abs(movementCollider.size.y * scale.y)
-        );
-    }
-
-    private float GetMovementColliderWorldAngle()
-    {
-        return movementCollider.transform.eulerAngles.z;
+        return movementCollider.Cast(direction, CreateContactFilter(layerMask), movementCastHits, distance);
     }
 
     private ContactFilter2D CreateContactFilter(LayerMask layerMask)

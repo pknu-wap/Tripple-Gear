@@ -1,6 +1,10 @@
 using System.Collections;
 using UnityEngine;
 
+#if UNITY_EDITOR && ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 public enum TeleportGizmoKind
 {
     WireBox,
@@ -16,6 +20,9 @@ public sealed class TeleportTrigger : MonoBehaviour
 {
     [Header("텔레포트")]
     [SerializeField, KoreanLabel("텔레포트 대상")] private Transform teleportSubject;
+#if UNITY_EDITOR
+    [SerializeField, KoreanLabel("임시 테스트용 F1 이동")] private bool temporaryF1Shortcut;
+#endif
     [SerializeField, KoreanLabel("텔레포트 위치")] private Transform teleportPoint;
     [SerializeField, KoreanLabel("직접 텔레포트 좌표")] private Vector3 teleportPosition;
     [SerializeField, KoreanLabel("대상 Z 유지")] private bool keepTargetZ = true;
@@ -26,6 +33,7 @@ public sealed class TeleportTrigger : MonoBehaviour
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager cameraManager;
     [SerializeField, KoreanLabel("새 카메라 영역 번호")] private int cameraAreaIndex = -1;
     [SerializeField, KoreanLabel("새 카메라 영역 이름")] private string cameraAreaName;
+    [SerializeField, KoreanLabel("목적지 카메라 방식")] private CameraFollowMode destinationFollowMode = CameraFollowMode.RunningMap;
     [SerializeField, KoreanLabel("텔레포트 후 카메라 스냅")] private bool snapCameraAfterTeleport = true;
 
     [Header("페이드")]
@@ -76,6 +84,21 @@ public sealed class TeleportTrigger : MonoBehaviour
         }
     }
 
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (!temporaryF1Shortcut) return;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current?.f1Key.wasPressedThisFrame == true)
+            TeleportPlayer();
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.F1))
+            TeleportPlayer();
+#endif
+    }
+#endif
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (isTeleporting || !CanTeleport(other))
@@ -92,12 +115,20 @@ public sealed class TeleportTrigger : MonoBehaviour
         StartCoroutine(TeleportRoutine(subject));
     }
 
-    public IEnumerator TeleportPlayer()
+    public void TeleportPlayer()
     {
-        if (!isTeleporting && isActiveAndEnabled && teleportSubject != null)
+        if (isTeleporting || !isActiveAndEnabled)
         {
-            yield return TeleportRoutine(teleportSubject);
+            return;
         }
+
+        if (teleportSubject == null)
+        {
+            Debug.LogWarning("보스 처치 텔레포트를 사용하려면 텔레포트 대상을 연결해 주세요.", this);
+            return;
+        }
+
+        StartCoroutine(TeleportRoutine(teleportSubject));
     }
 
     private IEnumerator TeleportRoutine(Transform subject)
@@ -116,6 +147,7 @@ public sealed class TeleportTrigger : MonoBehaviour
 
         TeleportSubject(subject);
         ApplyCameraArea();
+        ApplyCameraFollowMode();
 
         if (snapCameraAfterTeleport)
         {
@@ -173,6 +205,15 @@ public sealed class TeleportTrigger : MonoBehaviour
         if (cameraAreaIndex >= 0)
         {
             manager.SetCameraAreaByIndex(cameraAreaIndex);
+        }
+    }
+
+    private void ApplyCameraFollowMode()
+    {
+        CameraManager manager = GetCameraManager();
+        if (manager != null)
+        {
+            manager.SetFollowMode(destinationFollowMode);
         }
     }
 

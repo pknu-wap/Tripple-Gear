@@ -10,11 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8b8ad46f4326475ca70a01e32995ae42, type: 3}
-  m_Name: "\uBCF4\uC2A4\uC18C\uD658\uC6D0\uAC70\uB9AC\uBAB9SO"
-  m_EditorClassIdentifier: Assembly-CSharp::MonsterSO
-  maxHp: 3
-  moveSpeed: 0
-  followYAxis: 0
+  m_Name: "\uC6D0\uAC70\uB9AC\uBAB9SO"
+  m_EditorClassIdentifier: 
+  maxHp: 15
+  moveSpeed: 2
   attackDamage: 1
-  firstAttackDelay: 1.2
-  attackInterval: 1.8
+  attackInterval: 2

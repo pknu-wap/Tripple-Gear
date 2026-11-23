@@ -1,0 +1,743 @@
+fileFormatVersion: 2
+guid: d9e24d26d77a42fdbe95db99ffdb4251
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: RangedWalk_00
+  - first:
+      213: 21300002
+    second: RangedWalk_01
+  - first:
+      213: 21300004
+    second: RangedWalk_02
+  - first:
+      213: 21300006
+    second: RangedWalk_03
+  - first:
+      213: 21300008
+    second: RangedWalk_04
+  - first:
+      213: 21300010
+    second: RangedWalk_05
+  - first:
+      213: 21300012
+    second: RangedWalk_06
+  - first:
+      213: 21300014
+    second: RangedWalk_07
+  - first:
+      213: 21300016
+    second: RangedWalk_08
+  - first:
+      213: 21300018
+    second: RangedWalk_09
+  - first:
+      213: 21300020
+    second: RangedWalk_10
+  - first:
+      213: 21300022
+    second: RangedWalk_11
+  - first:
+      213: 21300024
+    second: RangedWalk_12
+  - first:
+      213: 21300026
+    second: RangedWalk_13
+  - first:
+      213: 21300028
+    second: RangedWalk_14
+  - first:
+      213: 21300030
+    second: RangedWalk_15
+  - first:
+      213: 21300032
+    second: RangedWalk_16
+  - first:
+      213: 21300034
+    second: RangedWalk_17
+  - first:
+      213: 21300036
+    second: RangedWalk_18
+  - first:
+      213: 21300038
+    second: RangedWalk_19
+  - first:
+      213: 21300040
+    second: RangedWalk_20
+  - first:
+      213: 21300042
+    second: RangedWalk_21
+  - first:
+      213: 21300044
+    second: RangedWalk_22
+  - first:
+      213: 21300046
+    second: RangedWalk_23
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: RangedWalk_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1440
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 070426ef85a44529a95dc6c9ce343cfc
+      internalID: 21300000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_01
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 1440
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df35e9153a4a44c7930aaad6df9401b8
+      internalID: 21300002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_02
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 1440
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d35abf1e1ce4714b67534f79fb6401b
+      internalID: 21300004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_03
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 1440
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fa994622e39454e8681ea9764b1743f
+      internalID: 21300006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_04
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 1440
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c17172cfbc454e8ea9902193b6270fed
+      internalID: 21300008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_05
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1080
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 563a418a08b04407811def78c19a0ec5
+      internalID: 21300010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_06
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 1080
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf69662f6bb247218b7dc2f6b340890e
+      internalID: 21300012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_07
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 1080
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a6171356ffc4c6b983a231be3f00c8b
+      internalID: 21300014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_08
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 1080
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8dc9b37fe20b4d8da0199c8339bff09d
+      internalID: 21300016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_09
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 1080
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 242b10b151e04fa592855e1be8c130e2
+      internalID: 21300018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 720
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6e1a3f34b3f24cee991c6eb579b7625b
+      internalID: 21300020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_11
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 720
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebe462d2011e40b5a6f802f49439d881
+      internalID: 21300022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_12
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 720
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94fde31d1c14484588cefb77ce21c382
+      internalID: 21300024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_13
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 720
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0116a15176c746dc950b39bde115a95d
+      internalID: 21300026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_14
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 720
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e91d9a997604f0c845791d7a4af3123
+      internalID: 21300028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_15
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 360
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1e407ac0f67b4b7ea97864b5a0f15c53
+      internalID: 21300030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_16
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 360
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21aadf19ae7e4736a3abec651c65f2ef
+      internalID: 21300032
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_17
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 360
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8aea93b6b6847208b202b54f246c51b
+      internalID: 21300034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_18
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 360
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 817028099a2d4225be862c2c706d37ca
+      internalID: 21300036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_19
+      rect:
+        serializedVersion: 2
+        x: 1408
+        y: 360
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e03d1b3bf6ca4d8b9d2bce08549da220
+      internalID: 21300038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9584023df4ae4d658a4fe4788c2dd6f1
+      internalID: 21300040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_21
+      rect:
+        serializedVersion: 2
+        x: 352
+        y: 0
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28305540ea3c44da8b744a11799b9030
+      internalID: 21300042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_22
+      rect:
+        serializedVersion: 2
+        x: 704
+        y: 0
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 37379f315d034b81a3ebe96550b86f61
+      internalID: 21300044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: RangedWalk_23
+      rect:
+        serializedVersion: 2
+        x: 1056
+        y: 0
+        width: 352
+        height: 360
+      alignment: 9
+      pivot: {x: 0.50426136, y: 0.66666667}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a6a5200b00084dc3a18e1d2678bbe6fd
+      internalID: 21300046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 3a7c288c8d6aa49419bff727a40f347b
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      RangedWalk_00: 21300000
+      RangedWalk_01: 21300002
+      RangedWalk_02: 21300004
+      RangedWalk_03: 21300006
+      RangedWalk_04: 21300008
+      RangedWalk_05: 21300010
+      RangedWalk_06: 21300012
+      RangedWalk_07: 21300014
+      RangedWalk_08: 21300016
+      RangedWalk_09: 21300018
+      RangedWalk_10: 21300020
+      RangedWalk_11: 21300022
+      RangedWalk_12: 21300024
+      RangedWalk_13: 21300026
+      RangedWalk_14: 21300028
+      RangedWalk_15: 21300030
+      RangedWalk_16: 21300032
+      RangedWalk_17: 21300034
+      RangedWalk_18: 21300036
+      RangedWalk_19: 21300038
+      RangedWalk_20: 21300040
+      RangedWalk_21: 21300042
+      RangedWalk_22: 21300044
+      RangedWalk_23: 21300046
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

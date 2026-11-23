@@ -3,17 +3,17 @@ using UnityEditor;
 
 public class DialogueEditorWindow : EditorWindow
 {
-    // ÆíÁıÇÒ ´ëÈ­ µ¥ÀÌÅÍ
+    // í¸ì§‘í•  ëŒ€í™” ë°ì´í„°
     private DialogueData dialogueData;
 
-    // Unity »ó´Ü ¸Ş´º¿¡ ÆíÁı Ã¢ Ãß°¡
+    // Unity ìƒë‹¨ ë©”ë‰´ì— í¸ì§‘ ì°½ ì¶”ê°€
     [MenuItem("Tools/Dialogue Editor")]
     public static void ShowWindow()
     {
         GetWindow<DialogueEditorWindow>("Dialogue Editor");
     }
 
-    // ÆíÁı Ã¢¿¡ Ç¥½ÃÇÒ ³»¿ë
+    // í¸ì§‘ ì°½ì— í‘œì‹œí•  ë‚´ìš©
     private void OnGUI()
     {
         GUILayout.Label(
@@ -23,7 +23,7 @@ public class DialogueEditorWindow : EditorWindow
 
         EditorGUILayout.Space(10);
 
-        // ´ëÈ­ µ¥ÀÌÅÍ ¼±ÅÃ
+        // ëŒ€í™” ë°ì´í„° ì„ íƒ
         dialogueData = (DialogueData)EditorGUILayout.ObjectField(
             "Dialogue Data",
             dialogueData,
@@ -33,24 +33,24 @@ public class DialogueEditorWindow : EditorWindow
 
         EditorGUILayout.Space(10);
 
-        // µ¥ÀÌÅÍ°¡ ¼±ÅÃµÇÁö ¾Ê¾Ò´Ù¸é ¾È³»
+        // ë°ì´í„°ê°€ ì„ íƒë˜ì§€ ì•Šì•˜ë‹¤ë©´ ì•ˆë‚´
         if (dialogueData == null)
         {
             EditorGUILayout.HelpBox(
-                "´ëÈ­ µ¥ÀÌÅÍ(DialogueData)¸¦ ¼±ÅÃÇØÁÖ¼¼¿ä.",
+                "ëŒ€í™” ë°ì´í„°(DialogueData)ë¥¼ ì„ íƒí•´ì£¼ì„¸ìš”.",
                 MessageType.Info
             );
 
             return;
         }
 
-        // ¼±ÅÃÇÑ ´ëÈ­ µ¥ÀÌÅÍ¸¦ ÆíÁıÇÒ ¼ö ÀÖµµ·Ï ÁØºñ
+        // ì„ íƒí•œ ëŒ€í™” ë°ì´í„°ë¥¼ í¸ì§‘í•  ìˆ˜ ìˆë„ë¡ ì¤€ë¹„
         SerializedObject serializedData =
             new SerializedObject(dialogueData);
 
         serializedData.Update();
 
-        // DialogueData ¾ÈÀÇ dialogueLines ¹è¿­ °¡Á®¿À±â
+        // DialogueData ì•ˆì˜ dialogueLines ë°°ì—´ ê°€ì ¸ì˜¤ê¸°
         SerializedProperty dialogueLines =
             serializedData.FindProperty("dialogueLines");
 
@@ -61,24 +61,24 @@ public class DialogueEditorWindow : EditorWindow
 
         EditorGUILayout.Space(5);
 
-        // ´ëÈ­ ¸ñ·Ï Ç¥½Ã ¹× ¼öÁ¤
+        // ëŒ€í™” ëª©ë¡ í‘œì‹œ ë° ìˆ˜ì •
         EditorGUILayout.PropertyField(
             dialogueLines,
             true
         );
 
-        // º¯°æ »çÇ× Àû¿ë
+        // ë³€ê²½ ì‚¬í•­ ì ìš©
         serializedData.ApplyModifiedProperties();
 
         EditorGUILayout.Space(10);
 
-        // ÀúÀå ¹öÆ°
+        // ì €ì¥ ë²„íŠ¼
         if (GUILayout.Button("Save Dialogue"))
         {
             EditorUtility.SetDirty(dialogueData);
             AssetDatabase.SaveAssets();
 
-            Debug.Log("´ëÈ­ µ¥ÀÌÅÍ°¡ ÀúÀåµÇ¾ú½À´Ï´Ù.");
+            Debug.Log("ëŒ€í™” ë°ì´í„°ê°€ ì €ì¥ë˜ì—ˆìŠµë‹ˆë‹¤.");
         }
     }
 }

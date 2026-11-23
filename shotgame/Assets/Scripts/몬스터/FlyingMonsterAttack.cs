@@ -8,13 +8,16 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     {
         Approach,
         Firing,
+        AnimatingShot,
         Retreat,
         WaitAfterRetreat,
     }
 
     [SerializeField, KoreanLabel("추적 컴포넌트")] private NormalMonsterChase chase;
     [SerializeField, KoreanLabel("체력 컴포넌트")] private MonsterHealth health;
-    [SerializeField, KoreanLabel("적공격 발사체")] private FlyingMonsterProjectile projectilePrefab;
+    [SerializeField, KoreanLabel("적공격 발사체")] private MonsterProjectile projectilePrefab;
+    [SerializeField, KoreanLabel("정지 시 애니메이션")] private RuntimeAnimatorController stationaryController;
+    [SerializeField, KoreanLabel("발사 애니메이션")] private RuntimeAnimatorController attackController;
     [SerializeField, KoreanLabel("발사 거리"), Min(0.1f)] private float fireRange = 3.5f;
     [SerializeField, KoreanLabel("공격당 발사 횟수"), Min(1)] private int shotsPerAttack = 3;
     [SerializeField, KoreanLabel("연속 발사 간격"), Min(0.01f)] private float shotInterval = 0.25f;
@@ -27,16 +30,22 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     [SerializeField, KoreanLabel("발사체 수명"), Min(0.1f)] private float projectileLifetime = 4f;
 
     private ArisaHealth player;
+    private Animator animator;
+    private RuntimeAnimatorController movementController;
     private Collider2D playerCollider;
     private Phase phase;
     private Vector3 retreatDestination;
     private Vector3 approachStartPosition;
+    private Vector3 burstTargetPosition;
     private float nextAttackTime;
     private float nextBurstShotTime;
     private float pauseEndTime;
     private int burstShotsRemaining;
     private bool started;
     private bool requiresReapproach;
+    private bool hasReleasedAnimatedShot;
+
+    private static readonly int RangedAttackState = Animator.StringToHash("Base Layer.RangedAttack");
 
     private MonsterSO Data => health != null ? health.Data : null;
 
@@ -48,6 +57,10 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     private void Awake()
     {
         FindReferences();
+        if (stationaryController != null || attackController != null)
+        {
+            animator = GetComponent<Animator>();
+        }
     }
 
     private void OnValidate()
@@ -66,6 +79,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
     private void OnDisable()
     {
+        SetAnimation(movementController);
         if (chase != null)
         {
             chase.SetMovementPaused(false);
@@ -87,16 +101,26 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
         chase.SetMovementPaused(true);
         if (!TryFindPlayer() || player.IsDead)
         {
+            if (phase == Phase.AnimatingShot)
+            {
+                phase = Phase.Approach;
+                SetAnimation(stationaryController);
+            }
+
             return;
         }
 
         chase.FaceTarget(player.transform);
         if (!started)
         {
+            if (animator != null)
+            {
+                movementController = animator.runtimeAnimatorController;
+            }
             started = true;
             phase = Phase.Approach;
             approachStartPosition = transform.position;
-            nextAttackTime = Time.time + Data.FirstAttackDelay;
+            nextAttackTime = 0f;
         }
 
         switch (phase)
@@ -106,6 +130,12 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
                 break;
             case Phase.Firing:
                 UpdateFiring();
+                break;
+            case Phase.AnimatingShot:
+                if (animator == null || !animator.isActiveAndEnabled || animator.runtimeAnimatorController != attackController)
+                {
+                    FinishAttackAnimation();
+                }
                 break;
             case Phase.Retreat:
                 UpdateRetreat();
@@ -136,10 +166,12 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
             float moved = chase.MoveHorizontally(nextX - transform.position.x);
             if (chase.IsJumping || Mathf.Abs(moved) > 0.0001f || distanceToPlayer > fireRange)
             {
+                SetAnimation(chase.IsJumping || Mathf.Abs(moved) > 0.0001f ? movementController : stationaryController);
                 return;
             }
         }
 
+        SetAnimation(stationaryController);
         if (Time.time < nextAttackTime || projectilePrefab == null)
         {
             return;
@@ -158,17 +190,77 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
             return;
         }
 
-        Vector3 playerPosition = GetPlayerPosition();
-        FireAtPlayer(playerPosition);
+        if (attackController != null && animator != null && animator.isActiveAndEnabled)
+        {
+            phase = Phase.AnimatingShot;
+            hasReleasedAnimatedShot = false;
+            SetAnimation(attackController);
+            animator.Play(RangedAttackState, 0, 0f);
+            return;
+        }
+
+        FireBurstShot();
+        if (burstShotsRemaining == 0)
+        {
+            BeginRetreat(GetPlayerPosition());
+        }
+    }
+
+    public void ReleaseAttackProjectile()
+    {
+        if (!hasReleasedAnimatedShot)
+        {
+            ReleaseBurstProjectile();
+        }
+    }
+
+    public void ReleaseBurstProjectile()
+    {
+        if (!isActiveAndEnabled || phase != Phase.AnimatingShot || burstShotsRemaining == 0
+            || Data == null || health.IsDead || player == null || player.IsDead || projectilePrefab == null)
+        {
+            return;
+        }
+
+        hasReleasedAnimatedShot = true;
+        FireBurstShot();
+    }
+
+    public void FinishAttackAnimation()
+    {
+        if (!isActiveAndEnabled || phase != Phase.AnimatingShot
+            || Data == null || health.IsDead || player == null || player.IsDead)
+        {
+            return;
+        }
+
+        ReleaseAttackProjectile();
+        if (burstShotsRemaining > 0)
+        {
+            phase = Phase.Firing;
+            return;
+        }
+
+        BeginRetreat(GetPlayerPosition());
+    }
+
+    private void FireBurstShot()
+    {
+        if (burstShotsRemaining == shotsPerAttack)
+        {
+            burstTargetPosition = GetPlayerPosition();
+        }
+
+        FireAtPlayer(burstTargetPosition);
         burstShotsRemaining--;
         if (burstShotsRemaining > 0)
         {
             nextBurstShotTime = Time.time + shotInterval;
-            return;
         }
-
-        nextAttackTime = Time.time + Data.AttackInterval;
-        BeginRetreat(playerPosition);
+        else
+        {
+            nextAttackTime = Time.time + Data.AttackInterval;
+        }
     }
 
     private void FireAtPlayer(Vector3 playerPosition)
@@ -181,7 +273,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
         direction.Normalize();
         Vector3 spawnPosition = transform.position + (Vector3)(direction * projectileSpawnOffset);
-        FlyingMonsterProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+        MonsterProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
         projectile.Launch(direction, projectileSpeed, projectileLifetime, Data.AttackDamage, player);
     }
 
@@ -207,9 +299,11 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
         if (Mathf.Abs(transform.position.x - retreatDestination.x) > 0.0001f
             && (Mathf.Abs(moved) > 0.0001f || chase.IsJumping))
         {
+            SetAnimation(movementController);
             return;
         }
 
+        SetAnimation(stationaryController);
         pauseEndTime = Time.time + retreatPause;
         phase = Phase.WaitAfterRetreat;
     }
@@ -245,6 +339,14 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
         if (health == null)
         {
             health = GetComponent<MonsterHealth>();
+        }
+    }
+
+    private void SetAnimation(RuntimeAnimatorController controller)
+    {
+        if (animator != null && controller != null && animator.runtimeAnimatorController != controller)
+        {
+            animator.runtimeAnimatorController = controller;
         }
     }
 }

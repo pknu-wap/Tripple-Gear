@@ -2,12 +2,12 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(100)]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
 public sealed class ArisaStanceCollider : MonoBehaviour
 {
     [SerializeField, KoreanLabel("이동 컴포넌트")] private ArisaHorizontalMovement movement;
     [SerializeField, KoreanLabel("조준 컴포넌트")] private ArisaMouseAim aim;
-    [SerializeField, KoreanLabel("대상 충돌체")] private BoxCollider2D targetCollider;
+    [SerializeField, KoreanLabel("대상 충돌체")] private CapsuleCollider2D targetCollider;
     [SerializeField, KoreanLabel("서기 충돌체 크기")] private Vector2 standingSize = new Vector2(0.9f, 2.65f);
     [SerializeField, KoreanLabel("서기 충돌체 위치")] private Vector2 standingOffset = new Vector2(-0.15f, -1.05f);
     [SerializeField, KoreanLabel("앉기 1프레임 충돌체 크기")] private Vector2 crouchFrame1Size = new Vector2(1.15f, 1.55f);
@@ -49,7 +49,7 @@ public sealed class ArisaStanceCollider : MonoBehaviour
 
         if (targetCollider == null)
         {
-            targetCollider = GetComponent<BoxCollider2D>();
+            targetCollider = GetComponent<CapsuleCollider2D>();
         }
 
         if (aim == null)
@@ -67,21 +67,22 @@ public sealed class ArisaStanceCollider : MonoBehaviour
 
         if (movement == null || !movement.IsCrouching)
         {
-            ApplyCollider(standingSize, standingOffset);
+            ApplyCollider(standingSize, standingOffset, CapsuleDirection2D.Vertical);
             return;
         }
 
         if (movement.CrouchFrameIndex <= 0)
         {
-            ApplyCollider(crouchFrame1Size, GetCrouchOffset(crouchFrame1Offset, leftCrouchFrame1OffsetAdjustment));
+            ApplyCollider(crouchFrame1Size, GetCrouchOffset(crouchFrame1Offset, leftCrouchFrame1OffsetAdjustment), CapsuleDirection2D.Vertical);
             return;
         }
 
-        ApplyCollider(crouchFrame2Size, GetCrouchOffset(crouchFrame2Offset, leftCrouchFrame2OffsetAdjustment));
+        ApplyCollider(crouchFrame2Size, GetCrouchOffset(crouchFrame2Offset, leftCrouchFrame2OffsetAdjustment), CapsuleDirection2D.Horizontal);
     }
 
-    private void ApplyCollider(Vector2 size, Vector2 offset)
+    private void ApplyCollider(Vector2 size, Vector2 offset, CapsuleDirection2D direction)
     {
+        targetCollider.direction = direction;
         targetCollider.size = size;
         targetCollider.offset = offset;
     }

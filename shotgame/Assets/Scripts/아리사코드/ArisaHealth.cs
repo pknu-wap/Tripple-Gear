@@ -3,7 +3,7 @@ using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(300)]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
 public sealed class ArisaHealth : MonoBehaviour
 {
     private const string AntiLayerName = "anti";
@@ -35,7 +35,7 @@ public sealed class ArisaHealth : MonoBehaviour
     private ArisaInvincibility invincibility;
     private ArisaMouseAim aim;
     private ArisaHorizontalMovement movement;
-    private BoxCollider2D bodyCollider;
+    private CapsuleCollider2D bodyCollider;
     private SpriteRenderer[] normalSpriteRenderers;
     private bool[] normalRendererStates;
     private Color hitSpriteOriginalColor;
@@ -198,7 +198,7 @@ public sealed class ArisaHealth : MonoBehaviour
 
         if (bodyCollider == null)
         {
-            bodyCollider = GetComponent<BoxCollider2D>();
+            bodyCollider = GetComponent<CapsuleCollider2D>();
         }
 
         if (hitSpriteRenderer == null)

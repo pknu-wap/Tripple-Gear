@@ -1,14 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class DialogueManager : MonoBehaviour
 {
-    [Header("´ëÈ­ µ¥ÀÌÅÍ")]
+    [Header("ëŒ€í™” ë°ì´í„°")]
     [SerializeField]
     private DialogueData dialogueData;
 
-    [Header("´ëÈ­ UI")]
+    [Header("ëŒ€í™” UI")]
     [SerializeField]
     private GameObject dialoguePanel;
 
@@ -35,12 +38,22 @@ public class DialogueManager : MonoBehaviour
 
     private void Update()
     {
-        if (isDialogueActive &&
-            (Input.GetKeyDown(KeyCode.Space) ||
-             Input.GetKeyDown(KeyCode.E)))
+        if (isDialogueActive && AdvancePressed())
         {
             NextDialogue();
         }
+    }
+
+    private static bool AdvancePressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        Keyboard keyboard = Keyboard.current;
+        return keyboard != null && (keyboard.spaceKey.wasPressedThisFrame || keyboard.eKey.wasPressedThisFrame);
+#elif ENABLE_LEGACY_INPUT_MANAGER
+        return Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.E);
+#else
+        return false;
+#endif
     }
 
     public void StartDialogue()
@@ -48,7 +61,7 @@ public class DialogueManager : MonoBehaviour
         if (dialogueData == null ||
             dialogueData.dialogueLines.Length == 0)
         {
-            Debug.LogWarning("´ëÈ­ µ¥ÀÌÅÍ°¡ ¾ø½À´Ï´Ù.");
+            Debug.LogWarning("ëŒ€í™” ë°ì´í„°ê°€ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
 
@@ -98,6 +111,6 @@ public class DialogueManager : MonoBehaviour
         isDialogueActive = false;
         dialoguePanel.SetActive(false);
 
-        Debug.Log("´ëÈ­ Á¾·á");
+        Debug.Log("ëŒ€í™” ì¢…ë£Œ");
     }
 }

@@ -2,20 +2,28 @@ using UnityEngine;
 
 // 직접 충돌을 검사하므로 anti 레이어 접촉 피해와 중복되지 않는다.
 [DisallowMultipleComponent]
-public sealed class EnemyProjectile2D : MonoBehaviour
+public sealed class EnemyProjectile2D : MonsterProjectile
 {
+    [SerializeField, KoreanLabel("지형 레이어")] private LayerMask groundLayers;
+    [SerializeField, KoreanLabel("충돌 반경"), Min(0.02f)] private float collisionRadius = 0.14f;
+    [SerializeField, KoreanLabel("폭발 프리팹")] private GameObject explosionPrefab;
+    [SerializeField, KoreanLabel("폭발 반경"), Min(0f)] private float explosionRadius;
+    [SerializeField, KoreanLabel("폭발 수명"), Min(0.1f)] private float explosionLifetime = 1f;
+    [SerializeField, KoreanLabel("폭발 크기 배율"), Min(0.1f)] private float explosionScale = 1f;
+
     private readonly RaycastHit2D[] hits = new RaycastHit2D[32];
     private Vector2 direction;
     private float speed;
     private int damage;
-    private LayerMask groundLayers;
-    private float collisionRadius;
-    private float explosionRadius;
-    private GameObject explosionPrefab;
-    private float explosionLifetime;
-    private float explosionScale;
     private float expiresAt;
+    private bool launched;
     private bool resolved;
+
+    public override void Launch(Vector2 direction, float speed, float lifetime, int damage, ArisaHealth player)
+    {
+        Launch(direction, speed, damage, groundLayers, collisionRadius, lifetime,
+            explosionPrefab, explosionRadius, explosionLifetime, explosionScale);
+    }
 
     public void Launch(Vector2 direction, float speed, int damage, LayerMask groundLayers,
         float collisionRadius, float lifetime, GameObject explosionPrefab = null,
@@ -31,12 +39,14 @@ public sealed class EnemyProjectile2D : MonoBehaviour
         this.explosionLifetime = Mathf.Max(0.1f, explosionLifetime);
         this.explosionScale = Mathf.Max(0.1f, explosionScale);
         expiresAt = Time.time + Mathf.Max(0.1f, lifetime);
+        launched = true;
+        resolved = false;
         transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(this.direction.y, this.direction.x) * Mathf.Rad2Deg);
     }
 
     private void Update()
     {
-        if (resolved) return;
+        if (!launched || resolved) return;
         float distance = speed * Time.deltaTime;
         ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
         int count = Physics2D.CircleCast(transform.position, collisionRadius, direction, filter, hits, distance);

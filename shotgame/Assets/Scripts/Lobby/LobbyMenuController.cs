@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class LobbyMenuController : MonoBehaviour
 {
-    [SerializeField] private string newGameSceneName = "인게임샘플";
+    [SerializeField] private string newGameSceneName = "시네마틱샘플";
     [SerializeField] private Button newGameButton;
     [SerializeField] private Button loadGameButton;
     [SerializeField] private Button optionsButton;
@@ -100,7 +99,7 @@ public sealed class LobbyMenuController : MonoBehaviour
 
     public void StartNewGame()
     {
-        LoadScene(newGameSceneName);
+        SceneTransitionSignalReceiver.LoadSceneWithSignal(newGameSceneName);
     }
 
     public void LoadGame()
@@ -120,18 +119,5 @@ public sealed class LobbyMenuController : MonoBehaviour
 #else
         Application.Quit();
 #endif
-    }
-
-    private void LoadScene(string sceneName)
-    {
-        if (string.IsNullOrWhiteSpace(sceneName))
-        {
-            Debug.LogWarning("이동할 씬 이름이 비어 있습니다.", this);
-            return;
-        }
-
-        string fromSceneName = SceneManager.GetActiveScene().name;
-        SceneTransitionSignalReceiver.NotifySceneTransition(fromSceneName, sceneName);
-        SceneManager.LoadScene(sceneName);
     }
 }
