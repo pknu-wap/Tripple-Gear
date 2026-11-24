@@ -76,7 +76,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!health.IsDead && !health.IsStunned)
+        if (!health.IsDead && !health.IsStunned && !health.IsEntering)
         {
             groundMotion?.Step();
         }
@@ -96,7 +96,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void Update()
     {
-        if (health != null && health.IsStunned) return;
+        if (health != null && (health.IsStunned || health.IsEntering)) return;
 
         if (MonsterData == null || health.IsDead)
         {

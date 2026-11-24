@@ -11,9 +11,9 @@ using Object = UnityEngine.Object;
 public static class BossEncounterBuilder
 {
     public const string ScenePath = "Assets/Scenes/보스테스트.unity";
-    public const string BossPrefabPath = "Assets/몬스터/챕터1보스몹/챕터1보스.prefab";
+    public const string BossPrefabPath = "Assets/SO/몬스터/챕터1보스.prefab";
     public const string PatternPath = "Assets/SO/몬스터/챕터1보스패턴SO.asset";
-    private const string FlyingMonsterPrefabPath = "Assets/몬스터/일반몹/플라잉몹_0.prefab";
+    private const string FlyingMonsterPrefabPath = "Assets/SO/몬스터/플라잉몹_0.prefab";
     private const string ArtDirectory = "Assets/몬스터/챕터1보스몹";
 
     [MenuItem("Tools/Shotgame/보스/보스 프리팹과 테스트 씬 생성")]

@@ -28,6 +28,7 @@ public sealed class CctvLaserAttack : MonoBehaviour
 
     private readonly List<RaycastHit2D> hits = new List<RaycastHit2D>();
     private SpriteRenderer cameraSprite;
+    private MonsterHealth health;
     private LineRenderer beam;
     private LineRenderer impactDot;
     private float nextDamageTime;
@@ -35,6 +36,7 @@ public sealed class CctvLaserAttack : MonoBehaviour
     private void Awake()
     {
         cameraSprite = GetComponent<SpriteRenderer>();
+        health = GetComponentInParent<MonsterHealth>();
         beam = CreateLine("CCTV 레이저", beamWidth, 0);
         impactDot = CreateLine("CCTV 레이저 충돌점", beamWidth * 3f, 8);
     }
@@ -47,6 +49,13 @@ public sealed class CctvLaserAttack : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (health != null && health.IsEntering)
+        {
+            beam.enabled = false;
+            impactDot.enabled = false;
+            return;
+        }
+
         GetScanPose(out Vector2 localOrigin, out Vector2 localDirection);
         Vector3 origin = transform.TransformPoint(localOrigin);
         Vector2 direction = ((Vector2)transform.TransformDirection(localDirection)).normalized;

@@ -96,7 +96,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
     private void Update()
     {
-        if (health != null && health.IsStunned) return;
+        if (health != null && (health.IsStunned || health.IsEntering)) return;
 
         if (chase == null || Data == null || health.IsDead || !chase.IsChasing)
         {
@@ -222,7 +222,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     public void ReleaseBurstProjectile()
     {
         if (!isActiveAndEnabled || phase != Phase.AnimatingShot || burstShotsRemaining == 0
-            || Data == null || health.IsDead || player == null || player.IsDead || projectilePrefab == null)
+            || Data == null || health.IsDead || health.IsEntering || player == null || player.IsDead || projectilePrefab == null)
         {
             return;
         }
@@ -234,7 +234,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
     public void FinishAttackAnimation()
     {
         if (!isActiveAndEnabled || phase != Phase.AnimatingShot
-            || Data == null || health.IsDead || player == null || player.IsDead)
+            || Data == null || health.IsDead || health.IsEntering || player == null || player.IsDead)
         {
             return;
         }

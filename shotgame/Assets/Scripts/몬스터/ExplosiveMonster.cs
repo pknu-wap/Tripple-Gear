@@ -49,7 +49,7 @@ public sealed class ExplosiveMonster : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (phase != Phase.Idle || health.IsDead || health.IsStunned)
+        if (phase != Phase.Idle || health.IsDead || health.IsStunned || health.IsEntering)
         {
             return;
         }
@@ -69,7 +69,7 @@ public sealed class ExplosiveMonster : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (health.IsDead)
+        if (health.IsDead || health.IsEntering)
         {
             return;
         }

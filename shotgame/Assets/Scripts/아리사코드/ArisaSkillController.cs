@@ -70,7 +70,7 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     public bool TryAcquireSkill(SkillSO skillData)
     {
-        if (skillData == null || !skillData.HasLogic || skillData.ActivatesOnPickup || storedSkill.Data != null)
+        if (skillData == null || !skillData.HasLogic || skillData.ActivatesOnPickup)
         {
             return false;
         }

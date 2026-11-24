@@ -5,7 +5,6 @@ using UnityEngine;
 internal sealed class SkillGrenade : MonoBehaviour
 {
     private const float CollisionRadius = 0.12f;
-    private const float Gravity = 17f;
     private const float ShockwaveDuration = 0.28f;
     private const int RingPoints = 32;
 
@@ -13,35 +12,49 @@ internal sealed class SkillGrenade : MonoBehaviour
     private static readonly Color ElectricColor = new Color(0.25f, 0.85f, 1f);
 
     internal void Launch(Transform owner, Sprite sprite, GameObject explosionEffect, bool electric, Vector2 velocity,
-        float fuseSeconds, LayerMask impactLayers, float radius, int damage, float stunSeconds, Sprite burstSprite)
+        float gravity, float maxFlightDistance, float fuseSeconds, LayerMask impactLayers, float radius, int damage, float stunSeconds,
+        Sprite burstSprite, float projectileSize, float burstScale)
     {
         SpriteRenderer renderer = gameObject.AddComponent<SpriteRenderer>();
         renderer.sprite = sprite;
         renderer.sortingOrder = 45;
         renderer.color = electric ? ElectricColor : Color.white;
-        transform.localScale = Vector3.one * (0.35f / Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y));
+        transform.localScale = Vector3.one * (projectileSize / Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y));
 
-        StartCoroutine(Fly(owner, renderer, explosionEffect, electric, velocity,
-            fuseSeconds, impactLayers, radius, damage, stunSeconds, burstSprite));
+        Vector2 acceleration = Vector2.down * gravity;
+        StartCoroutine(Fly(owner, renderer, explosionEffect, electric, velocity, acceleration,
+            maxFlightDistance, fuseSeconds, impactLayers, radius, damage, stunSeconds, burstSprite, burstScale));
     }
 
-    private IEnumerator Fly(Transform owner, SpriteRenderer renderer, GameObject explosionEffect, bool electric, Vector2 velocity,
-        float fuseSeconds, LayerMask impactLayers, float radius, int damage, float stunSeconds, Sprite burstSprite)
+    private IEnumerator Fly(Transform owner, SpriteRenderer renderer, GameObject explosionEffect, bool electric,
+        Vector2 velocity, Vector2 acceleration, float maxFlightDistance, float fuseSeconds, LayerMask impactLayers, float radius, int damage, float stunSeconds,
+        Sprite burstSprite, float burstScale)
     {
         WaitForFixedUpdate waitForPhysics = new WaitForFixedUpdate();
         ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
         filter.SetLayerMask(impactLayers);
         List<RaycastHit2D> hits = new List<RaycastHit2D>();
         float elapsed = 0f;
+        Vector2 launchPosition = transform.position;
+        float maxDistanceSquared = maxFlightDistance * maxFlightDistance;
 
         while (elapsed < fuseSeconds)
         {
             yield return waitForPhysics;
             float step = Mathf.Min(Time.fixedDeltaTime, fuseSeconds - elapsed);
-            Vector2 displacement = velocity * step + Vector2.down * (0.5f * Gravity * step * step);
+            Vector2 displacement = velocity * step + acceleration * (0.5f * step * step);
             float distance = displacement.magnitude;
             Vector2 direction = displacement.normalized;
             Vector2 origin = transform.position;
+            Vector2 fromLaunch = origin - launchPosition;
+            bool reachedRange = (fromLaunch + displacement).sqrMagnitude >= maxDistanceSquared;
+            if (reachedRange)
+            {
+                // Clip this physics step to the boundary before testing for an impact.
+                float alongRay = Vector2.Dot(fromLaunch, direction);
+                float discriminant = alongRay * alongRay + maxDistanceSquared - fromLaunch.sqrMagnitude;
+                distance = Mathf.Clamp(Mathf.Sqrt(Mathf.Max(0f, discriminant)) - alongRay, 0f, distance);
+            }
 
             Physics2D.CircleCast(origin, CollisionRadius, direction, filter, hits, distance);
             float impactDistance = float.PositiveInfinity;
@@ -68,9 +81,14 @@ internal sealed class SkillGrenade : MonoBehaviour
                 break;
             }
 
-            Move(displacement);
+            Move(direction * distance);
+            if (reachedRange)
+            {
+                break;
+            }
+
             transform.Rotate(0f, 0f, step * -540f);
-            velocity += Vector2.down * (Gravity * step);
+            velocity += acceleration * step;
             elapsed += step;
         }
 
@@ -78,11 +96,12 @@ internal sealed class SkillGrenade : MonoBehaviour
         if (burstSprite == null && explosionEffect != null)
         {
             GameObject effect = Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            effect.transform.localScale *= burstScale;
             Destroy(effect, 1.5f);
         }
 
         ApplyBurst(electric, radius, damage, stunSeconds);
-        yield return DrawBurst(burstSprite, electric, radius);
+        yield return DrawBurst(burstSprite, electric, radius, burstScale);
         Destroy(gameObject);
     }
 
@@ -113,7 +132,7 @@ internal sealed class SkillGrenade : MonoBehaviour
         }
     }
 
-    private IEnumerator DrawBurst(Sprite sprite, bool electric, float radius)
+    private IEnumerator DrawBurst(Sprite sprite, bool electric, float radius, float burstScale)
     {
         float duration = sprite == null ? ShockwaveDuration : electric ? 0.42f : 0.52f;
         SpriteRenderer burstRenderer = null;
@@ -132,7 +151,7 @@ internal sealed class SkillGrenade : MonoBehaviour
             properties.SetTexture("_MainTex", sprite.texture);
             burstRenderer.SetPropertyBlock(properties);
             float maxSize = Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y);
-            blastSize = radius * (electric ? 1.65f : 1.2f) / maxSize;
+            blastSize = radius * (electric ? 1.65f : 1.2f) * burstScale / maxSize;
         }
 
         Color color = electric ? ElectricColor : BlastColor;

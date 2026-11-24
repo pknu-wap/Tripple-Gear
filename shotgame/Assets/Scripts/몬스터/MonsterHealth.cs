@@ -21,6 +21,7 @@ public sealed class MonsterHealth : MonoBehaviour
     public int CurrentHp => currentHp;
     public bool IsDead => currentHp <= 0;
     internal bool IsStunned { get; private set; }
+    internal bool IsEntering { get; set; }
 
     internal void SetStunned(bool stunned) => IsStunned = stunned;
     public UnityEvent<int, int> HpChanged => hpChanged;

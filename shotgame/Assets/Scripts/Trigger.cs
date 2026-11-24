@@ -151,7 +151,7 @@ public partial class Trigger : TriggerBase
             GameObject monster = waveMonsters[i];
             if (monster != null)
             {
-                monster.SetActive(true);
+                ActivateWaveMonster(monster);
             }
         }
 
@@ -184,7 +184,8 @@ public partial class Trigger : TriggerBase
             if (!monster.scene.IsValid() || monster.scene != gameObject.scene
                 || transform.IsChildOf(monster.transform)
                 || (cameraManager != null && cameraManager.transform.IsChildOf(monster.transform))
-                || (monster.transform.parent != null && !monster.transform.parent.gameObject.activeInHierarchy))
+                || (monster.transform.parent != null && !monster.transform.parent.gameObject.activeInHierarchy)
+                || !ValidateWaveEntrance(monster))
             {
                 return false;
             }

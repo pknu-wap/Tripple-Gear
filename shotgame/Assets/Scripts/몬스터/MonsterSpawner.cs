@@ -37,12 +37,12 @@ public sealed class MonsterSpawner : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!health.IsDead) groundMotion?.Step();
+        if (!health.IsDead && !health.IsEntering) groundMotion?.Step();
     }
 
     private void LateUpdate()
     {
-        if (health.IsDead || monsterPrefab == null)
+        if (health.IsDead || health.IsEntering || monsterPrefab == null)
         {
             return;
         }
@@ -89,7 +89,7 @@ public sealed class MonsterSpawner : MonoBehaviour
 
     public void SpawnFromAnimation()
     {
-        if (waitingForSpawnEvent && isActiveAndEnabled && !health.IsDead && monsterPrefab != null)
+        if (waitingForSpawnEvent && isActiveAndEnabled && !health.IsDead && !health.IsEntering && monsterPrefab != null)
         {
             CompleteSpawn(Time.timeAsDouble);
         }

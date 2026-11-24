@@ -86,7 +86,7 @@ public partial class Trigger
 
         if (!ValidateEnemySpawns())
         {
-            ReportInvalidMission("적 출현 그룹에 몬스터 프리팹과 씬의 출현 지점을 연결해 주세요.");
+            ReportInvalidMission("적 출현 그룹의 몬스터 프리팹, 출현 위치, 연출 도착 위치를 확인해 주세요.");
             return false;
         }
 
