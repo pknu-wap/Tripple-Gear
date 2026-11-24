@@ -50,6 +50,9 @@ public class DialogueEditorWindow : EditorWindow
 
         serializedData.Update();
 
+        EditorGUILayout.PropertyField(serializedData.FindProperty("partnerPortrait"));
+        EditorGUILayout.Space(5);
+
         // DialogueData 안의 dialogueLines 배열 가져오기
         SerializedProperty dialogueLines =
             serializedData.FindProperty("dialogueLines");

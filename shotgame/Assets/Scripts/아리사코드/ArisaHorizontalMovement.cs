@@ -378,6 +378,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void Update()
     {
+        if (DialogueManager.BlocksGameplayInput)
+        {
+            ClearSampledInput();
+            return;
+        }
+
         SampleInput();
     }
 
@@ -386,6 +392,11 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
         if (movementBody == null)
         {
             return;
+        }
+
+        if (DialogueManager.BlocksGameplayInput)
+        {
+            ClearSampledInput();
         }
 
         verticalSpeed = movementBody.linearVelocity.y;
@@ -591,11 +602,17 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
         verticalSpeed = 0f;
         isLaunchedUpward = false;
+        ClearSampledInput();
+    }
+
+    private void ClearSampledInput()
+    {
         horizontalInput = 0f;
         jumpHeld = false;
         crouchHeld = false;
         fireHeld = false;
         jumpPressed = false;
+        hasMouseScreenPosition = false;
     }
 
     private void OnDestroy()

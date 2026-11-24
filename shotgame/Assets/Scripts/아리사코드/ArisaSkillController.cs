@@ -119,10 +119,9 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale == 0f) return;
+        if (Time.timeScale == 0f || DialogueManager.BlocksGameplayInput) return;
         if (storedSkill.Data != null && ReadSwapPressed()
-            && MissionInteractable.LastKeyboardInteractionFrame != Time.frameCount
-            && DialogueManager.LastAdvanceFrame != Time.frameCount)
+            && MissionInteractable.LastKeyboardInteractionFrame != Time.frameCount)
         {
             int previousCount = RemainingUseCount;
             SkillSlot previous = activeSkill;

@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
     private string lobbySceneName = "로비";
 
     [Header("Chapter Clear")]
-    [SerializeField] private WaveManager bossWave;
     [SerializeField] private GunSelectionUI gunSelectionPrefab;
     [SerializeField] private Canvas gameplayCanvas;
     [SerializeField] private MouseReticleController mouseReticle;
@@ -24,8 +23,9 @@ public class GameManager : MonoBehaviour
     private GunSelectionUI gunSelection;
     private float gameplayTimeScale;
     private bool ownsChapterPause;
-    private bool restoreMouseReticle;
-    private bool chapterCleared;
+    private int reticleSiblingIndex = -1;
+    private bool previousGunInputSuppression;
+    private TeleportTrigger selectedChapterTeleport;
     private bool isGameOver = false;
 
     internal bool IsGameOver => isGameOver;
@@ -51,36 +51,36 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnBossCleared()
+    public void OnBossCleared() => TryShowGunSelection(nextChapterTeleport);
+
+    internal bool TryShowGunSelection(TeleportTrigger chapterTeleport)
     {
-        if (chapterCleared || isGameOver)
+        if (ownsChapterPause || isGameOver)
         {
-            return;
+            return true;
         }
 
         if (gunSelectionPrefab == null || gameplayCanvas == null || playerGun == null
-            || nextChapterTeleport == null || !nextChapterTeleport.isActiveAndEnabled)
+            || chapterTeleport == null || !chapterTeleport.isActiveAndEnabled)
         {
             Debug.LogError("챕터 클리어에 필요한 UI, 플레이어 무기, 텔레포트를 연결해 주세요.", this);
-            return;
+            return false;
         }
 
-        chapterCleared = true;
-        if (bossWave != null)
-        {
-            bossWave.CompleteWave();
-        }
-
+        selectedChapterTeleport = chapterTeleport;
         gunSelection = Instantiate(gunSelectionPrefab, gameplayCanvas.transform, false);
         gameplayTimeScale = Time.timeScale;
         ownsChapterPause = true;
         Time.timeScale = 0f;
+        previousGunInputSuppression = playerGun.InputSuppressed;
+        playerGun.InputSuppressed = true;
 
-        restoreMouseReticle = mouseReticle != null && mouseReticle.enabled;
-        if (restoreMouseReticle)
+        if (mouseReticle != null && mouseReticle.transform.parent == gameplayCanvas.transform)
         {
-            mouseReticle.enabled = false;
+            reticleSiblingIndex = mouseReticle.transform.GetSiblingIndex();
+            mouseReticle.transform.SetAsLastSibling();
         }
+        return true;
     }
 
     public void SelectGun(GunSO gun)
@@ -95,12 +95,16 @@ public class GameManager : MonoBehaviour
         selectionPanel.SetActive(false);
         Destroy(selectionPanel);
         playerGun.EquipGun(gun);
-        StartCoroutine(MoveToNextChapter());
+        StartCoroutine(MoveToNextChapter(selectedChapterTeleport));
     }
 
-    private IEnumerator MoveToNextChapter()
+    private IEnumerator MoveToNextChapter(TeleportTrigger chapterTeleport)
     {
-        yield return nextChapterTeleport.TeleportPlayer();
+        Coroutine teleport = chapterTeleport != null ? chapterTeleport.StartPlayerTeleport() : null;
+        if (teleport != null)
+        {
+            yield return teleport;
+        }
         RestoreGameplay();
     }
 
@@ -113,10 +117,16 @@ public class GameManager : MonoBehaviour
 
         ownsChapterPause = false;
         Time.timeScale = gameplayTimeScale;
-        if (restoreMouseReticle && mouseReticle != null)
+        selectedChapterTeleport = null;
+        if (playerGun != null)
         {
-            mouseReticle.enabled = true;
+            playerGun.InputSuppressed = previousGunInputSuppression;
         }
+        if (reticleSiblingIndex >= 0 && mouseReticle != null)
+        {
+            mouseReticle.transform.SetSiblingIndex(reticleSiblingIndex);
+        }
+        reticleSiblingIndex = -1;
     }
 
     public void GameOver()

@@ -235,8 +235,11 @@ MonoBehaviour:
   dialogueData: {fileID: 11400000, guid: 30d12c70a68f64d459c42f4d9b2f9278, type: 2}
   dialoguePanel: {fileID: 1072368022}
   characterImage: {fileID: 506682024}
+  partnerImage: {fileID: 506682025}
+  listenerOpacity: 0.4
   characterNameText: {fileID: 1996404509}
   dialogueText: {fileID: 1096673340}
+  nextButton: {fileID: 506682026}
   dialoguePrefab: {fileID: 0}
 --- !u!1 &377301266
 GameObject:
@@ -319,6 +322,17 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!114 &506682025 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 9100000000000000104, guid: eee6e5548eb401441b30ba8ff43a4e3d, type: 3}
+  m_PrefabInstance: {fileID: 1674218441}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
 --- !u!1 &591702665
 GameObject:
@@ -1433,6 +1447,17 @@ MonoBehaviour:
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
   m_ScrollDeltaPerTick: 6
+--- !u!114 &506682026 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4597540607062673220, guid: eee6e5548eb401441b30ba8ff43a4e3d, type: 3}
+  m_PrefabInstance: {fileID: 1674218441}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

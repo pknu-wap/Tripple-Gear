@@ -69,6 +69,13 @@ public sealed class SubmachineGunFire : MonoBehaviour
     public event System.Action<int, int> AmmoChanged;
     public event System.Action ShotFired;
 
+    public void EquipGun(GunSO gun)
+    {
+        gunData = gun;
+        nextShotTime = 0f;
+        FillBulletCount();
+    }
+
     internal void StartDamageBoost(float bonus, float duration, GameObject effect)
     {
         damageBonus = bonus;
@@ -140,7 +147,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         UpdateReload();
-        if (InputSuppressed) return;
+        if (InputSuppressed || DialogueManager.BlocksGameplayInput) return;
 
         if (ReadReloadPressed())
         {

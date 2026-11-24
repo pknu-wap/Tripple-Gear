@@ -38,7 +38,8 @@ public sealed class MissionInteractable : MonoBehaviour
 
     private bool TryInteract()
     {
-        if (!isActiveAndEnabled || objective == null || objective.RemainingCount <= 0 || !PlayerIsInRange())
+        if (DialogueManager.BlocksGameplayInput || !isActiveAndEnabled || objective == null
+            || objective.RemainingCount <= 0 || !PlayerIsInRange())
         {
             return false;
         }

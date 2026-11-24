@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -7,6 +8,9 @@ using UnityEngine.InputSystem;
 
 public class DialogueManager : MonoBehaviour
 {
+    private static readonly HashSet<DialogueManager> activeDialogues = new HashSet<DialogueManager>();
+    private static int lastDialogueEndFrame = -1;
+
     [Header("대화 데이터")]
     [SerializeField]
     private DialogueData dialogueData;
@@ -19,31 +23,89 @@ public class DialogueManager : MonoBehaviour
     private Image characterImage;
 
     [SerializeField]
+    private Image partnerImage;
+
+    [SerializeField, Range(0f, 1f)]
+    private float listenerOpacity = 0.4f;
+
+    [SerializeField]
     private TextMeshProUGUI characterNameText;
 
     [SerializeField]
     private TextMeshProUGUI dialogueText;
 
     [SerializeField]
+    private Button nextButton;
+
+    [SerializeField]
     private GameObject dialoguePrefab;
     private GameObject dialogueInstance;
 
-    private int currentIndex = 0;
-    private bool isDialogueActive = false;
+    [SerializeField, Min(1f), InspectorName("초당 표시 글자 수")]
+    private float charactersPerSecond = 35f;
 
-    internal static int LastAdvanceFrame { get; private set; } = -1;
+    private int currentIndex = 0;
+    private int lastAdvanceFrame = -1;
+    private int dialogueCharacterCount;
+    private float visibleCharacterProgress;
+    private DialogueData.DialogueLine[] activeLines;
+    private Sprite arisaPortrait;
+    private Sprite activePartnerPortrait;
+
+    internal static bool BlocksGameplayInput =>
+        activeDialogues.Count > 0 || lastDialogueEndFrame == Time.frameCount;
+
+    private void Awake()
+    {
+        if (characterImage != null)
+        {
+            arisaPortrait = characterImage.sprite;
+        }
+    }
+
+    private void OnEnable()
+    {
+        if (nextButton != null)
+        {
+            nextButton.onClick.AddListener(NextDialogue);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (nextButton != null)
+        {
+            nextButton.onClick.RemoveListener(NextDialogue);
+        }
+
+        if (activeLines != null)
+        {
+            EndDialogue();
+        }
+    }
 
     private void Start()
     {
-        dialoguePanel.SetActive(false);
+        dialoguePanel.SetActive(activeLines != null);
     }
 
     private void Update()
     {
-        if (isDialogueActive && AdvancePressed())
+        if (activeLines == null)
         {
-            LastAdvanceFrame = Time.frameCount;
+            return;
+        }
+
+        if (AdvancePressed())
+        {
             NextDialogue();
+            return;
+        }
+
+        if (dialogueText.maxVisibleCharacters < dialogueCharacterCount)
+        {
+            visibleCharacterProgress += Time.unscaledDeltaTime * charactersPerSecond;
+            dialogueText.maxVisibleCharacters = Mathf.Min(dialogueCharacterCount, Mathf.FloorToInt(visibleCharacterProgress));
         }
     }
 
@@ -61,15 +123,27 @@ public class DialogueManager : MonoBehaviour
 
     public void StartDialogue()
     {
-        if (dialogueData == null ||
-            dialogueData.dialogueLines.Length == 0)
+        PlayDialogue(dialogueData);
+    }
+
+    public void PlayDialogue(DialogueData data)
+    {
+        if (!isActiveAndEnabled)
         {
-            Debug.LogWarning("대화 데이터가 없습니다.");
+            return;
+        }
+
+        if (data == null || data.dialogueLines == null || data.dialogueLines.Length == 0)
+        {
+            Debug.LogWarning("대화 데이터가 없습니다.", this);
             return;
         }
 
         currentIndex = 0;
-        isDialogueActive = true;
+        lastAdvanceFrame = Time.frameCount;
+        activeLines = data.dialogueLines;
+        activePartnerPortrait = data.partnerPortrait;
+        activeDialogues.Add(this);
 
         dialoguePanel.SetActive(true);
 
@@ -78,9 +152,22 @@ public class DialogueManager : MonoBehaviour
 
     public void NextDialogue()
     {
+        if (activeLines == null || lastAdvanceFrame == Time.frameCount)
+        {
+            return;
+        }
+
+        lastAdvanceFrame = Time.frameCount;
+
+        if (dialogueText.maxVisibleCharacters < dialogueCharacterCount)
+        {
+            dialogueText.maxVisibleCharacters = dialogueCharacterCount;
+            return;
+        }
+
         currentIndex++;
 
-        if (currentIndex >= dialogueData.dialogueLines.Length)
+        if (currentIndex >= activeLines.Length)
         {
             EndDialogue();
             return;
@@ -91,14 +178,44 @@ public class DialogueManager : MonoBehaviour
 
     private void ShowDialogue()
     {
-        DialogueData.DialogueLine line =
-            dialogueData.dialogueLines[currentIndex];
+        DialogueData.DialogueLine line = activeLines[currentIndex];
 
         characterNameText.text = line.characterName;
         dialogueText.text = line.dialogueText;
-        characterImage.sprite = line.characterImage;
+        dialogueText.maxVisibleCharacters = 0;
+        dialogueText.ForceMeshUpdate();
+        dialogueCharacterCount = dialogueText.textInfo.characterCount;
+        visibleCharacterProgress = 0f;
 
-        characterImage.enabled = line.characterImage != null;
+        if (line.speaker == DialogueData.Speaker.Legacy)
+        {
+            SetPortrait(characterImage, line.characterImage, 1f);
+            SetPortrait(partnerImage, null, 1f);
+            return;
+        }
+
+        bool arisaIsSpeaking = line.speaker == DialogueData.Speaker.Arisa;
+        if (!arisaIsSpeaking && line.characterImage != null)
+        {
+            activePartnerPortrait = line.characterImage;
+        }
+
+        SetPortrait(characterImage, arisaPortrait, arisaIsSpeaking ? 1f : listenerOpacity);
+        SetPortrait(partnerImage, activePartnerPortrait, arisaIsSpeaking ? listenerOpacity : 1f);
+    }
+
+    private static void SetPortrait(Image image, Sprite portrait, float opacity)
+    {
+        if (image == null)
+        {
+            return;
+        }
+
+        image.sprite = portrait;
+        image.enabled = portrait != null;
+        Color color = image.color;
+        color.a = opacity;
+        image.color = color;
     }
 
     public void CreateDialogueUI()
@@ -111,8 +228,14 @@ public class DialogueManager : MonoBehaviour
 
     private void EndDialogue()
     {
-        isDialogueActive = false;
-        dialoguePanel.SetActive(false);
+        lastDialogueEndFrame = Time.frameCount;
+        activeDialogues.Remove(this);
+        activeLines = null;
+        activePartnerPortrait = null;
+        if (dialoguePanel != null)
+        {
+            dialoguePanel.SetActive(false);
+        }
 
         Debug.Log("대화 종료");
     }

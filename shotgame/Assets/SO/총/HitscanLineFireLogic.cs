@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
@@ -25,18 +26,23 @@ public sealed class HitscanLineFireLogic : GunFireLogic
         }
 
         Vector2 fireDirection = context.Direction.normalized;
-        RaycastHit2D hit = Physics2D.Raycast(context.MuzzlePosition, fireDirection, Range, gunData.HitTargetLayers);
-        float shotDistance = hit.collider != null ? hit.distance : Range;
-        if (hit.collider != null)
+        float shotDistance = Range;
+        HashSet<MonsterHealth> damaged = new HashSet<MonsterHealth>();
+        foreach (RaycastHit2D hit in Physics2D.RaycastAll(context.MuzzlePosition, fireDirection, Range, gunData.HitTargetLayers))
         {
             MonsterHealth target = hit.collider.GetComponentInParent<MonsterHealth>();
-            // The direct hit carries the bonus once. The existing Enemy-layer hit uses base damage.
-            if (target != null) target.TakeGunDamage(gunData.Damage + context.DamageBonus);
-        }
+            if (target == null)
+            {
+                shotDistance = hit.distance;
+                break;
+            }
 
-        if (hit.collider != null)
-        {
-            GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+            if (damaged.Add(target))
+            {
+                // The direct hit carries the bonus once. The existing Enemy-layer hit uses base damage.
+                target.TakeGunDamage(gunData.Damage + context.DamageBonus);
+                GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+            }
         }
 
         CreateInstantShotVisual(gunData, context.MuzzlePosition, fireDirection, shotDistance, context.CoroutineRunner);

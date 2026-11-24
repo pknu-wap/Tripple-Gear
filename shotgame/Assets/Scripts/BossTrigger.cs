@@ -11,6 +11,7 @@ public sealed class BossTrigger : TriggerBase
     [SerializeField, KoreanLabel("보스")] private MonsterHealth boss;
     [SerializeField, KoreanLabel("등장 연출 타임라인")] private PlayableDirector introTimeline;
     [SerializeField, KoreanLabel("처치 후 텔레포트")] private TeleportTrigger defeatTeleport;
+    [SerializeField, KoreanLabel("처치 후 총 선택")] private GameManager gunSelectionManager;
     [SerializeField, KoreanLabel("전투 시작 이벤트")] private UnityEvent battleStarted = new UnityEvent();
     [SerializeField, KoreanLabel("보스 처치 이벤트")] private UnityEvent bossDefeated = new UnityEvent();
 
@@ -195,7 +196,12 @@ public sealed class BossTrigger : TriggerBase
         boss.Defeated.RemoveListener(CompleteEncounter);
         cameraLock.Release();
         bossDefeated.Invoke();
-        if (defeatTeleport != null) defeatTeleport.TeleportPlayer();
+        if (defeatTeleport == null || (playerHealth != null && playerHealth.IsDead)) return;
+
+        if (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatTeleport))
+        {
+            defeatTeleport.TeleportPlayer();
+        }
     }
 
     public void CancelEncounter()

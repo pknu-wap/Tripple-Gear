@@ -54,6 +54,7 @@ public sealed class AtailBossController : MonoBehaviour
     [SerializeField] private ArisaHealth player;
     [SerializeField] private BoatVoyage voyage;
     [SerializeField] private TeleportTrigger defeatExit;
+    [SerializeField, KoreanLabel("침몰 연출 후 총 선택")] private GameManager gunSelectionManager;
     [SerializeField] private Platform[] platforms;
     [SerializeField] private Transform waterline;
 
@@ -223,7 +224,12 @@ public sealed class AtailBossController : MonoBehaviour
         spawnedObjects = null;
         playingDefeat = false;
         Destroy(effects);
-        if (!player.IsDead && defeatExit != null) defeatExit.TeleportPlayer();
+        if (player.IsDead || defeatExit == null) yield break;
+
+        if (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatExit))
+        {
+            defeatExit.TeleportPlayer();
+        }
     }
 
     private IEnumerator PlayDefeatBursts()

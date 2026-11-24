@@ -12,10 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4626535ac33ff934280728c50096b119, type: 3}
   m_Name: OpeningDialogue
   m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  partnerPortrait: {fileID: 21300000, guid: 31eaf52e4ac948b2b83bba02852546a0, type: 3}
   dialogueLines:
-  - characterName: test
-    dialogueText: test1
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "요원 아리사 부산 로봇 공장에 도착했다"
     characterImage: {fileID: 0}
-  - characterName: test2
-    dialogueText: test2
+  - speaker: 2
+    characterName: 카이
+    dialogueText: "조심해 입구에 감시카메라가 있어"
+    characterImage: {fileID: 0}
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "너가 해킹으로 무력화 못시키나?"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 카이
+    dialogueText: "그게 가능했다면 너를 안보냈겠지"
+    characterImage: {fileID: 0}
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "...."
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 카이
+    dialogueText: "암튼 가진총의 마우스 좌클릭 버튼을 누르면 총이 발사되는 우수한 병기야"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 카이
+    dialogueText: "그리고 우클릭을하면 너가 가진 능력을 쓸 수 있고 E로 능력을 바꿀수있어"
+    characterImage: {fileID: 0}
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "나도 알거든"
     characterImage: {fileID: 0}

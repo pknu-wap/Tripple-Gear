@@ -43,9 +43,7 @@ public sealed class MouseReticleController : MonoBehaviour
             return;
         }
 
-        previousCursorVisible = Cursor.visible;
-        Cursor.visible = false;
-        cursorHidden = true;
+        SetCursorHidden(!DialogueManager.BlocksGameplayInput);
         if (gun != null)
         {
             gun.ShotFired += ShowShotColor;
@@ -54,13 +52,19 @@ public sealed class MouseReticleController : MonoBehaviour
 
     private void LateUpdate()
     {
+        bool dialogueActive = DialogueManager.BlocksGameplayInput;
+        if (canvasRect != null && reticleImage != null)
+        {
+            SetCursorHidden(!dialogueActive);
+        }
+
         if (colorFlashing && Time.unscaledTime >= restoreColorAt)
         {
             reticleImage.material = normalMaterial;
             colorFlashing = false;
         }
 
-        if (canvasRect == null || reticleImage == null || Mouse.current == null)
+        if (dialogueActive || canvasRect == null || reticleImage == null || Mouse.current == null)
         {
             if (reticleImage != null)
             {
@@ -94,11 +98,23 @@ public sealed class MouseReticleController : MonoBehaviour
         }
         colorFlashing = false;
 
-        if (cursorHidden)
+        SetCursorHidden(false);
+    }
+
+    private void SetCursorHidden(bool hidden)
+    {
+        if (cursorHidden == hidden)
         {
-            Cursor.visible = previousCursorVisible;
-            cursorHidden = false;
+            return;
         }
+
+        if (hidden)
+        {
+            previousCursorVisible = Cursor.visible;
+        }
+
+        Cursor.visible = !hidden && previousCursorVisible;
+        cursorHidden = hidden;
     }
 
     private void ShowShotColor()

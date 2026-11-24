@@ -104,6 +104,11 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (DialogueManager.BlocksGameplayInput)
+        {
+            return;
+        }
+
         Camera cameraToUse = targetCamera != null ? targetCamera : Camera.main;
         if (cameraToUse == null || !TryGetCurrentMouseScreenPosition(out Vector2 mouseScreenPosition))
         {
