@@ -16,7 +16,8 @@ public partial class Trigger
     private sealed class SpawnRoute
     {
         [SerializeField, InspectorName("출현 위치")] internal Transform start;
-        [SerializeField, InspectorName("도착 위치")] internal Transform arrival;
+        [SerializeField, InspectorName("도착 위치"), Tooltip("기준 위치의 좌우 중 한쪽을 랜덤으로 골라 X축으로 1~3유닛 떨어진 곳에 도착합니다. 높이는 그대로 사용합니다.")]
+        internal Transform arrival;
         [SerializeField, InspectorName("등장 설정")] internal MonsterEntranceSettings entrance;
     }
 
@@ -190,6 +191,11 @@ public partial class Trigger
         bool animated = route != null && route.entrance.type != MonsterEntranceType.Normal;
         Vector3 start = route != null ? route.start.position : settings.points[pointIndex].position;
         Vector3 destination = animated ? route.arrival.position : GetOffscreenPosition(start, view);
+        if (animated)
+        {
+            float offset = UnityEngine.Random.Range(1f, 3f);
+            destination.x += UnityEngine.Random.value < 0.5f ? -offset : offset;
+        }
 
         // Initialize chase height and patrol position at the actual combat location.
         MonsterHealth monster = Instantiate(settings.prefab, destination, settings.prefab.transform.rotation);
