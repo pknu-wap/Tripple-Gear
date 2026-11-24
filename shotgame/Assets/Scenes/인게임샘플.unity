@@ -8579,6 +8579,14 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4772539015695613499, guid: 231fc8cc5e6e727439ce378a85e05fde, type: 3}
+      propertyPath: enemySpawnGroups.Array.data[1].routes.Array.data[0].entrance.type
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4772539015695613499, guid: 231fc8cc5e6e727439ce378a85e05fde, type: 3}
+      propertyPath: enemySpawnGroups.Array.data[2].routes.Array.data[0].entrance.type
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4772539015695613499, guid: 231fc8cc5e6e727439ce378a85e05fde, type: 3}
       propertyPath: missionCompleted.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 9104000000000000425}
