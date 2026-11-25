@@ -5,14 +5,6 @@ using UnityEngine;
 public partial class Trigger
 {
     [Serializable]
-    private sealed class WaveEntrance
-    {
-        [SerializeField] internal GameObject monster;
-        [SerializeField] internal Transform start;
-        [SerializeField] internal MonsterEntranceSettings entrance;
-    }
-
-    [Serializable]
     private sealed class SpawnRoute
     {
         [SerializeField, InspectorName("출현 위치")] internal Transform start;
@@ -52,7 +44,7 @@ public partial class Trigger
     }
 
     [SerializeField, KoreanLabel("적 출현 그룹")] private EnemySpawnGroup[] enemySpawnGroups;
-    [SerializeField] private WaveEntrance[] waveEntrances;
+    [SerializeField] private PlacedMonsterEntrance[] waveEntrances;
     [SerializeField, KoreanLabel("목표 달성 시 출현한 적 정리")] private bool clearMissionSpawnedEnemies = true;
     [SerializeField, KoreanLabel("클리어 후에도 적 출현")] private bool continueSpawningAfterMissionClear;
 
@@ -96,19 +88,16 @@ public partial class Trigger
 
     private bool IsScenePoint(Transform point) => point != null && point.gameObject.scene == gameObject.scene;
 
-    private WaveEntrance GetWaveEntrance(GameObject monster) =>
-        waveEntrances == null ? null : Array.Find(waveEntrances, entry => entry != null && entry.monster == monster);
-
     private bool ValidateWaveEntrance(GameObject monster)
     {
-        WaveEntrance entry = GetWaveEntrance(monster);
+        PlacedMonsterEntrance entry = PlacedMonsterEntrance.Find(waveEntrances, monster);
         return entry == null || entry.entrance.type == MonsterEntranceType.Normal ||
-            (monster.TryGetComponent<MonsterHealth>(out _) && (entry.start == null || IsScenePoint(entry.start)));
+            (monster.TryGetComponent<MonsterHealth>(out _) && entry.HasValidStart(monster));
     }
 
     private void ActivateWaveMonster(GameObject monster)
     {
-        WaveEntrance entry = GetWaveEntrance(monster);
+        PlacedMonsterEntrance entry = PlacedMonsterEntrance.Find(waveEntrances, monster);
         Vector3 destination = monster.transform.position;
         monster.SetActive(true);
         if (entry == null || entry.entrance.type == MonsterEntranceType.Normal ||
@@ -117,23 +106,7 @@ public partial class Trigger
             return;
         }
 
-        Vector3 start = entry.start != null ? entry.start.position : GetDefaultWaveEntranceStart(destination, entry.entrance.type);
-        MonsterEntranceMotion.Play(health, start, destination, entry.entrance);
-    }
-
-    private Vector3 GetDefaultWaveEntranceStart(Vector3 destination, MonsterEntranceType type)
-    {
-        if (type == MonsterEntranceType.SkyDrop)
-        {
-            Camera view = cameraLock.Camera != null ? cameraLock.Camera : Camera.main;
-            destination.y += 6f;
-            if (view != null && view.orthographic)
-            {
-                destination.y = Mathf.Max(destination.y, view.transform.position.y + view.orthographicSize + 1.5f);
-            }
-            return destination;
-        }
-        return destination + new Vector3(-2.5f, -1.9f);
+        entry.Play(health, destination, cameraLock.Camera != null ? cameraLock.Camera : Camera.main);
     }
 
     private void StartEnemySpawns(ArisaHorizontalMovement player, bool repeat)
@@ -204,6 +177,7 @@ public partial class Trigger
             chase.BeginEncounterApproach(spawnTarget, view);
         }
         monster.gameObject.SetActive(true);
+        if (activeMissionBoat != null) destination = activeMissionBoat.PlaceGroundEnemyOnDeck(monster);
         if (animated) MonsterEntranceMotion.Play(monster, start, destination, route.entrance);
         return monster;
     }

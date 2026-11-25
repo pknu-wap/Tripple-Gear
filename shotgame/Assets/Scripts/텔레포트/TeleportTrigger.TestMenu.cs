@@ -1,4 +1,3 @@
-#if UNITY_EDITOR
 using System;
 using UnityEngine;
 #if ENABLE_INPUT_SYSTEM
@@ -17,7 +16,7 @@ public sealed partial class TeleportTrigger
         [SerializeField, InspectorName("이동 시 다시 시작할 보스")] internal BossTrigger resetBoss;
     }
 
-    [Header("에디터 테스트")]
+    [Header("테스트 이동")]
     [SerializeField, KoreanLabel("임시 테스트용 F1 메뉴")] private bool temporaryF1Shortcut;
     [SerializeField, KoreanLabel("F1 이동 목적지")] private TestDestination[] temporaryDestinations;
     [SerializeField, KoreanLabel("F1 메뉴 글꼴")] private Font temporaryMenuFont;
@@ -82,10 +81,10 @@ public sealed partial class TeleportTrigger
 
         const float rowHeight = 36f;
         float width = Mathf.Min(360f, Screen.width - 32f);
-        float height = 108f + rowHeight * temporaryDestinations.Length;
+        float height = 108f + rowHeight * (temporaryDestinations.Length + 1);
         float left = (Screen.width - width) * 0.5f;
         float top = (Screen.height - height) * 0.5f;
-        GUI.Box(new Rect(left, top, width, height), "F1 테스트 이동");
+        GUI.Box(new Rect(left, top, width, height), "F1 테스트 메뉴");
         for (int i = 0; i < temporaryDestinations.Length; i++)
         {
             TestDestination destination = temporaryDestinations[i];
@@ -95,6 +94,12 @@ public sealed partial class TeleportTrigger
             {
                 SelectTestDestination(i);
             }
+        }
+        if (teleportSubject != null && teleportSubject.TryGetComponent(out SubmachineGunFire playerGun)
+            && GUI.Button(new Rect(left + 16f, top + height - 43f - rowHeight, width - 32f, 30f),
+                playerGun.TestDamageEnabled ? "총 데미지 100 해제 (적용 중)" : "총 데미지 100 적용"))
+        {
+            playerGun.TestDamageEnabled = !playerGun.TestDamageEnabled;
         }
         if (GUI.Button(new Rect(left + 16f, top + height - 43f, width - 32f, 30f), "닫기  (F1 / Esc)"))
         {
@@ -178,6 +183,7 @@ public sealed partial class TeleportTrigger
         testMenuOpen = open;
         if (open)
         {
+            GameplayInput.Block(this);
             timeScaleBeforeTestMenu = Time.timeScale;
             cursorWasVisible = Cursor.visible;
             cursorLockBeforeTestMenu = Cursor.lockState;
@@ -187,6 +193,7 @@ public sealed partial class TeleportTrigger
         }
         else
         {
+            GameplayInput.Unblock(this);
             Cursor.lockState = cursorLockBeforeTestMenu;
             Cursor.visible = cursorWasVisible;
             // A scene change may already have restored its own time scale.
@@ -196,4 +203,3 @@ public sealed partial class TeleportTrigger
 
     private void OnDisable() => SetTestMenuOpen(false);
 }
-#endif

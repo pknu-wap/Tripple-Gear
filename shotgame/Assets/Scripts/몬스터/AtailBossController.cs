@@ -139,6 +139,7 @@ public sealed class AtailBossController : MonoBehaviour
         if (!running && !playingDefeat) return;
         StopBattleActivity();
         playingDefeat = false;
+        GameplayInput.Unblock(this);
         if (serpent.isActiveAndEnabled) serpent.Hide();
     }
 
@@ -163,6 +164,7 @@ public sealed class AtailBossController : MonoBehaviour
         serpent.CloseHatch();
         serpent.SetAttackHitboxes(false);
         playingDefeat = true;
+        GameplayInput.Block(this);
         spawnedObjects = new GameObject("아테일 침몰 연출");
         spawnedObjects.transform.SetParent(transform, false);
         StartCoroutine(DefeatSequence());
@@ -195,7 +197,7 @@ public sealed class AtailBossController : MonoBehaviour
         yield return Breach(entry);
         yield return Ascend(entry, sky);
 
-        StartCoroutine(PlayDefeatBursts());
+        Coroutine bursts = StartCoroutine(PlayDefeatBursts());
         Vector2 flightEnd = sky + direction * Mathf.Min(serpent.Span * 0.66f, 27f);
         yield return MoveAlong(2.65f, progress =>
         {
@@ -222,14 +224,17 @@ public sealed class AtailBossController : MonoBehaviour
         yield return new WaitForSeconds(0.65f);
         GameObject effects = spawnedObjects;
         spawnedObjects = null;
-        playingDefeat = false;
+        StopCoroutine(bursts);
         Destroy(effects);
-        if (player.IsDead || defeatExit == null) yield break;
-
-        if (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatExit))
+        if (!player.IsDead && defeatExit != null
+            && (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatExit)))
         {
-            defeatExit.TeleportPlayer();
+            Coroutine teleport = defeatExit.StartPlayerTeleport();
+            if (teleport != null) yield return teleport;
         }
+
+        playingDefeat = false;
+        GameplayInput.Unblock(this);
     }
 
     private IEnumerator PlayDefeatBursts()

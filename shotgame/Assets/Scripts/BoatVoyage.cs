@@ -51,7 +51,6 @@ public sealed class BoatVoyage : MonoBehaviour
         if (scrollingSea != null) Destroy(scrollingSea);
     }
 
-#if UNITY_EDITOR
     public void RestartForTest() => BeginDeparture(fromMission: false);
 
     internal void PreviewBossEntrance(float deckCenterX, Action playEntrance)
@@ -66,7 +65,6 @@ public sealed class BoatVoyage : MonoBehaviour
         yield return TeleportDirectionalFade.GetOrCreate().Play(() => boarded = BoardForVoyage(deckCenterX), 2f, 2f);
         if (boarded) playEntrance();
     }
-#endif
 
     public void Depart()
     {
@@ -203,6 +201,35 @@ public sealed class BoatVoyage : MonoBehaviour
         // CameraManager updates first. Remove its actual step from the texture motion.
         float cameraTravel = cameraManager.ManagedCamera.transform.position.x - cameraStartX;
         UpdateSeaScroll(cameraTravel);
+    }
+
+    internal Vector3 PlaceGroundEnemyOnDeck(MonsterHealth monster)
+    {
+        Vector3 position = monster.transform.position;
+        if (deck == null || !deck.isActiveAndEnabled || monster.TryGetComponent<FlyingMonsterAttack>(out _)
+            || !monster.TryGetComponent(out BoxCollider2D body) || !body.isActiveAndEnabled)
+        {
+            return position;
+        }
+
+        Physics2D.SyncTransforms();
+        Bounds deckBounds = deck.bounds;
+        Bounds bodyBounds = body.bounds;
+        position.x += ClampToDeckWidth(deckBounds, bodyBounds, 0f);
+        position.y += Mathf.Max(0f, deckBounds.max.y + MonsterGroundMotion.SkinWidth - bodyBounds.min.y);
+
+        if (body.attachedRigidbody != null) body.attachedRigidbody.position = position;
+        monster.transform.position = position;
+        Physics2D.SyncTransforms();
+        return position;
+    }
+
+    internal static float ClampToDeckWidth(Bounds deckBounds, Bounds bodyBounds, float step)
+    {
+        float minStep = deckBounds.min.x - bodyBounds.min.x;
+        float maxStep = deckBounds.max.x - bodyBounds.max.x;
+        return minStep > maxStep ? deckBounds.center.x - bodyBounds.center.x
+            : Mathf.Clamp(step, minStep, maxStep);
     }
 
     internal bool PrepareBattle(Trigger mission, ArisaHorizontalMovement subject, bool dock)

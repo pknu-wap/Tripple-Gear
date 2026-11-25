@@ -23,6 +23,7 @@ public sealed class MissionObjective : MonoBehaviour
     [SerializeField, KoreanLabel("목표 수량"), Min(1)] private int requiredCount = 1;
     [SerializeField, KoreanLabel("버틸 시간 (초)"), Min(0.01f)] private float requiredSeconds = 10f;
     [SerializeField, KoreanLabel("지정 몬스터 (씬 오브젝트)")] private MonsterHealth[] targetMonsters;
+    [SerializeField] private PlacedMonsterEntrance[] targetEntrances;
     [SerializeField, KoreanLabel("미션 시작 전에도 대상 표시")] private bool keepTargetsVisibleBeforeStart;
     [SerializeField, KoreanLabel("항해 전투 보트")] private BoatVoyage missionBoat;
     [SerializeField, KoreanLabel("항해 전투 방식")] private BoatBattleMode boatBattleMode;
@@ -77,7 +78,8 @@ public sealed class MissionObjective : MonoBehaviour
         {
             if (target == null || target.gameObject.scene != gameObject.scene || target.Data == null
                 || target.gameObject == gameObject || !unique.Add(target)
-                || (target.transform.parent != null && !target.transform.parent.gameObject.activeInHierarchy))
+                || (target.transform.parent != null && !target.transform.parent.gameObject.activeInHierarchy)
+                || PlacedMonsterEntrance.Find(targetEntrances, target.gameObject)?.HasValidStart(target.gameObject) == false)
             {
                 return false;
             }
@@ -113,6 +115,7 @@ public sealed class MissionObjective : MonoBehaviour
         IsRunning = true;
         if (goalType == GoalType.DefeatTargets)
         {
+            Camera view = Camera.main;
             foreach (MonsterHealth target in targetMonsters)
             {
                 UnityAction listener = () => RecordTargetDefeat(target);
@@ -120,10 +123,12 @@ public sealed class MissionObjective : MonoBehaviour
                 target.Defeated.AddListener(listener);
                 if (target.TryGetComponent(out NormalMonsterChase chase))
                 {
-                    chase.BeginEncounterApproach(null, Camera.main);
+                    chase.BeginEncounterApproach(null, view);
                 }
+                Vector3 destination = target.transform.position;
                 target.gameObject.SetActive(true);
                 if (!IsRunning) return;
+                PlacedMonsterEntrance.Find(targetEntrances, target.gameObject)?.Play(target, destination, view);
             }
         }
         onStarted.Invoke();
@@ -154,6 +159,7 @@ public sealed class MissionObjective : MonoBehaviour
                 chase.EndEncounterApproach();
             }
             if (hideTargets) entry.Key.gameObject.SetActive(false);
+            else if (entry.Key.TryGetComponent(out MonsterEntranceMotion motion)) motion.FinishWithoutEffect();
         }
         targetListeners.Clear();
     }

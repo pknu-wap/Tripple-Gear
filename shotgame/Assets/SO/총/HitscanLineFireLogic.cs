@@ -39,9 +39,12 @@ public sealed class HitscanLineFireLogic : GunFireLogic
 
             if (damaged.Add(target))
             {
-                // The direct hit carries the bonus once. The existing Enemy-layer hit uses base damage.
-                target.TakeGunDamage(gunData.Damage + context.DamageBonus);
-                GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+                target.TakeGunDamage(context.GetDamage(gunData));
+                if (!context.DamageOverride.HasValue)
+                {
+                    // The normal shot also applies base damage to Enemy-layer targets.
+                    GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+                }
             }
         }
 

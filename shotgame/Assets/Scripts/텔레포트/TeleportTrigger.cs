@@ -106,6 +106,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
 
     public void TeleportPlayer() => StartPlayerTeleport();
 
+    internal bool CanStartPlayerTeleport => !isTeleporting && isActiveAndEnabled && teleportSubject != null;
+
     internal Coroutine StartPlayerTeleport(System.Action onArrival = null)
     {
         if (isTeleporting || !isActiveAndEnabled)

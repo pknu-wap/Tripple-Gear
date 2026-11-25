@@ -8,7 +8,8 @@ public readonly struct GunFireContext
         Vector2 direction,
         Camera camera,
         MonoBehaviour coroutineRunner,
-        float damageBonus = 0f
+        float damageBonus = 0f,
+        float? damageOverride = null
     )
     {
         MuzzlePosition = muzzlePosition;
@@ -16,6 +17,7 @@ public readonly struct GunFireContext
         Camera = camera;
         CoroutineRunner = coroutineRunner;
         DamageBonus = damageBonus;
+        DamageOverride = damageOverride;
         Owner = coroutineRunner != null ? coroutineRunner.transform : null;
     }
 
@@ -25,6 +27,9 @@ public readonly struct GunFireContext
     public MonoBehaviour CoroutineRunner { get; }
     public Transform Owner { get; }
     public float DamageBonus { get; }
+    internal float? DamageOverride { get; }
+
+    internal float GetDamage(GunSO gun) => DamageOverride ?? (gun.Damage + DamageBonus);
 }
 
 [CreateAssetMenu(fileName = "총SO", menuName = "Shotgame/총/공통 총")]

@@ -104,7 +104,7 @@ public sealed class ArisaMouseAim : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (DialogueManager.BlocksGameplayInput)
+        if (GameplayInput.IsBlocked)
         {
             return;
         }

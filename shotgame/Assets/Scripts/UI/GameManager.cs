@@ -24,7 +24,6 @@ public class GameManager : MonoBehaviour
     private float gameplayTimeScale;
     private bool ownsChapterPause;
     private int reticleSiblingIndex = -1;
-    private bool previousGunInputSuppression;
     private TeleportTrigger selectedChapterTeleport;
     private bool isGameOver = false;
 
@@ -61,19 +60,26 @@ public class GameManager : MonoBehaviour
         }
 
         if (gunSelectionPrefab == null || gameplayCanvas == null || playerGun == null
-            || chapterTeleport == null || !chapterTeleport.isActiveAndEnabled)
+            || chapterTeleport == null || !chapterTeleport.CanStartPlayerTeleport)
         {
             Debug.LogError("챕터 클리어에 필요한 UI, 플레이어 무기, 텔레포트를 연결해 주세요.", this);
             return false;
         }
 
-        selectedChapterTeleport = chapterTeleport;
         gunSelection = Instantiate(gunSelectionPrefab, gameplayCanvas.transform, false);
+        if (!gunSelection.Show(playerGun, SelectGun))
+        {
+            gunSelection.gameObject.SetActive(false);
+            Destroy(gunSelection.gameObject);
+            gunSelection = null;
+            return false;
+        }
+
+        selectedChapterTeleport = chapterTeleport;
         gameplayTimeScale = Time.timeScale;
         ownsChapterPause = true;
         Time.timeScale = 0f;
-        previousGunInputSuppression = playerGun.InputSuppressed;
-        playerGun.InputSuppressed = true;
+        GameplayInput.Block(this);
 
         if (mouseReticle != null && mouseReticle.transform.parent == gameplayCanvas.transform)
         {
@@ -83,10 +89,17 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    public void SelectGun(GunSO gun)
+    private void SelectGun(GunSO gun, int damageIncrease)
     {
         if (gunSelection == null || isGameOver || gun == null || !gun.CanFire)
         {
+            return;
+        }
+
+        Coroutine teleport = selectedChapterTeleport != null ? selectedChapterTeleport.StartPlayerTeleport() : null;
+        if (teleport == null)
+        {
+            Debug.LogWarning("다음 챕터 이동을 시작할 수 없습니다.", this);
             return;
         }
 
@@ -94,17 +107,13 @@ public class GameManager : MonoBehaviour
         gunSelection = null;
         selectionPanel.SetActive(false);
         Destroy(selectionPanel);
-        playerGun.EquipGun(gun);
-        StartCoroutine(MoveToNextChapter(selectedChapterTeleport));
+        playerGun.EquipChapterReward(gun, damageIncrease);
+        StartCoroutine(MoveToNextChapter(teleport));
     }
 
-    private IEnumerator MoveToNextChapter(TeleportTrigger chapterTeleport)
+    private IEnumerator MoveToNextChapter(Coroutine teleport)
     {
-        Coroutine teleport = chapterTeleport != null ? chapterTeleport.StartPlayerTeleport() : null;
-        if (teleport != null)
-        {
-            yield return teleport;
-        }
+        yield return teleport;
         RestoreGameplay();
     }
 
@@ -118,10 +127,7 @@ public class GameManager : MonoBehaviour
         ownsChapterPause = false;
         Time.timeScale = gameplayTimeScale;
         selectedChapterTeleport = null;
-        if (playerGun != null)
-        {
-            playerGun.InputSuppressed = previousGunInputSuppression;
-        }
+        GameplayInput.Unblock(this);
         if (reticleSiblingIndex >= 0 && mouseReticle != null)
         {
             mouseReticle.transform.SetSiblingIndex(reticleSiblingIndex);

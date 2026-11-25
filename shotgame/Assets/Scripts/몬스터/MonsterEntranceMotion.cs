@@ -18,6 +18,43 @@ internal struct MonsterEntranceSettings
     [SerializeField, InspectorName("등장 효과 프리팹")] internal GameObject effectPrefab;
 }
 
+[Serializable]
+internal sealed class PlacedMonsterEntrance
+{
+    [SerializeField] internal GameObject monster;
+    [SerializeField] internal Transform start;
+    [SerializeField] internal MonsterEntranceSettings entrance;
+
+    internal static PlacedMonsterEntrance Find(PlacedMonsterEntrance[] entries, GameObject target) =>
+        entries == null ? null : Array.Find(entries, entry => entry != null && entry.monster == target);
+
+    internal bool HasValidStart(GameObject target) =>
+        entrance.type == MonsterEntranceType.Normal || start == null || start.gameObject.scene == target.scene;
+
+    internal void Play(MonsterHealth health, Vector3 destination, Camera view)
+    {
+        if (entrance.type == MonsterEntranceType.Normal) return;
+
+        Vector3 origin = start != null ? start.position : GetDefaultStart(destination, view);
+        MonsterEntranceMotion.Play(health, origin, destination, entrance);
+    }
+
+    private Vector3 GetDefaultStart(Vector3 destination, Camera view)
+    {
+        if (entrance.type != MonsterEntranceType.SkyDrop)
+        {
+            return destination + new Vector3(-2.5f, -1.9f);
+        }
+
+        destination.y += 6f;
+        if (view != null && view.orthographic)
+        {
+            destination.y = Mathf.Max(destination.y, view.transform.position.y + view.orthographicSize + 1.5f);
+        }
+        return destination;
+    }
+}
+
 [DisallowMultipleComponent]
 internal sealed class MonsterEntranceMotion : MonoBehaviour
 {
@@ -114,6 +151,15 @@ internal sealed class MonsterEntranceMotion : MonoBehaviour
         if (settings.effectPrefab != null)
         {
             Instantiate(settings.effectPrefab, position, Quaternion.identity);
+        }
+    }
+
+    internal void FinishWithoutEffect()
+    {
+        if (isActiveAndEnabled && health != null && !health.IsDead)
+        {
+            SetPosition(to);
+            enabled = false;
         }
     }
 

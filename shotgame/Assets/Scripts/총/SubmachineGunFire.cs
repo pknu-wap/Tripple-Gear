@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 #if ENABLE_INPUT_SYSTEM
@@ -16,6 +17,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private const float MinAttackSpeed = 0.1f;
     private const int MinBulletCount = 1;
     private const float ReloadAnimationPeakProgress = 0.5f;
+    private const float TestShotDamage = 100f;
 #if UNITY_EDITOR
     private const string DefaultGunDataPath = "Assets/SO/총/기관단총SO.asset";
 #endif
@@ -39,6 +41,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private int currentBulletCount;
     private float damageBoostEndsAt;
     private float damageBonus;
+    private readonly Dictionary<GunSO, int> chapterDamageBonuses = new Dictionary<GunSO, int>();
     private GameObject damageBoostEffect;
     private float unlimitedAmmoEndsAt;
     private GameObject unlimitedAmmoEffect;
@@ -62,7 +65,9 @@ public sealed class SubmachineGunFire : MonoBehaviour
 #endif
 
     public bool IsReloading => isReloading;
+    internal GunSO CurrentGun => gunData;
     internal bool InputSuppressed { get; set; }
+    internal bool TestDamageEnabled { get; set; }
     public int CurrentBulletCount => currentBulletCount;
     public int MaxBulletCount => GetMaxBulletCount();
     public bool HasUnlimitedAmmo => Time.time < unlimitedAmmoEndsAt;
@@ -74,6 +79,19 @@ public sealed class SubmachineGunFire : MonoBehaviour
         gunData = gun;
         nextShotTime = 0f;
         FillBulletCount();
+    }
+
+    internal float GetChapterDamage(GunSO gun) => gun.Damage + GetChapterDamageBonus(gun);
+
+    internal void EquipChapterReward(GunSO gun, int damageIncrease)
+    {
+        chapterDamageBonuses[gun] = GetChapterDamageBonus(gun) + damageIncrease;
+        EquipGun(gun);
+    }
+
+    private int GetChapterDamageBonus(GunSO gun)
+    {
+        return chapterDamageBonuses.TryGetValue(gun, out int bonus) ? bonus : 0;
     }
 
     internal void StartDamageBoost(float bonus, float duration, GameObject effect)
@@ -147,7 +165,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         UpdateReload();
-        if (InputSuppressed || DialogueManager.BlocksGameplayInput) return;
+        if (InputSuppressed || GameplayInput.IsBlocked) return;
 
         if (ReadReloadPressed())
         {
@@ -305,8 +323,13 @@ public sealed class SubmachineGunFire : MonoBehaviour
             return;
         }
 
-        float shotBonus = Time.time < damageBoostEndsAt ? damageBonus : 0f;
-        gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this, shotBonus));
+        float shotBonus = GetChapterDamageBonus(gunData);
+        if (Time.time < damageBoostEndsAt)
+        {
+            shotBonus += damageBonus;
+        }
+        gunData.Fire(new GunFireContext(spawnPosition, direction, cameraToUse, this, shotBonus,
+            damageOverride: TestDamageEnabled ? TestShotDamage : null));
         PlayFireSound();
         arisaAim?.PlayFireShake(gunData.FireShakeAngle, gunData.FireShakeDuration, gunData.FireShakeCycles);
     }

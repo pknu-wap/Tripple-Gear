@@ -119,7 +119,7 @@ public sealed class ArisaSkillController : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale == 0f || DialogueManager.BlocksGameplayInput) return;
+        if (Time.timeScale == 0f || GameplayInput.IsBlocked) return;
         if (storedSkill.Data != null && ReadSwapPressed()
             && MissionInteractable.LastKeyboardInteractionFrame != Time.frameCount)
         {

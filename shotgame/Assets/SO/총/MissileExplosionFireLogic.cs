@@ -47,7 +47,7 @@ public sealed class MissileExplosionFireLogic : GunFireLogic
             projectile = projectileObject.AddComponent<Projectile2D>();
         }
 
-        float damage = gunData.Damage + context.DamageBonus;
+        float damage = context.GetDamage(gunData);
         projectile.ConfigureHitSettings(gunData, hitPosition => ApplyExplosionDamage(hitPosition, damage), false);
         projectile.Launch(
             fireDirection,

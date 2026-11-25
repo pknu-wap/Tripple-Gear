@@ -1,0 +1,455 @@
+fileFormatVersion: 2
+guid: ec0d7741e7224ec18fdf56393c629831
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 21300000
+    second: ExplosiveMonsterWalk_1
+  - first:
+      213: 21300002
+    second: ExplosiveMonsterWalk_2
+  - first:
+      213: 21300004
+    second: ExplosiveMonsterWalk_3
+  - first:
+      213: 21300006
+    second: ExplosiveMonsterWalk_4
+  - first:
+      213: 21300008
+    second: ExplosiveMonsterWalk_5
+  - first:
+      213: 21300010
+    second: ExplosiveMonsterWalk_6
+  - first:
+      213: 21300012
+    second: ExplosiveMonsterWalk_7
+  - first:
+      213: 21300014
+    second: ExplosiveMonsterWalk_8
+  - first:
+      213: 21300016
+    second: ExplosiveMonsterWalk_9
+  - first:
+      213: 21300018
+    second: ExplosiveMonsterWalk_10
+  - first:
+      213: 21300020
+    second: ExplosiveMonsterWalk_11
+  - first:
+      213: 21300022
+    second: ExplosiveMonsterWalk_12
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 292
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: 0
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 1
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_1
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 768
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.5050000, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e805b5c063843b7bb73e02567d6211c
+      internalID: 21300000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_2
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 768
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4950000, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b26fe557620c45329201a085dcdb43ee
+      internalID: 21300002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_3
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 768
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4833333, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4625990d38047a8976c9b1be469ef1a
+      internalID: 21300004
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_4
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 768
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4650000, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16fbb92304724a418778c589a958e4b1
+      internalID: 21300006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_5
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 406
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.5083333, y: 0.5065359}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 04fdf754d1284bc9af9efe0d64f19bf4
+      internalID: 21300008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_6
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 406
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4950000, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d5ce452881c4fb88a345d5d921002e6
+      internalID: 21300010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_7
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 406
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4833333, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a69a84ae27044d01aa0b8281f0d5fc1a
+      internalID: 21300012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_8
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 406
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4700000, y: 0.5000000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 406e27868a1c4447b834330967946a1d
+      internalID: 21300014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_9
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 44
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.5116667, y: 0.5000000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2368b4f863584afa85f28c18458294de
+      internalID: 21300016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_10
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 44
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.5000000, y: 0.5098039}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 917c4ae311f741ed80617e195cef8a02
+      internalID: 21300018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_11
+      rect:
+        serializedVersion: 2
+        x: 766
+        y: 44
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4850000, y: 0.5032680}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b418da7c02ee4170a113b7e5acc4981f
+      internalID: 21300020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ExplosiveMonsterWalk_12
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 44
+        width: 300
+        height: 306
+      alignment: 9
+      pivot: {x: 0.4700000, y: 0.5000000}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78f472bc952b409ba8991378cd406b3b
+      internalID: 21300022
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ExplosiveMonsterWalk_1: 21300000
+      ExplosiveMonsterWalk_2: 21300002
+      ExplosiveMonsterWalk_3: 21300004
+      ExplosiveMonsterWalk_4: 21300006
+      ExplosiveMonsterWalk_5: 21300008
+      ExplosiveMonsterWalk_6: 21300010
+      ExplosiveMonsterWalk_7: 21300012
+      ExplosiveMonsterWalk_8: 21300014
+      ExplosiveMonsterWalk_9: 21300016
+      ExplosiveMonsterWalk_10: 21300018
+      ExplosiveMonsterWalk_11: 21300020
+      ExplosiveMonsterWalk_12: 21300022
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

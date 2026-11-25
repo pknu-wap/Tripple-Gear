@@ -9,29 +9,34 @@ public sealed class ExplosiveMonster : MonoBehaviour
     private enum Phase
     {
         Idle,
-        Patrol,
+        Chase,
         Fuse,
     }
 
     private const float FuseDuration = 3f;
+    private const float ExplosionEffectLifetime = 0.7f;
+    private static readonly int IsMoving = Animator.StringToHash("IsMoving");
     private static readonly Color WarningColor = new Color(1f, 0.24f, 0.1f);
     private static readonly ContactFilter2D BodyFilter = new ContactFilter2D { useTriggers = false };
 
-    [SerializeField, KoreanLabel("방향 전환 간격 (초)"), Min(0.1f)] private float turnInterval = 2f;
     [SerializeField, KoreanLabel("폭발 반경"), Min(0.1f)] private float blastRadius = 1.5f;
     [SerializeField, KoreanLabel("폭발 효과 프리팹")] private GameObject explosionEffectPrefab;
 
     private readonly Plane[] cameraPlanes = new Plane[6];
     private readonly List<Collider2D> overlaps = new List<Collider2D>();
+    private readonly RaycastHit2D[] wallHits = new RaycastHit2D[8];
     private MonsterHealth health;
     private SpriteRenderer spriteRenderer;
     private Rigidbody2D body;
     private BoxCollider2D contactCollider;
     private MonsterGroundMotion groundMotion;
-    private float patrolOriginX;
-    private Color patrolColor;
+    private ContactFilter2D wallFilter;
+    private Animator animator;
+    private ArisaHealth targetPlayer;
+    private Collider2D targetCollider;
+    private Color idleColor;
+    private bool idleFlipX;
     private Phase phase;
-    private float patrolElapsed;
     private double fuseEndsAt;
 
     private void Awake()
@@ -41,11 +46,26 @@ public sealed class ExplosiveMonster : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
         contactCollider = GetComponent<BoxCollider2D>();
         groundMotion = new MonsterGroundMotion(contactCollider);
-        patrolOriginX = body.position.x;
-        patrolColor = spriteRenderer.color;
+        animator = GetComponent<Animator>();
+        wallFilter = new ContactFilter2D
+        {
+            useLayerMask = true,
+            layerMask = LayerMask.GetMask("Box", "WaveBoundary"),
+            useTriggers = false,
+        };
+        idleColor = spriteRenderer.color;
+        idleFlipX = spriteRenderer.flipX;
     }
 
-    private void OnEnable() => groundMotion.Reset();
+    private void OnEnable()
+    {
+        groundMotion.Reset();
+        phase = Phase.Idle;
+        SetTarget(null);
+        spriteRenderer.color = idleColor;
+        spriteRenderer.flipX = idleFlipX;
+        SetMoving(false);
+    }
 
     private void LateUpdate()
     {
@@ -63,7 +83,7 @@ public sealed class ExplosiveMonster : MonoBehaviour
         GeometryUtility.CalculateFrustumPlanes(battleCamera, cameraPlanes);
         if (GeometryUtility.TestPlanesAABB(cameraPlanes, spriteRenderer.bounds))
         {
-            phase = Phase.Patrol;
+            phase = Phase.Chase;
         }
     }
 
@@ -71,12 +91,14 @@ public sealed class ExplosiveMonster : MonoBehaviour
     {
         if (health.IsDead || health.IsEntering)
         {
+            SetMoving(false);
             return;
         }
 
         if (health.IsStunned)
         {
             if (phase == Phase.Fuse) fuseEndsAt += Time.fixedDeltaTime;
+            SetMoving(false);
             return;
         }
 
@@ -84,47 +106,117 @@ public sealed class ExplosiveMonster : MonoBehaviour
         double now = Time.fixedTimeAsDouble;
         switch (phase)
         {
-            case Phase.Patrol:
-                Patrol(now);
+            case Phase.Chase:
+                Chase(now);
                 break;
             case Phase.Fuse:
-                if (now >= fuseEndsAt)
-                {
-                    Explode();
-                }
-                else
-                {
-                    float elapsed = FuseDuration - (float)(fuseEndsAt - now);
-                    spriteRenderer.color = Color.Lerp(WarningColor, patrolColor,
-                        Mathf.PingPong(elapsed * 4f, 1f));
-                }
+                UpdateFuse(now);
                 break;
         }
     }
 
-    private void Patrol(double now)
+    private void Chase(double now)
     {
         contactCollider.Overlap(BodyFilter, overlaps);
-        if (FindLivingPlayer() != null)
+        ArisaHealth player = FindLivingPlayer();
+        if (player != null)
         {
             phase = Phase.Fuse;
+            SetTarget(player);
             fuseEndsAt = now + FuseDuration;
-            spriteRenderer.color = WarningColor;
+            UpdateFuse(now);
             return;
         }
 
-        float interval = Mathf.Max(0.1f, turnInterval);
-        patrolElapsed = Mathf.Repeat(patrolElapsed + Time.fixedDeltaTime, 2f * interval);
-        float distance = Mathf.PingPong(patrolElapsed, interval) * health.Data.MoveSpeed;
+        if (targetPlayer == null)
+        {
+            SetTarget(FindFirstObjectByType<ArisaHealth>());
+        }
+        FollowTarget();
+    }
+
+    private void UpdateFuse(double now)
+    {
+        if (now >= fuseEndsAt)
+        {
+            Explode();
+            return;
+        }
+
+        float elapsed = FuseDuration - (float)(fuseEndsAt - now);
+        spriteRenderer.color = Color.Lerp(WarningColor, idleColor,
+            Mathf.PingPong(elapsed * (4f + elapsed), 1f));
+
+        FollowTarget();
+    }
+
+    private void SetTarget(ArisaHealth player)
+    {
+        targetPlayer = player;
+        targetCollider = player != null ? player.GetComponent<Collider2D>() : null;
+    }
+
+    private void FollowTarget()
+    {
+        if (targetPlayer == null || targetPlayer.IsDead || !targetPlayer.isActiveAndEnabled)
+        {
+            SetMoving(false);
+            return;
+        }
+
+        float targetX = targetCollider != null ? targetCollider.bounds.center.x : targetPlayer.transform.position.x;
+        MoveTowards(targetX);
+    }
+
+    private void MoveTowards(float targetX)
+    {
         Vector2 position = body.position;
-        body.MovePosition(new Vector2(patrolOriginX - distance, position.y));
+        float movement = Mathf.MoveTowards(position.x, targetX, health.Data.MoveSpeed * Time.fixedDeltaTime) - position.x;
+        if (Mathf.Abs(movement) <= 0.0001f)
+        {
+            SetMoving(false);
+            return;
+        }
+
+        float sign = Mathf.Sign(movement);
+        spriteRenderer.flipX = sign < 0f;
+        Vector2 direction = new Vector2(sign, 0f);
+        Bounds bounds = contactCollider.bounds;
+        float skin = MonsterGroundMotion.SkinWidth;
+        float distance = Mathf.Abs(movement);
+        Vector2 castSize = new Vector2(bounds.size.x, Mathf.Max(skin, bounds.size.y - 2f * skin));
+        int count = Physics2D.BoxCast(bounds.center, castSize, 0f, direction, wallFilter, wallHits, distance + skin);
+        for (int i = 0; i < count; i++)
+        {
+            RaycastHit2D hit = wallHits[i];
+            if (hit.collider != null && Vector2.Dot(hit.normal, direction) < -0.01f)
+            {
+                distance = Mathf.Min(distance, Mathf.Max(0f, hit.distance - skin));
+            }
+        }
+
+        SetMoving(distance > 0.0001f);
+        if (distance > 0.0001f)
+        {
+            body.MovePosition(position + direction * distance);
+        }
+    }
+
+    private void SetMoving(bool moving)
+    {
+        if (animator != null && animator.runtimeAnimatorController != null)
+        {
+            animator.SetBool(IsMoving, moving);
+        }
     }
 
     private void Explode()
     {
         if (explosionEffectPrefab != null)
         {
-            Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+            GameObject effect = Instantiate(explosionEffectPrefab, body.position, Quaternion.identity);
+            effect.transform.localScale *= blastRadius;
+            Destroy(effect, ExplosionEffectLifetime);
         }
 
         Physics2D.OverlapCircle(body.position, blastRadius, BodyFilter, overlaps);
