@@ -16,5 +16,9 @@ MonoBehaviour:
   moveSpeed: 3.7
   attackDamage: 1
   attackInterval: 2
-  dropPrefab: {fileID: 953330073782280629, guid: e9487ec6e1a72a649b041a83fb0ffcde, type: 3}
-  dropChance: 0.65
+  useWallHitFlash: 0
+  dropSlots:
+  - prefab: {fileID: 953330073782280629, guid: e9487ec6e1a72a649b041a83fb0ffcde, type: 3}
+    chance: 0.65
+  dropPrefab: {fileID: 0}
+  dropChance: 0

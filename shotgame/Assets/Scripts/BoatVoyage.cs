@@ -12,6 +12,7 @@ public sealed class BoatVoyage : MonoBehaviour
     [SerializeField, KoreanLabel("보트 그림")] private SpriteRenderer hull;
     [SerializeField, KoreanLabel("바다 배경")] private SpriteRenderer[] seaTiles;
     [SerializeField, KoreanLabel("수면 스크롤 셰이더")] private Shader seaScrollShader;
+    [SerializeField, KoreanLabel("항해 끝에 시작할 미션")] private Trigger arrivalMission;
     [SerializeField, KoreanLabel("항해 속도"), Min(0.1f)] private float cruiseSpeed = 6f;
     [SerializeField, KoreanLabel("출항 가속도"), Min(0.1f)] private float acceleration = 5f;
 
@@ -161,10 +162,12 @@ public sealed class BoatVoyage : MonoBehaviour
         bool stoppingForBattle = phase == VoyagePhase.Docking || phase == VoyagePhase.Battle;
         speed = Mathf.MoveTowards(speed, stoppingForBattle ? 0f : cruiseSpeed, acceleration * deltaTime);
         float step = Mathf.Clamp(remaining, 0f, speed * deltaTime);
+        bool reachedEnd = phase == VoyagePhase.Sailing && remaining <= step;
 
         if (!stoppingForBattle && remaining <= step)
         {
             phase = VoyagePhase.Arrived;
+            speed = 0f;
         }
         else if (phase == VoyagePhase.Docking && remaining <= step)
         {
@@ -180,6 +183,11 @@ public sealed class BoatVoyage : MonoBehaviour
         {
             transform.position += Vector3.right * step;
             Physics2D.SyncTransforms();
+        }
+
+        if (reachedEnd && arrivalMission != null)
+        {
+            arrivalMission.TryStartBoatArrivalMission(this, player);
         }
     }
 
@@ -242,14 +250,14 @@ public sealed class BoatVoyage : MonoBehaviour
 
         activeBattleMission = mission;
         dockedBattle = dock;
-        phase = dock ? VoyagePhase.Docking : VoyagePhase.Battle;
-        if (!dock) speed = 0f;
+        phase = dock && phase != VoyagePhase.Arrived ? VoyagePhase.Docking : VoyagePhase.Battle;
+        if (phase == VoyagePhase.Battle) speed = 0f;
         return true;
     }
 
     internal bool IsBattleReady(Trigger mission)
     {
-        return activeBattleMission == mission && (!dockedBattle
+        return activeBattleMission == mission && (phase == VoyagePhase.Battle
             || (speed <= 0f && visualSpeed <= 0f && (wake == null || !wake.HasLiveParticles)));
     }
 

@@ -60,6 +60,9 @@ public partial class Trigger
         return false;
     }
 
+    internal bool TryStartBoatArrivalMission(BoatVoyage boat, ArisaHorizontalMovement player) =>
+        ResolveMode(Manager) == TriggerMode.Mission && IsMissionForBoat(boat) && TryActivate(Manager, player);
+
     public void ResetMissionForRetry()
     {
         CancelMission();

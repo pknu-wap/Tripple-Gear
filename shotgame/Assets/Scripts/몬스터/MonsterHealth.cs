@@ -112,9 +112,8 @@ public sealed class MonsterHealth : MonoBehaviour
 
     private void DropItem()
     {
-        GameObject prefab = monsterData.DropPrefab;
-        float chance = monsterData.DropChance;
-        if (prefab != null && chance > 0f && (chance >= 1f || Random.value < chance))
+        GameObject prefab = monsterData.RollDrop();
+        if (prefab != null)
         {
             Instantiate(prefab, transform.position, prefab.transform.rotation);
         }
