@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
@@ -29,6 +30,7 @@ public sealed class BeachLaserSurvival : MonoBehaviour
     private const int LaneCount = 8;
     private const int SparkCount = 8;
     private const float DischargeFlash = 0.08f;
+    private const float ImpactShakeDuration = 0.28f;
     // Centers of the three red lenses on BeachLaserAirship.png, in sprite UVs.
     private static readonly Vector2[] Emitters =
     {
@@ -45,12 +47,17 @@ public sealed class BeachLaserSurvival : MonoBehaviour
     private Image chargeHalo;
     private Image chargeCore;
     private readonly Image[] chargeSparks = new Image[SparkCount];
+    private BeachLaserImpactDust impactDust;
     private bool active;
     private float departure;
     private float reveal;
     private int lastShot;
     private int lane;
     private bool hitThisShot;
+    private bool impactThisShot;
+    private float shakeStartedAt = float.NegativeInfinity;
+    private Vector2 shakeOffset;
+    private Camera shakenCamera;
     private float shipOffset;
     private float shipBank;
     private float lineupStart;
@@ -72,6 +79,10 @@ public sealed class BeachLaserSurvival : MonoBehaviour
         }
 
         if (charge == null) CreateChargeVisuals();
+        impactDust ??= new BeachLaserImpactDust((RectTransform)overlay.transform, beam, glowSprite);
+        impactDust.Clear();
+        shakeStartedAt = float.NegativeInfinity;
+        shakeOffset = Vector2.zero;
         active = true;
         departure = 0f;
         lastShot = -1;
@@ -127,7 +138,12 @@ public sealed class BeachLaserSurvival : MonoBehaviour
             if (departure <= 0f) return;
             departure = Mathf.Max(0f, departure - Time.deltaTime);
             if (departure == 0f) Hide();
-            else Present(departure / ExitSeconds);
+            else
+            {
+                UpdateShake();
+                Present(departure / ExitSeconds);
+                impactDust.Update(view, shakeOffset);
+            }
             return;
         }
 
@@ -152,6 +168,7 @@ public sealed class BeachLaserSurvival : MonoBehaviour
             int pick = Random.Range(0, lane < 0 ? LaneCount : LaneCount - 1);
             lane = lane >= 0 && pick >= lane ? pick + 1 : pick;
             hitThisShot = false;
+            impactThisShot = false;
             AlignEmitter(LaneCenter());
         }
 
@@ -159,20 +176,32 @@ public sealed class BeachLaserSurvival : MonoBehaviour
         float lineup = Mathf.Clamp01(phase / LineupSeconds);
         shipOffset = Mathf.SmoothStep(lineupStart, lineupTarget, lineup);
         shipBank = lineup < 1f ? -Mathf.Sign(lineupTarget - lineupStart) * 2.3f * Mathf.Sin(lineup * Mathf.PI) : 0f;
-        Present(1f);
         bool firing = phase >= WarningSeconds && phase < BeamEnd;
         warning.gameObject.SetActive(phase < WarningSeconds);
         beam.gameObject.SetActive(firing);
 
         float center = LaneCenter();
         float emitterY = Mathf.Lerp(ShipBottom, ShipTop, emitter.y);
-        UpdateCharge(new Vector2(center, emitterY), phase);
         float left = center - BeamWidth * 0.5f;
         float right = center + BeamWidth * 0.5f;
         float floorY = arenaFloor.bounds.max.y;
         float floorViewport = view.WorldToViewportPoint(new Vector3(0f, floorY, transform.position.z)).y;
+        if (firing && !impactThisShot)
+        {
+            impactThisShot = true;
+            shakeStartedAt = Time.time;
+            float floorDepth = view.WorldToViewportPoint(arenaFloor.bounds.center).z;
+            Vector3 impact = view.ViewportToWorldPoint(new Vector3(center, floorViewport, floorDepth));
+            impact.y = floorY;
+            impactDust.Play(impact);
+        }
+
+        UpdateShake();
+        Present(1f);
+        UpdateCharge(new Vector2(center, emitterY) + shakeOffset, phase);
         SetBand(warning, left, right, floorViewport, floorViewport + 0.026f);
         SetBand(beam, left, right, floorViewport, emitterY);
+        impactDust.Update(view, shakeOffset);
         if (!firing || hitThisShot || playerCollider == null || !playerCollider.enabled) return;
 
         float depth = view.WorldToViewportPoint(player.transform.position).z;
@@ -277,17 +306,66 @@ public sealed class BeachLaserSurvival : MonoBehaviour
         ship.localRotation = Quaternion.Euler(0f, 0f, shipBank * eased);
     }
 
-    private static void SetBand(RectTransform rect, float left, float right, float bottom, float top)
+    private void SetBand(RectTransform rect, float left, float right, float bottom, float top)
     {
-        rect.anchorMin = new Vector2(left, bottom);
-        rect.anchorMax = new Vector2(right, top);
+        rect.anchorMin = new Vector2(left, bottom) + shakeOffset;
+        rect.anchorMax = new Vector2(right, top) + shakeOffset;
         rect.offsetMin = rect.offsetMax = Vector2.zero;
     }
 
-    private void OnDisable() => Hide();
+    private void UpdateShake()
+    {
+        float elapsed = Time.time - shakeStartedAt;
+        float remaining = 1f - Mathf.Clamp01(elapsed / ImpactShakeDuration);
+        if (remaining <= 0f)
+        {
+            shakeOffset = Vector2.zero;
+            return;
+        }
+
+        float angle = elapsed * 2f * Mathf.PI;
+        shakeOffset = new Vector2(0.010f * Mathf.Sin(angle * 19f + 0.6f),
+            0.022f * Mathf.Cos(angle * 23f)) * (remaining * remaining);
+    }
+
+    private void OnEnable()
+    {
+        RenderPipelineManager.beginCameraRendering += BeginCameraShake;
+        RenderPipelineManager.endCameraRendering += EndCameraShake;
+    }
+
+    private void OnDisable()
+    {
+        RenderPipelineManager.beginCameraRendering -= BeginCameraShake;
+        RenderPipelineManager.endCameraRendering -= EndCameraShake;
+        Hide();
+    }
+
+    private void BeginCameraShake(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera != view || shakeOffset == Vector2.zero) return;
+
+        // Shift the rendered view without moving the camera that the mission and its boundaries use.
+        Vector2 clipOffset = shakeOffset * 2f;
+        camera.projectionMatrix = Matrix4x4.Translate(new Vector3(clipOffset.x, clipOffset.y, 0f))
+            * camera.projectionMatrix;
+        shakenCamera = camera;
+    }
+
+    private void EndCameraShake(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera == shakenCamera) RestoreCamera();
+    }
+
+    private void RestoreCamera()
+    {
+        if (shakenCamera != null) shakenCamera.ResetProjectionMatrix();
+        shakenCamera = null;
+    }
 
     private void OnDestroy()
     {
+        impactDust?.Dispose();
         if (glowSprite != null) Destroy(glowSprite);
         if (glowTexture != null) Destroy(glowTexture);
     }
@@ -296,6 +374,10 @@ public sealed class BeachLaserSurvival : MonoBehaviour
     {
         active = false;
         departure = 0f;
+        shakeStartedAt = float.NegativeInfinity;
+        shakeOffset = Vector2.zero;
+        RestoreCamera();
+        impactDust?.Clear();
         if (overlay != null) overlay.gameObject.SetActive(false);
     }
 }

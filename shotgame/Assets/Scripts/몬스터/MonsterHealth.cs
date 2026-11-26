@@ -15,9 +15,16 @@ public sealed class MonsterHealth : MonoBehaviour
 
     // 같은 SO를 사용하는 몬스터도 현재 HP는 각자 보관한다.
     private int currentHp;
+    private int? maxHpOverride;
+    private NormalMonsterChase chase;
+    private ExplosiveMonster explosive;
+    private Animator idleAnimator;
+    private RuntimeAnimatorController idleController;
+    private AnimatorUpdateMode previousAnimatorMode;
+    private bool playingIdleDuringDialogue;
 
     public MonsterSO Data => monsterData;
-    public int MaxHp => monsterData != null ? monsterData.MaxHp : 0;
+    public int MaxHp => GameDifficulty.ScaleMonsterHp(maxHpOverride ?? (monsterData != null ? monsterData.MaxHp : 0));
     public int CurrentHp => currentHp;
     public bool IsDead => currentHp <= 0;
     internal bool IsStunned { get; private set; }
@@ -27,10 +34,17 @@ public sealed class MonsterHealth : MonoBehaviour
     public UnityEvent<int, int> HpChanged => hpChanged;
     public UnityEvent Defeated => defeated;
     internal MissionObjective RequiredDamageObjective { get; set; }
-    internal bool DefeatedByGun { get; private set; }
+    internal MonsterSO DropTableOverride { get; set; }
 
     private void Awake()
     {
+        TryGetComponent(out chase);
+        TryGetComponent(out explosive);
+        if ((chase != null || explosive != null) && TryGetComponent(out idleAnimator))
+        {
+            idleController = idleAnimator.runtimeAnimatorController;
+        }
+
         if (monsterData == null)
         {
             Debug.LogError("MonsterHealth에 몬스터 SO를 연결해 주세요.", this);
@@ -39,6 +53,43 @@ public sealed class MonsterHealth : MonoBehaviour
 
         currentHp = MaxHp;
         hpChanged?.Invoke(currentHp, MaxHp);
+    }
+
+    internal void InitializeHpOverride(int maxHp)
+    {
+        maxHpOverride = maxHp;
+        currentHp = MaxHp;
+        hpChanged?.Invoke(currentHp, MaxHp);
+    }
+
+    private void LateUpdate()
+    {
+        if (idleController == null || idleAnimator == null) return;
+
+        if (GameplayPause.IsPausedOnlyForDialogue && !IsDead && !IsEntering && !IsStunned
+            && !idleAnimator.applyRootMotion && idleAnimator.runtimeAnimatorController == idleController
+            && (chase == null || !chase.IsChasing) && (explosive == null || explosive.IsIdle))
+        {
+            if (playingIdleDuringDialogue) return;
+
+            previousAnimatorMode = idleAnimator.updateMode;
+            idleAnimator.updateMode = AnimatorUpdateMode.UnscaledTime;
+            playingIdleDuringDialogue = true;
+        }
+        else
+        {
+            RestoreAnimatorMode();
+        }
+    }
+
+    private void OnDisable() => RestoreAnimatorMode();
+
+    private void RestoreAnimatorMode()
+    {
+        if (!playingIdleDuringDialogue) return;
+
+        if (idleAnimator != null) idleAnimator.updateMode = previousAnimatorMode;
+        playingIdleDuringDialogue = false;
     }
 
     public void TakeDamage(int amount)
@@ -65,10 +116,9 @@ public sealed class MonsterHealth : MonoBehaviour
     {
         if (TryGetComponent(out RobotStun stun)) stun.End();
         currentHp = MaxHp;
-        DefeatedByGun = false;
         if (TryGetComponent(out MonsterHitFlash hitFlash)) hitFlash.enabled = false;
         if (TryGetComponent(out MonsterDeathEffect deathEffect)) deathEffect.ResetForMission();
-        if (TryGetComponent(out NormalMonsterChase chase)) chase.ResetForMission();
+        if (chase != null) chase.ResetForMission();
         hpChanged?.Invoke(currentHp, MaxHp);
     }
 
@@ -96,10 +146,24 @@ public sealed class MonsterHealth : MonoBehaviour
             return;
         }
 
-        DefeatedByGun = IsDead && fromGun;
         if (fromGun)
         {
             MonsterHitFlash.Play(gameObject, monsterData.UseWallHitFlash);
+        }
+
+        if (IsDead
+            && !TryGetComponent<BossMonsterController>(out _)
+            && !TryGetComponent<AtailSerpent>(out _)
+            && !TryGetComponent<SummitAirshipBoss>(out _)
+            && !TryGetComponent<GongOilBoss>(out _))
+        {
+            TryGetComponent(out MonsterDeathEffect deathEffect);
+            GameObject burst = deathEffect != null ? deathEffect.Prefab : null;
+            if (burst == null && explosive != null)
+            {
+                burst = explosive.ExplosionEffectPrefab;
+            }
+            MonsterDeathBurst.Play(gameObject, burst, fromGun, monsterData.UseWallHitFlash);
         }
 
         hpChanged?.Invoke(currentHp, MaxHp);
@@ -112,7 +176,7 @@ public sealed class MonsterHealth : MonoBehaviour
 
     private void DropItem()
     {
-        GameObject prefab = monsterData.RollDrop();
+        GameObject prefab = (DropTableOverride != null ? DropTableOverride : monsterData).RollDrop();
         if (prefab != null)
         {
             Instantiate(prefab, transform.position, prefab.transform.rotation);

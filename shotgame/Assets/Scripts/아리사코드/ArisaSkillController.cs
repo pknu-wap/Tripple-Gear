@@ -24,6 +24,11 @@ public sealed class ArisaSkillController : MonoBehaviour
             Uses = data.MaxUseCount;
             CooldownEndsAt = 0f;
         }
+
+        internal void AddUses(int amount)
+        {
+            Uses += Mathf.Min(amount, int.MaxValue - Uses);
+        }
     }
 
     private const float MinDirectionSqrMagnitude = 0.0001f;
@@ -55,6 +60,14 @@ public sealed class ArisaSkillController : MonoBehaviour
     public float CooldownRemaining => IsCoolingDown ? activeSkill.CooldownEndsAt - Time.time : 0f;
     public bool IsCoolingDown => SkillData != null && Time.time < activeSkill.CooldownEndsAt;
 
+    internal void ClearSkills()
+    {
+        int previousCount = RemainingUseCount;
+        activeSkill = default;
+        storedSkill = default;
+        NotifySkillSlotsChanged(previousCount);
+    }
+
     internal bool TryAddSkillUses(int amount)
     {
         if (amount <= 0 || SkillData == null || RemainingUseCount <= 0)
@@ -63,7 +76,7 @@ public sealed class ArisaSkillController : MonoBehaviour
         }
 
         int previousCount = RemainingUseCount;
-        activeSkill.Uses += Mathf.Min(amount, int.MaxValue - previousCount);
+        activeSkill.AddUses(amount);
         NotifySkillSlotsChanged(previousCount);
         return true;
     }
@@ -76,8 +89,22 @@ public sealed class ArisaSkillController : MonoBehaviour
         }
 
         int previousCount = RemainingUseCount;
-        if (activeSkill.Data == null) activeSkill = new SkillSlot(skillData);
-        else storedSkill = new SkillSlot(skillData);
+        if (activeSkill.Data == skillData)
+        {
+            activeSkill.AddUses(skillData.MaxUseCount);
+        }
+        else if (storedSkill.Data == skillData)
+        {
+            storedSkill.AddUses(skillData.MaxUseCount);
+        }
+        else if (activeSkill.Data == null)
+        {
+            activeSkill = new SkillSlot(skillData);
+        }
+        else
+        {
+            storedSkill = new SkillSlot(skillData);
+        }
         NotifySkillSlotsChanged(previousCount);
         return true;
     }

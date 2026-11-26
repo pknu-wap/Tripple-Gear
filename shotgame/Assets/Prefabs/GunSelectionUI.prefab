@@ -92,7 +92,7 @@ MonoBehaviour:
   shotgun: {fileID: 11400000, guid: d6096933bfe642e69d0be3b7963fd736, type: 2}
   sniper: {fileID: 11400000, guid: 1fd104cce1ad43bb9d6c35dc047587ea, type: 2}
   missile: {fileID: 11400000, guid: 96d1b4058c1f4b3d8b77fc7c378606ca, type: 2}
-  font: {fileID: 11400000, guid: 2bd59b4eeb500a443adcf90eb8098d2f, type: 2}
+  font: {fileID: 11400000, guid: 1d534fbfd40d1484db324281fbe67efc, type: 2}
   textOutline: {fileID: 2100000, guid: 85892284160d401f8084b220b37f21ae, type: 2}
   gunArtwork: {fileID: 2800000, guid: 2bfe3fc636984e10a8ab3492efbe361b, type: 3}
   rocketArtwork: {fileID: 2800000, guid: 4869711e73d09c54aa82229d0b5f980b, type: 3}

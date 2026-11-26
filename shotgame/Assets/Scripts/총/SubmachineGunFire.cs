@@ -83,9 +83,14 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     internal float GetChapterDamage(GunSO gun) => gun.Damage + GetChapterDamageBonus(gun);
 
-    internal void EquipChapterReward(GunSO gun, int damageIncrease)
+    internal Dictionary<GunSO, int> CopyChapterDamageBonuses() => new Dictionary<GunSO, int>(chapterDamageBonuses);
+
+    internal void EquipChapterReward(GunSO gun, IReadOnlyDictionary<GunSO, int> damageIncreases)
     {
-        chapterDamageBonuses[gun] = GetChapterDamageBonus(gun) + damageIncrease;
+        foreach (var reward in damageIncreases)
+        {
+            chapterDamageBonuses[reward.Key] = GetChapterDamageBonus(reward.Key) + reward.Value;
+        }
         EquipGun(gun);
     }
 

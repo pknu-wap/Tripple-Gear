@@ -1,0 +1,598 @@
+fileFormatVersion: 2
+guid: 5da1377e86944d13b5fcdb47a84e4b75
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 900021213
+    second: GongOilCharge1
+  - first:
+      213: 900021214
+    second: GongOilCharge2
+  - first:
+      213: 900021215
+    second: GongOilCharge3
+  - first:
+      213: 900021216
+    second: GongOilCharge4
+  - first:
+      213: 900021217
+    second: GongOilCharge5
+  - first:
+      213: 900021218
+    second: GongOilCharge6
+  - first:
+      213: 900021219
+    second: GongOilThrow1
+  - first:
+      213: 900021220
+    second: GongOilThrow2
+  - first:
+      213: 900021221
+    second: GongOilThrow3
+  - first:
+      213: 900021222
+    second: GongOilThrow4
+  - first:
+      213: 900021223
+    second: GongOilThrow5
+  - first:
+      213: 900021224
+    second: GongOilThrow6
+  - first:
+      213: 900021225
+    second: GongOilElectric1
+  - first:
+      213: 900021226
+    second: GongOilElectric2
+  - first:
+      213: 900021227
+    second: GongOilElectric3
+  - first:
+      213: 900021228
+    second: GongOilSummon1
+  - first:
+      213: 900021229
+    second: GongOilSummon2
+  - first:
+      213: 900021230
+    second: GongOilSummon3
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 4096
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.62, y: 0.02551834}
+  spritePixelsToUnits: 105
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: GongOilCharge1
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 1901
+        width: 467
+        height: 438
+      alignment: 9
+      pivot: {x: 0.61670236, y: 0.02054795}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95949f5367e04d61b4da8f0da1b8f225
+      internalID: 900021213
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilCharge2
+      rect:
+        serializedVersion: 2
+        x: 483
+        y: 1857
+        width: 470
+        height: 482
+      alignment: 9
+      pivot: {x: 0.61489362, y: 0.01452282}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b83c14453ead43c2b6c561387159ba18
+      internalID: 900021214
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilCharge3
+      rect:
+        serializedVersion: 2
+        x: 961
+        y: 1912
+        width: 508
+        height: 427
+      alignment: 9
+      pivot: {x: 0.62007874, y: 0.01639344}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7606157c7bee43edb73ba814bc442ae6
+      internalID: 900021215
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilCharge4
+      rect:
+        serializedVersion: 2
+        x: 1477
+        y: 1982
+        width: 524
+        height: 357
+      alignment: 9
+      pivot: {x: 0.64503817, y: 0.04761905}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2dd4aa3e113d4c5482c56d420c40050a
+      internalID: 900021216
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilCharge5
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 1491
+        width: 518
+        height: 358
+      alignment: 9
+      pivot: {x: 0.63320463, y: 0.02234637}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e61acee135e4e38b9b530a734e3f9f1
+      internalID: 900021217
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilCharge6
+      rect:
+        serializedVersion: 2
+        x: 534
+        y: 1407
+        width: 464
+        height: 442
+      alignment: 9
+      pivot: {x: 0.62931034, y: 0.01809955}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28320c1f3cdc4f9fa62e14cfb0b498a4
+      internalID: 900021218
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow1
+      rect:
+        serializedVersion: 2
+        x: 1006
+        y: 1445
+        width: 368
+        height: 404
+      alignment: 9
+      pivot: {x: 0.48097826, y: 0.01732673}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fccca110831480f9f3681d68f46461c
+      internalID: 900021219
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow2
+      rect:
+        serializedVersion: 2
+        x: 1382
+        y: 1445
+        width: 363
+        height: 404
+      alignment: 9
+      pivot: {x: 0.48209366, y: 0.01732673}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 79403fd0ab464c528d152dd99713dd2f
+      internalID: 900021220
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow3
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 968
+        width: 367
+        height: 431
+      alignment: 9
+      pivot: {x: 0.46866485, y: 0.01392111}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a42823ddc6ba4fd7865d132aad247d78
+      internalID: 900021221
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow4
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 987
+        width: 394
+        height: 412
+      alignment: 9
+      pivot: {x: 0.54314721, y: 0.01699029}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4808b116874d41d4b7c2f202713a3018
+      internalID: 900021222
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow5
+      rect:
+        serializedVersion: 2
+        x: 785
+        y: 993
+        width: 438
+        height: 406
+      alignment: 9
+      pivot: {x: 0.56849315, y: 0.01724138}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1914ef2fee164f34a2828f97d3879826
+      internalID: 900021223
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilThrow6
+      rect:
+        serializedVersion: 2
+        x: 1231
+        y: 1002
+        width: 402
+        height: 397
+      alignment: 9
+      pivot: {x: 0.51990050, y: 0.01763224}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10f4d96d546041c58f0680807cc19380
+      internalID: 900021224
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilElectric1
+      rect:
+        serializedVersion: 2
+        x: 1641
+        y: 1036
+        width: 368
+        height: 363
+      alignment: 9
+      pivot: {x: 0.48913043, y: 0.01652893}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdb581449e604b0bad86f4e4a816ca62
+      internalID: 900021225
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilElectric2
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 555
+        width: 402
+        height: 405
+      alignment: 9
+      pivot: {x: 0.48507463, y: 0.01481481}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa9b2ea3181f410cbdaaa5926c29fdd7
+      internalID: 900021226
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilElectric3
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 511
+        width: 468
+        height: 449
+      alignment: 9
+      pivot: {x: 0.43162393, y: 0.01336303}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d537737348dc4636b2d591bc17d76ad3
+      internalID: 900021227
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilSummon1
+      rect:
+        serializedVersion: 2
+        x: 894
+        y: 556
+        width: 409
+        height: 404
+      alignment: 9
+      pivot: {x: 0.52078240, y: 0.01732673}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebc03a2a3beb4a9fa7a2cf4fe345c4f0
+      internalID: 900021228
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilSummon2
+      rect:
+        serializedVersion: 2
+        x: 1311
+        y: 547
+        width: 378
+        height: 413
+      alignment: 9
+      pivot: {x: 0.48677249, y: 0.01694915}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3edc709cbc24ac0a708c09aa79653f2
+      internalID: 900021229
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilSummon3
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 8
+        width: 392
+        height: 495
+      alignment: 9
+      pivot: {x: 0.44642857, y: 0.01616162}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f3d04f142fc4395923f37663c23ab7b
+      internalID: 900021230
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID: f826dec7bab545e5a49c7dfaaf7bdf63
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      GongOilCharge1: 900021213
+      GongOilCharge2: 900021214
+      GongOilCharge3: 900021215
+      GongOilCharge4: 900021216
+      GongOilCharge5: 900021217
+      GongOilCharge6: 900021218
+      GongOilThrow1: 900021219
+      GongOilThrow2: 900021220
+      GongOilThrow3: 900021221
+      GongOilThrow4: 900021222
+      GongOilThrow5: 900021223
+      GongOilThrow6: 900021224
+      GongOilElectric1: 900021225
+      GongOilElectric2: 900021226
+      GongOilElectric3: 900021227
+      GongOilSummon1: 900021228
+      GongOilSummon2: 900021229
+      GongOilSummon3: 900021230
+  mipmapLimitGroupName:
+  pSDRemoveMatte: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

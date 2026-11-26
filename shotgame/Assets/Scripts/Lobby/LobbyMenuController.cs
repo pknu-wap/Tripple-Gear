@@ -1,118 +1,62 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class LobbyMenuController : MonoBehaviour
 {
-    [SerializeField] private string newGameSceneName = "시네마틱샘플";
+    [SerializeField] private string newGameSceneName = "인게임샘플";
+    [SerializeField] private GameObject mainMenu;
+    [SerializeField] private GameObject difficultyMenu;
     [SerializeField] private Button newGameButton;
-    [SerializeField] private Button loadGameButton;
-    [SerializeField] private Button optionsButton;
     [SerializeField] private Button quitButton;
-
-    private void Awake()
-    {
-        FindReferences();
-    }
-
-    private void OnValidate()
-    {
-        FindReferences();
-    }
+    [SerializeField] private Button easyButton;
+    [SerializeField] private Button hardButton;
+    [SerializeField] private Button backButton;
 
     private void OnEnable()
     {
-        FindReferences();
-
-        if (newGameButton != null)
-        {
-            newGameButton.onClick.AddListener(StartNewGame);
-        }
-
-        if (loadGameButton != null)
-        {
-            loadGameButton.onClick.AddListener(LoadGame);
-        }
-
-        if (optionsButton != null)
-        {
-            optionsButton.onClick.AddListener(OpenOptions);
-        }
-
-        if (quitButton != null)
-        {
-            quitButton.onClick.AddListener(QuitGame);
-        }
+        newGameButton.onClick.AddListener(ShowDifficultyMenu);
+        quitButton.onClick.AddListener(QuitGame);
+        easyButton.onClick.AddListener(StartEasyGame);
+        hardButton.onClick.AddListener(StartHardGame);
+        backButton.onClick.AddListener(ShowMainMenu);
     }
 
     private void OnDisable()
     {
-        if (newGameButton != null)
-        {
-            newGameButton.onClick.RemoveListener(StartNewGame);
-        }
-
-        if (loadGameButton != null)
-        {
-            loadGameButton.onClick.RemoveListener(LoadGame);
-        }
-
-        if (optionsButton != null)
-        {
-            optionsButton.onClick.RemoveListener(OpenOptions);
-        }
-
-        if (quitButton != null)
-        {
-            quitButton.onClick.RemoveListener(QuitGame);
-        }
+        newGameButton.onClick.RemoveListener(ShowDifficultyMenu);
+        quitButton.onClick.RemoveListener(QuitGame);
+        easyButton.onClick.RemoveListener(StartEasyGame);
+        hardButton.onClick.RemoveListener(StartHardGame);
+        backButton.onClick.RemoveListener(ShowMainMenu);
     }
 
-    private void FindReferences()
+    private void ShowDifficultyMenu()
     {
-        if (newGameButton == null)
-        {
-            newGameButton = FindButton("NewGameButton");
-        }
-
-        if (loadGameButton == null)
-        {
-            loadGameButton = FindButton("LoadGameButton");
-        }
-
-        if (optionsButton == null)
-        {
-            optionsButton = FindButton("OptionsButton");
-        }
-
-        if (quitButton == null)
-        {
-            quitButton = FindButton("QuitButton");
-        }
+        mainMenu.SetActive(false);
+        difficultyMenu.SetActive(true);
+        EventSystem.current?.SetSelectedGameObject(easyButton.gameObject);
     }
 
-    private static Button FindButton(string objectName)
+    private void ShowMainMenu()
     {
-        GameObject buttonObject = GameObject.Find(objectName);
-        return buttonObject != null ? buttonObject.GetComponent<Button>() : null;
+        difficultyMenu.SetActive(false);
+        mainMenu.SetActive(true);
+        EventSystem.current?.SetSelectedGameObject(newGameButton.gameObject);
     }
 
-    public void StartNewGame()
+    private void StartEasyGame() => StartNewGame(isEasy: true);
+
+    private void StartHardGame() => StartNewGame(isEasy: false);
+
+    private void StartNewGame(bool isEasy)
     {
+        GameDifficulty.IsEasy = isEasy;
         SceneTransitionSignalReceiver.LoadSceneWithSignal(newGameSceneName);
     }
 
-    public void LoadGame()
-    {
-        Debug.Log("불러오기 메뉴는 아직 구현되지 않았습니다.", this);
-    }
-
-    public void OpenOptions()
-    {
-        Debug.Log("옵션 메뉴는 아직 구현되지 않았습니다.", this);
-    }
-
-    public void QuitGame()
+    private void QuitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;

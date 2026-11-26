@@ -1,0 +1,286 @@
+fileFormatVersion: 2
+guid: 11134c58eafc49cb9830f90f74c6b534
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 900031213
+    second: GongOilRisingSlash1
+  - first:
+      213: 900031214
+    second: GongOilRisingSlash2
+  - first:
+      213: 900031215
+    second: GongOilRisingSlash3
+  - first:
+      213: 900031216
+    second: GongOilRisingSlash4
+  - first:
+      213: 900031217
+    second: GongOilRisingSlash5
+  - first:
+      213: 900031218
+    second: GongOilRisingSlash6
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.62, y: 0.02551834}
+  spritePixelsToUnits: 105
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: GongOilRisingSlash1
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 564
+        width: 357
+        height: 366
+      alignment: 9
+      pivot: {x: 0.43417367, y: 0.03278689}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 163ecdbf8ee443fdb611b41052f2d687
+      internalID: 900031213
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilRisingSlash2
+      rect:
+        serializedVersion: 2
+        x: 652
+        y: 576
+        width: 319
+        height: 353
+      alignment: 9
+      pivot: {x: 0.47648903, y: 0.02549575}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: abdbd3d77f574d30a0bcf4f8944007b4
+      internalID: 900031214
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilRisingSlash3
+      rect:
+        serializedVersion: 2
+        x: 1044
+        y: 578
+        width: 454
+        height: 344
+      alignment: 9
+      pivot: {x: 0.62114537, y: 0.02034884}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 20d3b7f7bc554868a91d8937fa8dfbfd
+      internalID: 900031215
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilRisingSlash4
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 63
+        width: 480
+        height: 419
+      alignment: 9
+      pivot: {x: 0.64583333, y: 0.02386635}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a8c68a7792b47499254eccf1fc7e46f
+      internalID: 900031216
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilRisingSlash5
+      rect:
+        serializedVersion: 2
+        x: 523
+        y: 63
+        width: 491
+        height: 416
+      alignment: 9
+      pivot: {x: 0.62729124, y: 0.02403846}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96b23193fdd4442f91f647e69f19813b
+      internalID: 900031217
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GongOilRisingSlash6
+      rect:
+        serializedVersion: 2
+        x: 1040
+        y: 64
+        width: 475
+        height: 432
+      alignment: 9
+      pivot: {x: 0.63157895, y: 0.02083333}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d03c2c7e9a7e4e81bb8af325d1cfc5de
+      internalID: 900031218
+      vertices: []
+      indices: []
+      edges: []
+      weights: []
+    outline: []
+    customData:
+    physicsShape: []
+    bones: []
+    spriteID: f826dec7bab545e5a49c7dfaaf7bdf63
+    internalID: 0
+    vertices: []
+    indices:
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      GongOilRisingSlash1: 900031213
+      GongOilRisingSlash2: 900031214
+      GongOilRisingSlash3: 900031215
+      GongOilRisingSlash4: 900031216
+      GongOilRisingSlash5: 900031217
+      GongOilRisingSlash6: 900031218
+  mipmapLimitGroupName:
+  pSDRemoveMatte: 0
+  userData:
+  assetBundleName:
+  assetBundleVariant:

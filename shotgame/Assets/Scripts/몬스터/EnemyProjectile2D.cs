@@ -57,7 +57,7 @@ public sealed class EnemyProjectile2D : MonsterProjectile
 
     private void Update()
     {
-        if (!launched || resolved) return;
+        if (GameplayPause.IsPaused || !launched || resolved) return;
         float delta = Time.deltaTime;
         Vector2 falling = Vector2.down * (gravity * delta);
         Vector2 movement = (velocity + falling * 0.5f) * delta;

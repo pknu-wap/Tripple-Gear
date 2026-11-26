@@ -8,6 +8,7 @@ public sealed class MonsterSpawner : MonoBehaviour
     private const float SummonChargeTime = 1f / 3f;
     private const float SpawnEventGrace = 0.12f;
     private static readonly int SummonState = Animator.StringToHash("Base Layer.Summon");
+    private readonly Plane[] cameraPlanes = new Plane[6];
 
     [SerializeField, KoreanLabel("소환할 몬스터 프리팹")] private MonsterHealth monsterPrefab;
     [SerializeField, KoreanLabel("한 번에 소환할 마릿수"), Min(1)]
@@ -20,6 +21,8 @@ public sealed class MonsterSpawner : MonoBehaviour
     private MonsterHealth health;
     private MonsterGroundMotion groundMotion;
     private Animator summonAnimator;
+    private SpriteRenderer spriteRenderer;
+    private BoxCollider2D body;
     private bool hasEnteredCamera;
     private bool waitingForSpawnEvent;
     private double nextSpawnTime;
@@ -30,7 +33,8 @@ public sealed class MonsterSpawner : MonoBehaviour
     {
         health = GetComponent<MonsterHealth>();
         summonAnimator = GetComponent<Animator>();
-        if (TryGetComponent(out BoxCollider2D body)) groundMotion = new MonsterGroundMotion(body);
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        if (TryGetComponent(out body)) groundMotion = new MonsterGroundMotion(body);
     }
 
     private void OnEnable() => groundMotion?.Reset();
@@ -42,7 +46,7 @@ public sealed class MonsterSpawner : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (health.IsDead || health.IsEntering || monsterPrefab == null)
+        if (GameplayPause.IsPaused || health.IsDead || health.IsEntering || monsterPrefab == null)
         {
             return;
         }
@@ -117,9 +121,11 @@ public sealed class MonsterSpawner : MonoBehaviour
             return false;
         }
 
-        Vector3 viewport = battleCamera.WorldToViewportPoint(transform.position);
-        return viewport.z >= battleCamera.nearClipPlane && viewport.z <= battleCamera.farClipPlane
-            && viewport.x >= 0f && viewport.x <= 1f && viewport.y >= 0f && viewport.y <= 1f;
+        Bounds bounds = spriteRenderer != null ? spriteRenderer.bounds
+            : body != null ? body.bounds
+            : new Bounds(transform.position, Vector3.zero);
+        GeometryUtility.CalculateFrustumPlanes(battleCamera, cameraPlanes);
+        return GeometryUtility.TestPlanesAABB(cameraPlanes, bounds);
     }
 
     private void SpawnMonster()

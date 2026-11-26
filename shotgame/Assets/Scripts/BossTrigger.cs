@@ -25,6 +25,7 @@ public sealed class BossTrigger : TriggerBase
     private readonly EncounterCameraLock cameraLock = new EncounterCameraLock();
     private EncounterState state;
     private ArisaHealth playerHealth;
+    private ArisaSkillController playerSkills;
     private PlayableDirector playingIntro;
     private DirectorWrapMode previousWrapMode;
     private bool reportedInvalidSetup;
@@ -77,6 +78,7 @@ public sealed class BossTrigger : TriggerBase
             return false;
         }
 
+        playerSkills = player.GetComponentInParent<ArisaSkillController>();
         if (introTimeline == null)
         {
             BeginBattle();
@@ -195,6 +197,7 @@ public sealed class BossTrigger : TriggerBase
         state = EncounterState.Finished;
         boss.Defeated.RemoveListener(CompleteEncounter);
         cameraLock.Release();
+        if (playerSkills != null) playerSkills.ClearSkills();
         bossDefeated.Invoke();
         if (defeatTeleport == null || (playerHealth != null && playerHealth.IsDead)) return;
 

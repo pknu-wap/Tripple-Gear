@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 public enum TeleportGizmoKind
 {
@@ -42,6 +43,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [Header("배경음악")]
     [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
     [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
+
+    [SerializeField, KoreanLabel("도착 연출 완료 시")] private UnityEvent onTeleportCompleted = new UnityEvent();
 
     [Header("기즈모")]
     [SerializeField, KoreanLabel("기즈모 표시")] private bool drawGizmos = true;
@@ -151,11 +154,15 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         }
 
         isTeleporting = false;
+        onTeleportCompleted?.Invoke();
     }
 
     internal void PlacePlayerAtDestination()
     {
-        if (teleportSubject != null) PlaceAtDestination(teleportSubject, restorePlayerFollow: false);
+        if (teleportSubject == null) return;
+
+        PlaceAtDestination(teleportSubject, restorePlayerFollow: false);
+        onTeleportCompleted?.Invoke();
     }
 
     private void PlaceAtDestination(Transform subject, bool restorePlayerFollow)

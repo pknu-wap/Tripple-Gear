@@ -9,6 +9,8 @@ public sealed class MonsterDeathEffect : MonoBehaviour
     private MonsterHealth health;
     private bool hasHandledDeath;
 
+    internal GameObject Prefab => deathEffectPrefab;
+
     internal void ResetForMission() => hasHandledDeath = false;
 
     private void Awake()
@@ -48,19 +50,6 @@ public sealed class MonsterDeathEffect : MonoBehaviour
         }
 
         hasHandledDeath = true;
-        if (deathEffectPrefab != null)
-        {
-            GameObject effect = Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
-            if (health.DefeatedByGun)
-            {
-                MonsterHitFlash.Play(effect, health.Data.UseWallHitFlash);
-            }
-        }
-        else if (health.DefeatedByGun && TryGetComponent(out SpriteRenderer sprite))
-        {
-            MonsterHitFlash.PlayFinalSprite(sprite, health.Data.UseWallHitFlash);
-        }
-
         gameObject.SetActive(false);
     }
 }

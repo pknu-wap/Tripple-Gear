@@ -1,9 +1,10 @@
 using System.IO;
+using TMPro;
 using UnityEditor;
-using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -13,6 +14,7 @@ public static class LobbySceneBuilder
     private const string InGameSampleScenePath = "Assets/Scenes/인게임샘플.unity";
     private const string TestBattleScenePath = "Assets/Scenes/테스트 배틀씬.unity";
     private const string TestBattleSceneName = "테스트 배틀씬";
+    private const string InGameSampleSceneName = "인게임샘플";
     private const string CinematicSampleSceneName = "시네마틱샘플";
 
     public static void BuildLobbyAndBattleScenes()
@@ -47,36 +49,41 @@ public static class LobbySceneBuilder
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
         Camera camera = CreateCamera();
-        Canvas canvas = CreateCanvas();
+        Canvas canvas = CreateCanvas(out EventSystem eventSystem);
         CreateBlackBackground(canvas.transform);
 
         LobbyMenuController controller = CreateLobbyController();
         CreateTransitionSignalReceiver();
 
-        Text title = CreateText(canvas.transform, "Title", "Tripple gear", 56, TextAnchor.MiddleCenter);
+        TextMeshProUGUI title = CreateText(canvas.transform, "Title", "Tripple gear", 56, TextAlignmentOptions.Center);
         RectTransform titleTransform = title.rectTransform;
         titleTransform.anchorMin = new Vector2(0.5f, 0.5f);
         titleTransform.anchorMax = new Vector2(0.5f, 0.5f);
         titleTransform.anchoredPosition = new Vector2(0f, 160f);
         titleTransform.sizeDelta = new Vector2(720f, 90f);
 
-        Button newGameButton = CreateButton(canvas.transform, "NewGameButton", "새게임", new Vector2(0f, 60f));
-        Button loadGameButton = CreateButton(canvas.transform, "LoadGameButton", "불러오기", new Vector2(0f, 0f));
-        Button optionsButton = CreateButton(canvas.transform, "OptionsButton", "옵션", new Vector2(0f, -60f));
-        Button quitButton = CreateButton(canvas.transform, "QuitButton", "종료", new Vector2(0f, -120f));
+        RectTransform mainMenu = CreateMenu(canvas.transform, "Main Menu");
+        Button newGameButton = CreateButton(mainMenu, "NewGameButton", "새게임", new Vector2(0f, 80f));
+        Button quitButton = CreateButton(mainMenu, "QuitButton", "종료", Vector2.zero);
+
+        RectTransform difficultyMenu = CreateMenu(canvas.transform, "Difficulty Menu");
+        Button easyButton = CreateButton(difficultyMenu, "EasyButton", "Easy", new Vector2(0f, 80f));
+        Button hardButton = CreateButton(difficultyMenu, "HardButton", "Hard", Vector2.zero);
+        Button backButton = CreateButton(difficultyMenu, "BackButton", "뒤로", new Vector2(0f, -80f));
+        difficultyMenu.gameObject.SetActive(false);
+
+        eventSystem.firstSelectedGameObject = newGameButton.gameObject;
 
         SerializedObject controllerObject = new SerializedObject(controller);
-        controllerObject.FindProperty("newGameSceneName").stringValue = CinematicSampleSceneName;
+        controllerObject.FindProperty("newGameSceneName").stringValue = InGameSampleSceneName;
+        controllerObject.FindProperty("mainMenu").objectReferenceValue = mainMenu.gameObject;
+        controllerObject.FindProperty("difficultyMenu").objectReferenceValue = difficultyMenu.gameObject;
         controllerObject.FindProperty("newGameButton").objectReferenceValue = newGameButton;
-        controllerObject.FindProperty("loadGameButton").objectReferenceValue = loadGameButton;
-        controllerObject.FindProperty("optionsButton").objectReferenceValue = optionsButton;
         controllerObject.FindProperty("quitButton").objectReferenceValue = quitButton;
+        controllerObject.FindProperty("easyButton").objectReferenceValue = easyButton;
+        controllerObject.FindProperty("hardButton").objectReferenceValue = hardButton;
+        controllerObject.FindProperty("backButton").objectReferenceValue = backButton;
         controllerObject.ApplyModifiedPropertiesWithoutUndo();
-
-        UnityEventTools.AddPersistentListener(newGameButton.onClick, controller.StartNewGame);
-        UnityEventTools.AddPersistentListener(loadGameButton.onClick, controller.LoadGame);
-        UnityEventTools.AddPersistentListener(optionsButton.onClick, controller.OpenOptions);
-        UnityEventTools.AddPersistentListener(quitButton.onClick, controller.QuitGame);
 
         Selection.activeObject = camera;
         EditorSceneManager.SaveScene(scene, LobbyScenePath);
@@ -95,7 +102,7 @@ public static class LobbySceneBuilder
         return camera;
     }
 
-    private static Canvas CreateCanvas()
+    private static Canvas CreateCanvas(out EventSystem eventSystem)
     {
         GameObject canvasObject = new GameObject("Lobby Canvas");
         Canvas canvas = canvasObject.AddComponent<Canvas>();
@@ -109,10 +116,21 @@ public static class LobbySceneBuilder
         canvasObject.AddComponent<GraphicRaycaster>();
 
         GameObject eventSystemObject = new GameObject("EventSystem");
-        eventSystemObject.AddComponent<EventSystem>();
-        eventSystemObject.AddComponent<StandaloneInputModule>();
+        eventSystem = eventSystemObject.AddComponent<EventSystem>();
+        eventSystemObject.AddComponent<InputSystemUIInputModule>();
 
         return canvas;
+    }
+
+    private static RectTransform CreateMenu(Transform parent, string name)
+    {
+        RectTransform menu = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+        menu.SetParent(parent, false);
+        menu.anchorMin = Vector2.zero;
+        menu.anchorMax = Vector2.one;
+        menu.offsetMin = Vector2.zero;
+        menu.offsetMax = Vector2.zero;
+        return menu;
     }
 
     private static void CreateBlackBackground(Transform parent)
@@ -142,23 +160,24 @@ public static class LobbySceneBuilder
         return receiverObject.AddComponent<SceneTransitionSignalReceiver>();
     }
 
-    private static Text CreateText(
+    private static TextMeshProUGUI CreateText(
         Transform parent,
         string name,
         string text,
         int fontSize,
-        TextAnchor alignment
+        TextAlignmentOptions alignment
     )
     {
         GameObject textObject = new GameObject(name);
         textObject.transform.SetParent(parent, false);
 
-        Text textComponent = textObject.AddComponent<Text>();
+        TextMeshProUGUI textComponent = textObject.AddComponent<TextMeshProUGUI>();
         textComponent.text = text;
-        textComponent.font = GetDefaultFont();
+        textComponent.font = TMP_Settings.defaultFontAsset;
         textComponent.fontSize = fontSize;
         textComponent.alignment = alignment;
         textComponent.color = Color.white;
+        textComponent.raycastTarget = false;
 
         return textComponent;
     }
@@ -183,9 +202,9 @@ public static class LobbySceneBuilder
         buttonTransform.anchorMin = new Vector2(0.5f, 0.5f);
         buttonTransform.anchorMax = new Vector2(0.5f, 0.5f);
         buttonTransform.anchoredPosition = position;
-        buttonTransform.sizeDelta = new Vector2(320f, 48f);
+        buttonTransform.sizeDelta = new Vector2(360f, 72f);
 
-        Text labelText = CreateText(buttonObject.transform, "Text", label, 24, TextAnchor.MiddleCenter);
+        TextMeshProUGUI labelText = CreateText(buttonObject.transform, "Text", label, 48, TextAlignmentOptions.Center);
         RectTransform labelTransform = labelText.rectTransform;
         labelTransform.anchorMin = Vector2.zero;
         labelTransform.anchorMax = Vector2.one;
@@ -193,17 +212,6 @@ public static class LobbySceneBuilder
         labelTransform.offsetMax = Vector2.zero;
 
         return button;
-    }
-
-    private static Font GetDefaultFont()
-    {
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        if (font != null)
-        {
-            return font;
-        }
-
-        return Resources.GetBuiltinResource<Font>("Arial.ttf");
     }
 
     private static void UpdateBuildSettings()

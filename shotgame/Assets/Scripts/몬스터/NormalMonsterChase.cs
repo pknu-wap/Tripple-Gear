@@ -8,11 +8,13 @@ public sealed class NormalMonsterChase : MonoBehaviour
 {
     private const float CollisionSkinWidth = MonsterGroundMotion.SkinWidth;
     private readonly RaycastHit2D[] obstacleHits = new RaycastHit2D[16];
+    private readonly Plane[] cameraPlanes = new Plane[6];
 
     [Header("감지")]
     [SerializeField, KoreanLabel("대상 카메라")] private Camera targetCamera;
     [SerializeField, KoreanLabel("카메라 진입 로그")] private bool logWhenEnteredCamera = true;
     [SerializeField, KoreanLabel("카메라 진입 메시지")] private string cameraEnteredLogMessage = "일반몹이 Main Camera 영역에 들어왔습니다.";
+    [SerializeField, KoreanLabel("화면 밖에서도 활성 유지")] private bool keepActiveOffscreen;
     [SerializeField, KoreanLabel("화면 밖 비활성화 시간"), Min(0f)] private float offscreenDisableDelay = 2f;
 
     [Header("추적")]
@@ -96,6 +98,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPause.IsPaused) return;
         if (health != null && (health.IsStunned || health.IsEntering)) return;
 
         if (MonsterData == null || health.IsDead)
@@ -115,7 +118,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
             return;
         }
 
-        if (!encounterSpawn && HasBeenOutsideCameraLongEnough())
+        if (!keepActiveOffscreen && !encounterSpawn && HasBeenOutsideCameraLongEnough())
         {
             gameObject.SetActive(false);
             return;
@@ -439,17 +442,7 @@ public sealed class NormalMonsterChase : MonoBehaviour
     private bool IsInsideCameraView()
     {
         Camera cameraToUse = GetCamera();
-        if (cameraToUse == null)
-        {
-            return false;
-        }
-
-        Vector3 viewportPosition = cameraToUse.WorldToViewportPoint(transform.position);
-        return viewportPosition.z >= 0f
-            && viewportPosition.x >= 0f
-            && viewportPosition.x <= 1f
-            && viewportPosition.y >= 0f
-            && viewportPosition.y <= 1f;
+        return cameraToUse != null && IsVisibleInCamera(cameraToUse);
     }
 
     private bool HasBeenOutsideCameraLongEnough()
@@ -474,14 +467,8 @@ public sealed class NormalMonsterChase : MonoBehaviour
         Bounds bounds = spriteRenderer != null ? spriteRenderer.bounds
             : movementCollider != null ? movementCollider.bounds
             : new Bounds(transform.position, Vector3.zero);
-        Vector3 viewportMin = cameraToUse.WorldToViewportPoint(bounds.min);
-        Vector3 viewportMax = cameraToUse.WorldToViewportPoint(bounds.max);
-
-        return viewportMax.z > 0f
-            && Mathf.Max(viewportMin.x, viewportMax.x) >= 0f
-            && Mathf.Min(viewportMin.x, viewportMax.x) <= 1f
-            && Mathf.Max(viewportMin.y, viewportMax.y) >= 0f
-            && Mathf.Min(viewportMin.y, viewportMax.y) <= 1f;
+        GeometryUtility.CalculateFrustumPlanes(cameraToUse, cameraPlanes);
+        return GeometryUtility.TestPlanesAABB(cameraPlanes, bounds);
     }
 
     private bool TryAssignFollowTarget()

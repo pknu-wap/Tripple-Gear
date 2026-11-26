@@ -49,6 +49,7 @@ public sealed class CctvLaserAttack : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (GameplayPause.IsPaused) return;
         if (health != null && health.IsEntering)
         {
             beam.enabled = false;

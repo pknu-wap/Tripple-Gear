@@ -96,6 +96,7 @@ public sealed class FlyingMonsterAttack : MonoBehaviour
 
     private void Update()
     {
+        if (GameplayPause.IsPaused) return;
         if (health != null && (health.IsStunned || health.IsEntering)) return;
 
         if (chase == null || Data == null || health.IsDead || !chase.IsChasing)

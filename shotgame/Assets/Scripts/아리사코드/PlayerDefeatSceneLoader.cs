@@ -11,7 +11,13 @@ public sealed class PlayerDefeatSceneLoader : MonoBehaviour
 
     public void LoadLobby()
     {
-        if (isLoadingLobby || (GameManager.Instance != null && GameManager.Instance.IsGameOver))
+        if (isLoadingLobby)
+        {
+            return;
+        }
+
+        GameManager manager = GameManager.Instance;
+        if (manager != null && manager.gameObject.scene == gameObject.scene && manager.TryShowGameOver())
         {
             return;
         }

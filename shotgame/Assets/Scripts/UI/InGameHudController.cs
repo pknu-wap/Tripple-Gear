@@ -90,6 +90,6 @@ public sealed class InGameHudController : MonoBehaviour
 
     private void UpdateAmmo(int current, int maximum)
     {
-        if (ammoText != null) ammoText.text = gun != null && gun.HasUnlimitedAmmo ? ": 무제한" : $": {maximum}/{current}";
+        if (ammoText != null) ammoText.text = gun != null && gun.HasUnlimitedAmmo ? ": 무제한" : $": {current}/{maximum}";
     }
 }

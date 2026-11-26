@@ -14,64 +14,88 @@ public class UIBarController : MonoBehaviour
     [SerializeField] private float currentValue = 100f;
     private const float MaxValue = 100f;
     private MonsterHealth bossHealth;
+    private MonsterHealth encounterBoss;
+    private Color defaultFillColor;
+    private Color previousFillColor;
+
+    internal void ShowEncounter(MonsterHealth target)
+    {
+        if (target == null || encounterBoss == target) return;
+        if (encounterBoss != null) encounterBoss.HpChanged.RemoveListener(UpdateBossHealth);
+        else if (barFillImage != null) previousFillColor = barFillImage.color;
+
+        encounterBoss = target;
+        if (barFillImage != null) barFillImage.color = defaultFillColor;
+        if (!isActiveAndEnabled) return;
+
+        encounterBoss.HpChanged.AddListener(UpdateBossHealth);
+        UpdateBossHealth(target.CurrentHp, target.MaxHp);
+    }
+
+    internal void HideEncounter(MonsterHealth target)
+    {
+        if (target == null || encounterBoss != target) return;
+
+        encounterBoss.HpChanged.RemoveListener(UpdateBossHealth);
+        encounterBoss = null;
+        if (barFillImage != null) barFillImage.color = previousFillColor;
+        if (isActiveAndEnabled) RefreshBossHealth();
+    }
+
+    private MonsterHealth DisplayedBoss => encounterBoss != null ? encounterBoss : bossHealth;
+    private bool HasLivingBoss => DisplayedBoss != null && DisplayedBoss.gameObject.activeInHierarchy && !DisplayedBoss.IsDead;
+
+    private void RefreshBossHealth()
+    {
+        MonsterHealth target = DisplayedBoss;
+        UpdateBossHealth(target != null ? target.CurrentHp : 0, target != null ? target.MaxHp : 0);
+    }
 
     private void Awake()
     {
-        if (!Application.isPlaying || boss == null)
-        {
-            return;
-        }
+        if (!Application.isPlaying) return;
 
+        defaultFillColor = barFillImage != null ? barFillImage.color : Color.white;
+        if (boss == null) return;
         bossHealth = boss.GetComponent<MonsterHealth>();
         SetBossBarVisible(false);
     }
 
     private void OnEnable()
     {
-        if (!Application.isPlaying || boss == null)
-        {
-            return;
-        }
+        if (!Application.isPlaying) return;
 
-        if (bossHealth == null)
-        {
-            bossHealth = boss.GetComponent<MonsterHealth>();
-        }
-
-        if (bossHealth != null)
-        {
-            bossHealth.HpChanged.AddListener(UpdateBossHealth);
-            UpdateBossHealth(bossHealth.CurrentHp, bossHealth.MaxHp);
-        }
+        if (bossHealth != null) bossHealth.HpChanged.AddListener(OnDefaultBossHealthChanged);
+        if (encounterBoss != null) encounterBoss.HpChanged.AddListener(UpdateBossHealth);
+        if (bossHealth != null || encounterBoss != null) RefreshBossHealth();
     }
 
     private void Update()
     {
-        if (Application.isPlaying && boss != null)
+        if (Application.isPlaying && (bossHealth != null || encounterBoss != null))
         {
-            SetBossBarVisible(boss.activeInHierarchy && bossHealth != null && !bossHealth.IsDead);
+            SetBossBarVisible(HasLivingBoss);
         }
     }
 
     private void OnDisable()
     {
-        if (!Application.isPlaying || boss == null)
-        {
-            return;
-        }
+        if (!Application.isPlaying) return;
 
-        if (bossHealth != null)
-        {
-            bossHealth.HpChanged.RemoveListener(UpdateBossHealth);
-        }
+        if (bossHealth != null) bossHealth.HpChanged.RemoveListener(OnDefaultBossHealthChanged);
+        if (encounterBoss != null) encounterBoss.HpChanged.RemoveListener(UpdateBossHealth);
+        if (bossHealth != null || encounterBoss != null) SetBossBarVisible(false);
+    }
 
-        SetBossBarVisible(false);
+    private void OnDefaultBossHealthChanged(int currentHp, int maxHp)
+    {
+        if (encounterBoss == null) UpdateBossHealth(currentHp, maxHp);
     }
 
     private void UpdateBossHealth(int currentHp, int maxHp)
     {
         SetValue(maxHp > 0 ? currentHp * MaxValue / maxHp : 0f);
-        SetBossBarVisible(boss != null && boss.activeInHierarchy && currentHp > 0);
+        SetBossBarVisible(HasLivingBoss);
     }
 
     private void SetBossBarVisible(bool visible)

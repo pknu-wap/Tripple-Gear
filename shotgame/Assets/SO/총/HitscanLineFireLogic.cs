@@ -12,6 +12,8 @@ public sealed class HitscanLineFireLogic : GunFireLogic
     [SerializeField, KoreanLabel("페이드 인 시간"), Min(0f)] private float 페이드인시간 = 0.02f;
     [SerializeField, KoreanLabel("페이드 아웃 시간"), Min(0f)] private float 페이드아웃시간 = 0.08f;
 
+    private readonly Plane[] cameraPlanes = new Plane[6];
+
     public float Range => 사거리;
     public float VisibleDuration => 표시시간;
     public bool UseFade => 페이드사용;
@@ -26,9 +28,15 @@ public sealed class HitscanLineFireLogic : GunFireLogic
         }
 
         Vector2 fireDirection = context.Direction.normalized;
+        Vector3 shotOrigin = context.MuzzlePosition;
         float shotDistance = Range;
+        if (context.Camera != null && !ClipShotToCamera(context.Camera, fireDirection, ref shotOrigin, ref shotDistance))
+        {
+            return;
+        }
+
         HashSet<MonsterHealth> damaged = new HashSet<MonsterHealth>();
-        foreach (RaycastHit2D hit in Physics2D.RaycastAll(context.MuzzlePosition, fireDirection, Range, gunData.HitTargetLayers))
+        foreach (RaycastHit2D hit in Physics2D.RaycastAll(shotOrigin, fireDirection, shotDistance, gunData.HitTargetLayers))
         {
             MonsterHealth target = hit.collider.GetComponentInParent<MonsterHealth>();
             if (target == null)
@@ -48,7 +56,37 @@ public sealed class HitscanLineFireLogic : GunFireLogic
             }
         }
 
-        CreateInstantShotVisual(gunData, context.MuzzlePosition, fireDirection, shotDistance, context.CoroutineRunner);
+        CreateInstantShotVisual(gunData, shotOrigin, fireDirection, shotDistance, context.CoroutineRunner);
+    }
+
+    private bool ClipShotToCamera(Camera camera, Vector2 direction, ref Vector3 origin, ref float distance)
+    {
+        GeometryUtility.CalculateFrustumPlanes(camera, cameraPlanes);
+        float entry = 0f;
+        float exit = distance;
+        foreach (Plane plane in cameraPlanes)
+        {
+            float originSide = plane.GetDistanceToPoint(origin);
+            float travel = Vector3.Dot(plane.normal, direction);
+            if (travel > 0f)
+            {
+                entry = Mathf.Max(entry, -originSide / travel);
+            }
+            else if (travel < 0f)
+            {
+                exit = Mathf.Min(exit, -originSide / travel);
+            }
+            else if (originSide < 0f)
+            {
+                return false;
+            }
+
+            if (entry >= exit) return false;
+        }
+
+        origin += (Vector3)direction * entry;
+        distance = exit - entry;
+        return true;
     }
 
     private void CreateInstantShotVisual(

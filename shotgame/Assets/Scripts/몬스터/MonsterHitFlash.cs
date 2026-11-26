@@ -4,8 +4,8 @@ using UnityEngine;
 public sealed class MonsterHitFlash : MonoBehaviour
 {
     private const float Duration = 0.1f;
-    private static readonly Color HitOrange = new Color(2.0f, 1.5f, 0.8f);
-    private static readonly Color WallHitOrange = new Color(1f, 0.72f, 0.44f);
+    private static readonly Color HitOrange = new Color(2.0f, 1.5f, 1.0f);
+    private static readonly Color WallHitOrange = new Color(1f, 0.72f, 0.8f);
     private const float WallFlashStrength = 0.25f;
     private static readonly int HitFlashColor = Shader.PropertyToID("_HitFlashColor");
 
@@ -22,32 +22,6 @@ public sealed class MonsterHitFlash : MonoBehaviour
     private MaterialPropertyBlock shaderProperties;
     private Color flashColor;
     private float endTime;
-
-    internal static void PlayFinalSprite(SpriteRenderer source, bool useWallHitFlash)
-    {
-        if (!source.enabled || source.sprite == null)
-        {
-            return;
-        }
-
-        // 피격 판정이 끝난 몬스터 대신 마지막 스프라이트만 잠깐 표시한다.
-        GameObject visual = new GameObject("Monster Final Hit");
-        visual.layer = source.gameObject.layer;
-        visual.transform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
-        visual.transform.localScale = source.transform.lossyScale;
-
-        SpriteRenderer renderer = visual.AddComponent<SpriteRenderer>();
-        renderer.sprite = source.sprite;
-        renderer.sharedMaterial = source.sharedMaterial;
-        renderer.sortingLayerID = source.sortingLayerID;
-        renderer.sortingOrder = source.sortingOrder;
-        renderer.maskInteraction = source.maskInteraction;
-        renderer.flipX = source.flipX;
-        renderer.flipY = source.flipY;
-        renderer.color = source.color;
-        Play(visual, useWallHitFlash);
-        Destroy(visual, Duration);
-    }
 
     internal static void Play(GameObject target, bool useWallHitFlash)
     {

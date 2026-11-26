@@ -14,13 +14,15 @@ public sealed class ExplosiveMonster : MonoBehaviour
     }
 
     private const float FuseDuration = 3f;
-    private const float ExplosionEffectLifetime = 0.7f;
     private static readonly int IsMoving = Animator.StringToHash("IsMoving");
     private static readonly Color WarningColor = new Color(1f, 0.24f, 0.1f);
     private static readonly ContactFilter2D BodyFilter = new ContactFilter2D { useTriggers = false };
 
     [SerializeField, KoreanLabel("폭발 반경"), Min(0.1f)] private float blastRadius = 1.5f;
     [SerializeField, KoreanLabel("폭발 효과 프리팹")] private GameObject explosionEffectPrefab;
+
+    internal GameObject ExplosionEffectPrefab => explosionEffectPrefab;
+    internal bool IsIdle => phase == Phase.Idle;
 
     private readonly Plane[] cameraPlanes = new Plane[6];
     private readonly List<Collider2D> overlaps = new List<Collider2D>();
@@ -69,7 +71,7 @@ public sealed class ExplosiveMonster : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (phase != Phase.Idle || health.IsDead || health.IsStunned || health.IsEntering)
+        if (GameplayPause.IsPaused || phase != Phase.Idle || health.IsDead || health.IsStunned || health.IsEntering)
         {
             return;
         }
@@ -212,13 +214,6 @@ public sealed class ExplosiveMonster : MonoBehaviour
 
     private void Explode()
     {
-        if (explosionEffectPrefab != null)
-        {
-            GameObject effect = Instantiate(explosionEffectPrefab, body.position, Quaternion.identity);
-            effect.transform.localScale *= blastRadius;
-            Destroy(effect, ExplosionEffectLifetime);
-        }
-
         Physics2D.OverlapCircle(body.position, blastRadius, BodyFilter, overlaps);
         ArisaHealth player = FindLivingPlayer();
         if (player != null)

@@ -52,6 +52,10 @@ public class DialogueManager : MonoBehaviour
     private Sprite arisaPortrait;
     private Sprite activePartnerPortrait;
 
+    internal static int ActiveDialogueCount => activeDialogues.Count;
+
+    internal bool IsPlaying(DialogueData data) => data != null && activeLines == data.dialogueLines;
+
     internal static bool BlocksGameplayInput =>
         activeDialogues.Count > 0 || lastDialogueEndFrame == Time.frameCount;
 
@@ -144,6 +148,7 @@ public class DialogueManager : MonoBehaviour
         activeLines = data.dialogueLines;
         activePartnerPortrait = data.partnerPortrait;
         activeDialogues.Add(this);
+        GameplayPause.Acquire(this);
 
         dialoguePanel.SetActive(true);
 
@@ -230,6 +235,7 @@ public class DialogueManager : MonoBehaviour
     {
         lastDialogueEndFrame = Time.frameCount;
         activeDialogues.Remove(this);
+        GameplayPause.Release(this);
         activeLines = null;
         activePartnerPortrait = null;
         if (dialoguePanel != null)

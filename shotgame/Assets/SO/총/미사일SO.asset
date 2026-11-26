@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   "\uCD1D\uC54C\uD504\uB9AC\uD339": {fileID: 8393731948003835515, guid: d5406a0f430c1b847bacfc35ea568239, type: 3}
   "\uCD1D\uC54C\uC2A4\uD504\uB77C\uC774\uD2B8": {fileID: 4984234110176085014, guid: 4869711e73d09c54aa82229d0b5f980b, type: 3}
-  "\uCD1D\uC54C\uAC2F\uC218": 1
+  "\uCD1D\uC54C\uAC2F\uC218": 3
   "\uACF5\uACA9\uC18D\uB3C4": 1
   "\uCD1D\uC54C\uBC1C\uC0AC\uC18D\uB3C4": 15
   "\uBC1C\uC0AC\uC18C\uB9AC": {fileID: 0}

@@ -25,7 +25,7 @@ public sealed class GunSelectionUI : MonoBehaviour
     private Material gunArtworkMaterial;
     private bool canSelect;
 
-    internal bool Show(SubmachineGunFire playerGun, Action<GunSO, int> onSelected)
+    internal bool Show(SubmachineGunFire playerGun, Action<GunSO, IReadOnlyDictionary<GunSO, int>> onSelected)
     {
         GunSO equipped = playerGun.CurrentGun;
         if (equipped == null)
@@ -54,6 +54,16 @@ public sealed class GunSelectionUI : MonoBehaviour
         alternatives.RemoveAt(firstIndex);
         GunSO second = alternatives[UnityEngine.Random.Range(0, alternatives.Count)];
 
+        var damageIncreases = new Dictionary<GunSO, int>(5);
+        foreach (GunSO gun in new[] { equipped, submachineGun, shotgun, sniper, missile })
+        {
+            if (gun != null && gun.CanFire && !damageIncreases.ContainsKey(gun))
+            {
+                damageIncreases.Add(gun, UnityEngine.Random.Range(1, 6));
+            }
+        }
+        Action<GunSO> selectGun = gun => onSelected(gun, damageIncreases);
+
         gunArtworkMaterial = new Material(artworkTransparency);
         RectTransform layout = CreateRect(transform, "Reward Layout", Vector2.zero, Vector2.one);
         var selection = layout.gameObject.AddComponent<CanvasGroup>();
@@ -62,7 +72,7 @@ public sealed class GunSelectionUI : MonoBehaviour
         aspect.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
         aspect.aspectRatio = 16f / 9f;
 
-        CreateText(layout, "Title", "챕터 클리어 · 무기 선택", new Vector2(0.05f, 0.80f),
+        CreateText(layout, "Title", "챕터 클리어 • 무기 선택", new Vector2(0.05f, 0.80f),
             new Vector2(0.95f, 0.85f), Color.white, 45f, true);
 
         GunSO[] offers = { equipped, first, second };
@@ -70,8 +80,7 @@ public sealed class GunSelectionUI : MonoBehaviour
         for (int slot = 0; slot < offers.Length; slot++)
         {
             GunSO gun = offers[slot];
-            int increase = UnityEngine.Random.Range(1, 6);
-            cards[slot] = CreateCard(layout, slot, gun, playerGun.GetChapterDamage(gun), increase, onSelected);
+            cards[slot] = CreateCard(layout, slot, gun, playerGun.GetChapterDamage(gun), damageIncreases[gun], selectGun);
         }
 
         StartCoroutine(RevealCards(selection, cards));
@@ -114,7 +123,7 @@ public sealed class GunSelectionUI : MonoBehaviour
     }
 
     private CanvasGroup CreateCard(RectTransform layout, int slot, GunSO gun, float currentDamage, int increase,
-        Action<GunSO, int> onSelected)
+        Action<GunSO> onSelected)
     {
         const float cardWidth = 0.298f;
         float left = 0.029f + slot * 0.322f;
@@ -128,7 +137,7 @@ public sealed class GunSelectionUI : MonoBehaviour
         {
             if (canSelect)
             {
-                onSelected(gun, increase);
+                onSelected(gun);
             }
         });
         ColorBlock colors = button.colors;
@@ -148,7 +157,7 @@ public sealed class GunSelectionUI : MonoBehaviour
             Color.white, 44f, true);
         CreateLine(card, "Title Divider", 0.81f, 0.12f);
 
-        RectTransform artArea = CreateRect(card, "Artwork Area", new Vector2(0.06f, 0.305f), new Vector2(0.94f, 0.785f));
+        RectTransform artArea = CreateRect(card, "Artwork Area", new Vector2(0.06f, 0.39f), new Vector2(0.94f, 0.785f));
         RawImage art = CreateRect(artArea, "Weapon Artwork", Vector2.zero, Vector2.one).gameObject.AddComponent<RawImage>();
         art.raycastTarget = false;
         art.texture = gun == missile ? rocketArtwork : gunArtwork;
@@ -162,12 +171,23 @@ public sealed class GunSelectionUI : MonoBehaviour
         aspect.aspectRatio = art.texture.width * art.uvRect.width / (art.texture.height * art.uvRect.height);
         button.SetArtwork(art.rectTransform);
 
-        CreateLine(card, "Damage Divider", 0.29f, 0.06f);
-        CreateText(card, "Damage Label", "데미지", new Vector2(0.10f, 0.169f), new Vector2(0.90f, 0.248f),
-            SecondaryText, 24f, false);
-        CreateText(card, "Damage Value", $"{currentDamage:0.##} <color=#4FD3F5>+{increase}</color>",
-            new Vector2(0.10f, 0.055f), new Vector2(0.90f, 0.169f), Color.white, 47f, true);
+        CreateLine(card, "Stats Divider", 0.35f, 0.06f);
+        CreateStatRow(card, "공격력", $"{currentDamage:0.##} <color=#4FD3F5>+{increase}</color>", 0.25f);
+        CreateStatRow(card, "탄창 용량", $"{Mathf.Max(1, gun.BulletCount)}발", 0.15f);
+
+        float reloadTime = Mathf.Max(0f, gun.ReloadSpeed);
+        string reloadUnit = gun.ReloadsSequentially && reloadTime > 0f ? "초/발" : "초";
+        CreateStatRow(card, "장전 속도", $"{reloadTime:0.##}{reloadUnit}", 0.05f);
         return card.gameObject.AddComponent<CanvasGroup>();
+    }
+
+    private void CreateStatRow(RectTransform card, string label, string value, float bottom)
+    {
+        float top = bottom + 0.08f;
+        CreateText(card, label + " Label", label, new Vector2(0.10f, bottom), new Vector2(0.48f, top),
+            SecondaryText, 30f, false, TextAlignmentOptions.Left);
+        CreateText(card, label + " Value", value, new Vector2(0.50f, bottom), new Vector2(0.90f, top),
+            Color.white, 34f, true, TextAlignmentOptions.Right);
     }
 
     private string GetWeaponName(GunSO gun)
@@ -191,7 +211,7 @@ public sealed class GunSelectionUI : MonoBehaviour
     }
 
     private void CreateText(Transform parent, string name, string value, Vector2 min, Vector2 max, Color color,
-        float maxSize, bool bold)
+        float maxSize, bool bold, TextAlignmentOptions alignment = TextAlignmentOptions.Center)
     {
         var label = CreateRect(parent, name, min, max).gameObject.AddComponent<TextMeshProUGUI>();
         label.font = font;
@@ -202,7 +222,7 @@ public sealed class GunSelectionUI : MonoBehaviour
         label.text = value;
         label.color = color;
         label.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
-        label.alignment = TextAlignmentOptions.Center;
+        label.alignment = alignment;
         label.enableAutoSizing = true;
         label.fontSizeMin = 1f;
         label.fontSizeMax = maxSize;

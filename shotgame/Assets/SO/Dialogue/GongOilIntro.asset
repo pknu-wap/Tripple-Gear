@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4626535ac33ff934280728c50096b119, type: 3}
+  m_Name: GongOilIntro
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  partnerPortrait: {fileID: 900001213, guid: 5a57cfeb300f43ea87096c97ec83883a, type: 3}
+  dialogueLines:
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "진짜였잖아?"
+    characterImage: {fileID: 0}
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "중장님 왜 이런 반란을..."
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 공오일
+    dialogueText: "너희 정규군은 썩은지 꽤 됐으니깐"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 공오일
+    dialogueText: "내가 이제 로봇 시대가 올것이고"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 공오일
+    dialogueText: "10년동안 이 연구를 하고 논문까지 내고 로봇 공장까지 다 지었는데"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 공오일
+    dialogueText: "정규군 윗대가리들이 돈을 목적으로 나의 10년을 다 강탈해갔어"
+    characterImage: {fileID: 0}
+  - speaker: 2
+    characterName: 공오일
+    dialogueText: "그러니깐....나는 썩은 군대를 정리하고 세계를 로봇으로 지배할거다"
+    characterImage: {fileID: 0}
+  - speaker: 1
+    characterName: 아리사
+    dialogueText: "제정신이 아니군... 앗 온다"
+    characterImage: {fileID: 0}

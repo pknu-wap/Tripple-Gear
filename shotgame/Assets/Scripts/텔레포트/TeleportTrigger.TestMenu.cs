@@ -1,7 +1,11 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 #endif
 
 public sealed partial class TeleportTrigger
@@ -19,10 +23,10 @@ public sealed partial class TeleportTrigger
     [Header("테스트 이동")]
     [SerializeField, KoreanLabel("임시 테스트용 F1 메뉴")] private bool temporaryF1Shortcut;
     [SerializeField, KoreanLabel("F1 이동 목적지")] private TestDestination[] temporaryDestinations;
-    [SerializeField, KoreanLabel("F1 메뉴 글꼴")] private Font temporaryMenuFont;
 
     private bool testMenuOpen;
-    private float timeScaleBeforeTestMenu;
+    private GameObject testMenuCanvas;
+    private RectTransform testMenuPanel;
     private bool cursorWasVisible;
     private CursorLockMode cursorLockBeforeTestMenu;
 
@@ -42,6 +46,11 @@ public sealed partial class TeleportTrigger
         bool togglePressed = false;
 #endif
         if (togglePressed) SetTestMenuOpen(!testMenuOpen);
+        if (testMenuOpen)
+        {
+            testMenuPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                Mathf.Max(0f, Mathf.Min(360f, Screen.width - 32f)));
+        }
     }
 
     private void OnGUI()
@@ -68,44 +77,101 @@ public sealed partial class TeleportTrigger
             {
                 SelectTestDestination(index);
                 input.Use();
-                return;
             }
         }
+    }
 
-        Color previousColor = GUI.color;
-        Font previousFont = GUI.skin.font;
-        GUI.color = new Color(0f, 0f, 0f, 0.65f);
-        GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
-        GUI.color = previousColor;
-        if (temporaryMenuFont != null) GUI.skin.font = temporaryMenuFont;
-
+    private void CreateTestMenu()
+    {
         const float rowHeight = 36f;
-        float width = Mathf.Min(360f, Screen.width - 32f);
         float height = 108f + rowHeight * (temporaryDestinations.Length + 1);
-        float left = (Screen.width - width) * 0.5f;
-        float top = (Screen.height - height) * 0.5f;
-        GUI.Box(new Rect(left, top, width, height), "F1 테스트 메뉴");
+        testMenuCanvas = new GameObject("F1 Test Menu", typeof(Canvas), typeof(GraphicRaycaster), typeof(Image));
+        var canvas = testMenuCanvas.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = short.MaxValue;
+        testMenuCanvas.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.65f);
+
+        if (EventSystem.current == null)
+        {
+            var events = new GameObject("F1 Event System", typeof(EventSystem));
+            events.transform.SetParent(canvas.transform, false);
+#if ENABLE_INPUT_SYSTEM
+            events.AddComponent<InputSystemUIInputModule>();
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            events.AddComponent<StandaloneInputModule>();
+#endif
+        }
+
+        var panel = new GameObject("Panel", typeof(Image)).GetComponent<Image>();
+        panel.color = new Color(0.16f, 0.16f, 0.16f);
+        testMenuPanel = panel.rectTransform;
+        testMenuPanel.SetParent(canvas.transform, false);
+        testMenuPanel.sizeDelta = new Vector2(360f, height);
+        CreateTestMenuLabel(CreateTestMenuRow(testMenuPanel, "Title", 0f, 30f), "F1 테스트 메뉴");
+
         for (int i = 0; i < temporaryDestinations.Length; i++)
         {
             TestDestination destination = temporaryDestinations[i];
             if (destination != null && (destination.route != null || destination.voyage != null
-                || destination.atailEntrance != null) && GUI.Button(
-                new Rect(left + 16f, top + 32f + i * rowHeight, width - 32f, 30f), $"{i + 1}. {destination.label}"))
+                || destination.atailEntrance != null))
             {
-                SelectTestDestination(i);
+                int index = i;
+                CreateTestMenuButton(32f + i * rowHeight, $"{i + 1}. {destination.label}",
+                    _ => SelectTestDestination(index));
             }
         }
-        if (teleportSubject != null && teleportSubject.TryGetComponent(out SubmachineGunFire playerGun)
-            && GUI.Button(new Rect(left + 16f, top + height - 43f - rowHeight, width - 32f, 30f),
-                playerGun.TestDamageEnabled ? "총 데미지 100 해제 (적용 중)" : "총 데미지 100 적용"))
+
+        if (teleportSubject != null && teleportSubject.TryGetComponent(out SubmachineGunFire playerGun))
         {
-            playerGun.TestDamageEnabled = !playerGun.TestDamageEnabled;
+            string DamageLabel() => playerGun.TestDamageEnabled
+                ? "총 데미지 100 해제 (적용 중)" : "총 데미지 100 적용";
+            CreateTestMenuButton(height - 43f - rowHeight, DamageLabel(), label =>
+            {
+                if (playerGun == null) return;
+                playerGun.TestDamageEnabled = !playerGun.TestDamageEnabled;
+                label.text = DamageLabel();
+            });
         }
-        if (GUI.Button(new Rect(left + 16f, top + height - 43f, width - 32f, 30f), "닫기  (F1 / Esc)"))
-        {
-            SetTestMenuOpen(false);
-        }
-        GUI.skin.font = previousFont;
+
+        CreateTestMenuButton(height - 43f, "닫기  (F1 / Esc)", _ => SetTestMenuOpen(false));
+    }
+
+    private void CreateTestMenuButton(float top, string text, Action<TMP_Text> onClick)
+    {
+        RectTransform row = CreateTestMenuRow(testMenuPanel, "Button", top, 30f);
+        var background = row.gameObject.AddComponent<Image>();
+        background.color = new Color(0.32f, 0.32f, 0.32f);
+        var button = row.gameObject.AddComponent<Button>();
+        button.targetGraphic = background;
+        TMP_Text label = CreateTestMenuLabel(row, text);
+        button.onClick.AddListener(() => onClick(label));
+    }
+
+    private static RectTransform CreateTestMenuRow(RectTransform parent, string name, float top, float height)
+    {
+        var row = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+        row.SetParent(parent, false);
+        row.anchorMin = new Vector2(0f, 1f);
+        row.anchorMax = Vector2.one;
+        row.offsetMin = new Vector2(16f, -top - height);
+        row.offsetMax = new Vector2(-16f, -top);
+        return row;
+    }
+
+    private static TMP_Text CreateTestMenuLabel(RectTransform parent, string text)
+    {
+        var label = new GameObject("Label", typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+        label.rectTransform.SetParent(parent, false);
+        label.rectTransform.anchorMin = Vector2.zero;
+        label.rectTransform.anchorMax = Vector2.one;
+        label.rectTransform.offsetMin = Vector2.zero;
+        label.rectTransform.offsetMax = Vector2.zero;
+        label.font = TMP_Settings.defaultFontAsset;
+        label.text = text;
+        label.alignment = TextAlignmentOptions.Center;
+        label.fontSize = 14f;
+        label.raycastTarget = false;
+        return label;
     }
 
     private void SelectTestDestination(int index)
@@ -184,20 +250,24 @@ public sealed partial class TeleportTrigger
         if (open)
         {
             GameplayInput.Block(this);
-            timeScaleBeforeTestMenu = Time.timeScale;
             cursorWasVisible = Cursor.visible;
             cursorLockBeforeTestMenu = Cursor.lockState;
-            Time.timeScale = 0f;
+            GameplayPause.Acquire(this);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            CreateTestMenu();
         }
         else
         {
+            if (testMenuCanvas != null)
+            {
+                testMenuCanvas.SetActive(false);
+                Destroy(testMenuCanvas);
+            }
             GameplayInput.Unblock(this);
             Cursor.lockState = cursorLockBeforeTestMenu;
             Cursor.visible = cursorWasVisible;
-            // A scene change may already have restored its own time scale.
-            if (Time.timeScale == 0f) Time.timeScale = timeScaleBeforeTestMenu;
+            GameplayPause.Release(this);
         }
     }
 

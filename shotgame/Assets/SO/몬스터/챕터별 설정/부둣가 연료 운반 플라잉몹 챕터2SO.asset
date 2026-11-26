@@ -20,6 +20,10 @@ MonoBehaviour:
   useWallHitFlash: 0
   dropSlots:
   - prefab: {fileID: 953330073782280629, guid: e9487ec6e1a72a649b041a83fb0ffcde, type: 3}
-    chance: 0.65
+    chance: 0.4
+  - prefab: {fileID: 478080452589911, guid: fabcfddb6da34e2aa14bba7168105a23, type: 3}
+    chance: 0.5
+  - prefab: {fileID: 6922012336221618387, guid: 0bca78edda9a4906bbe5daed3c09e757, type: 3}
+    chance: 0.1
   dropPrefab: {fileID: 0}
   dropChance: 0
