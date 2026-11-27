@@ -51,10 +51,16 @@ public class DialogueManager : MonoBehaviour
     private DialogueData.DialogueLine[] activeLines;
     private Sprite arisaPortrait;
     private Sprite activePartnerPortrait;
+    private AudioSource voiceSource;
 
     internal static int ActiveDialogueCount => activeDialogues.Count;
 
     internal bool IsPlaying(DialogueData data) => data != null && activeLines == data.dialogueLines;
+
+    internal void StopDialogue(DialogueData data)
+    {
+        if (IsPlaying(data)) EndDialogue();
+    }
 
     internal static bool BlocksGameplayInput =>
         activeDialogues.Count > 0 || lastDialogueEndFrame == Time.frameCount;
@@ -185,6 +191,7 @@ public class DialogueManager : MonoBehaviour
     {
         DialogueData.DialogueLine line = activeLines[currentIndex];
 
+        PlayVoice(line.voiceClip);
         characterNameText.text = line.characterName;
         dialogueText.text = line.dialogueText;
         dialogueText.maxVisibleCharacters = 0;
@@ -207,6 +214,20 @@ public class DialogueManager : MonoBehaviour
 
         SetPortrait(characterImage, arisaPortrait, arisaIsSpeaking ? 1f : listenerOpacity);
         SetPortrait(partnerImage, activePartnerPortrait, arisaIsSpeaking ? listenerOpacity : 1f);
+    }
+
+    private void PlayVoice(AudioClip clip)
+    {
+        if (voiceSource == null)
+        {
+            if (clip == null) return;
+            voiceSource = gameObject.AddComponent<AudioSource>();
+            voiceSource.playOnAwake = false;
+        }
+
+        voiceSource.Stop();
+        voiceSource.clip = clip;
+        if (clip != null) voiceSource.Play();
     }
 
     private static void SetPortrait(Image image, Sprite portrait, float opacity)
@@ -233,6 +254,7 @@ public class DialogueManager : MonoBehaviour
 
     private void EndDialogue()
     {
+        PlayVoice(null);
         lastDialogueEndFrame = Time.frameCount;
         activeDialogues.Remove(this);
         GameplayPause.Release(this);

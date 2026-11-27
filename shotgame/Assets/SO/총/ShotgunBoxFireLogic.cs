@@ -73,6 +73,7 @@ public sealed class ShotgunBoxFireLogic : GunFireLogic
             MonsterHealth health = hit.GetComponentInParent<MonsterHealth>();
             if (health != null && damagedMonsters.Add(health))
             {
+                if (!health.IsDead) GameplaySfx.Play(GameplaySfx.Cue.MetalHit, 0.36f);
                 health.TakeGunDamage(damage);
             }
         }

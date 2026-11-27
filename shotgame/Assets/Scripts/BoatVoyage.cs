@@ -131,6 +131,7 @@ public sealed class BoatVoyage : MonoBehaviour
         cameraStartX = cameraManager.ManagedCamera.transform.position.x;
         phase = deckCenterX.HasValue ? VoyagePhase.Docked : VoyagePhase.Sailing;
         if (phase == VoyagePhase.Sailing) wake?.Play();
+        GameplaySfx.Play(GameplaySfx.Cue.Wind, .38f);
         Departed?.Invoke();
         return true;
     }
@@ -151,7 +152,8 @@ public sealed class BoatVoyage : MonoBehaviour
 
         if (player.transform.position.y < seaBounds.min.y - 2f && playerHealth != null)
         {
-            playerHealth.TakeFatalDamage();
+            if (playerHealth.TestInvincibilityEnabled) player.BoardBoat(deck);
+            else playerHealth.TakeFatalDamage();
         }
 
         Camera currentCamera = cameraManager.ManagedCamera;

@@ -17,20 +17,25 @@ MonoBehaviour:
   - speaker: 1
     characterName: 아리사
     dialogueText: "통신보안 소령 아리사, 광안리에 도착했다"
+    voiceClip: {fileID: 8300000, guid: e6c7024262f475a41af615133c7813b2, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "통신보안 중령 카이, 장산으로 가면 비행선이 하나있어"
+    voiceClip: {fileID: 8300000, guid: 2e3c8789091657d4dae319af9fa3ac05, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "거기에 은퇴한 전 중장 공오일이 있다고 해"
+    voiceClip: {fileID: 8300000, guid: aa8b83da36ab018409076a1784445261, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "이번 로봇 반란은 그가 발생시킨걸로 보여"
+    voiceClip: {fileID: 8300000, guid: 55cbf5fd38534a74d8f8f88dfec873bb, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "가서 처치하도록"
+    voiceClip: {fileID: 8300000, guid: 9a6281fd72769bf4cabcd03271a5e920, type: 3}
     characterImage: {fileID: 0}

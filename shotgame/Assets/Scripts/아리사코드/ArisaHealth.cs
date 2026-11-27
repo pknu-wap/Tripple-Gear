@@ -45,6 +45,7 @@ public sealed class ArisaHealth : MonoBehaviour
     private bool hitVisualActive;
 
     public int MaxHp => maxHp;
+    internal bool TestInvincibilityEnabled { get; set; }
     public int CurrentHp => currentHp;
     public bool IsDead => currentHp <= 0;
     public UnityEvent<int, int> HpChanged => hpChanged;
@@ -157,7 +158,7 @@ public sealed class ArisaHealth : MonoBehaviour
     {
         // 스킬 컴포넌트가 Awake 이후에 무적 컴포넌트를 추가할 수도 있다.
         FindReferences();
-        if (Time.time < hitProtectionEndTime
+        if (TestInvincibilityEnabled || Time.time < hitProtectionEndTime
             || (invincibility != null && invincibility.IsInvincible))
         {
             return;
@@ -171,7 +172,15 @@ public sealed class ArisaHealth : MonoBehaviour
         TakeDamage(Mathf.CeilToInt(amount));
     }
 
-    internal void Defeat() => SetHp(0);
+    internal void Defeat()
+    {
+        if (!TestInvincibilityEnabled) SetHp(0);
+    }
+
+    internal void HealToFull()
+    {
+        if (!IsDead) SetHp(MaxHp);
+    }
 
     public void Heal(int amount)
     {
@@ -261,6 +270,7 @@ public sealed class ArisaHealth : MonoBehaviour
 
         if (currentHp < previousHp)
         {
+            GameplaySfx.Play(GameplaySfx.Cue.PlayerHit);
             hitProtectionEndTime = Time.time + hitDisplayDuration;
             PlayHitPresentation(hitDisplayDuration);
             PlayHitReaction(sourcePosition);

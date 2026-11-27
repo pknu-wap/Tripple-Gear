@@ -188,6 +188,7 @@ public sealed class BeachLaserSurvival : MonoBehaviour
         float floorViewport = view.WorldToViewportPoint(new Vector3(0f, floorY, transform.position.z)).y;
         if (firing && !impactThisShot)
         {
+            GameplaySfx.Play(GameplaySfx.Cue.Laser, 0.58f);
             impactThisShot = true;
             shakeStartedAt = Time.time;
             float floorDepth = view.WorldToViewportPoint(arenaFloor.bounds.center).z;

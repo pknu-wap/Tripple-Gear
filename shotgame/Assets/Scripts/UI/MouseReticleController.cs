@@ -21,6 +21,7 @@ public sealed class MouseReticleController : MonoBehaviour
     private bool colorFlashing;
     private bool previousCursorVisible;
     private bool cursorHidden;
+    internal bool ShowMenuCursor { get; set; }
 
     private void Awake()
     {
@@ -52,10 +53,10 @@ public sealed class MouseReticleController : MonoBehaviour
 
     private void LateUpdate()
     {
-        bool dialogueActive = DialogueManager.BlocksGameplayInput;
+        bool menuCursor = ShowMenuCursor || DialogueManager.BlocksGameplayInput;
         if (canvasRect != null && reticleImage != null)
         {
-            SetCursorHidden(!dialogueActive);
+            SetCursorHidden(!menuCursor);
         }
 
         if (colorFlashing && Time.unscaledTime >= restoreColorAt)
@@ -64,7 +65,7 @@ public sealed class MouseReticleController : MonoBehaviour
             colorFlashing = false;
         }
 
-        if (dialogueActive || canvasRect == null || reticleImage == null || Mouse.current == null)
+        if (menuCursor || canvasRect == null || reticleImage == null || Mouse.current == null)
         {
             if (reticleImage != null)
             {

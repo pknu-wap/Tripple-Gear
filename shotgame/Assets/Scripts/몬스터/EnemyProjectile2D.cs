@@ -139,6 +139,7 @@ public sealed class EnemyProjectile2D : MonsterProjectile
     {
         if (explosionPrefab != null)
         {
+            GameplaySfx.Play(GameplaySfx.Cue.Explosion, 0.46f);
             GameObject effect = Instantiate(explosionPrefab, transform.position, Quaternion.identity, transform.parent);
             effect.transform.localScale *= explosionScale;
             Destroy(effect, explosionLifetime);

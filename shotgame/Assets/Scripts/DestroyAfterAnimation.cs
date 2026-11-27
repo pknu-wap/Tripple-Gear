@@ -15,6 +15,7 @@ public sealed class DestroyAfterAnimation : MonoBehaviour
         }
 
         // Let the Animator enter its initial state before checking playback progress.
+        GameplaySfx.Play(GameplaySfx.Cue.Explosion, .47f);
         yield return null;
 
         while (animator != null && animator.isActiveAndEnabled)

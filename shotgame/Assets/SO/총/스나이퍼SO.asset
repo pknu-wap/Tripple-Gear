@@ -17,7 +17,7 @@ MonoBehaviour:
   "\uCD1D\uC54C\uAC2F\uC218": 1
   "\uACF5\uACA9\uC18D\uB3C4": 1
   "\uCD1D\uC54C\uBC1C\uC0AC\uC18D\uB3C4": 0
-  "\uBC1C\uC0AC\uC18C\uB9AC": {fileID: 0}
+  "\uBC1C\uC0AC\uC18C\uB9AC": {fileID: 8300000, guid: 7bde19d818714e45ac867f8f27a144ec, type: 3}
   "\uBC1C\uC0AC\uC18C\uB9AC\uD06C\uAE30": 0.3
   "\uB370\uBBF8\uC9C0": 10
   "\uC7A5\uC804\uC18D\uB3C4": 1

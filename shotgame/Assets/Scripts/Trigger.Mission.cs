@@ -197,6 +197,7 @@ public partial class Trigger
         // Keep the last sample until we observe completion and release the graph.
         playingMissionIntro.extrapolationMode = DirectorWrapMode.Hold;
         playingMissionIntro.stopped += OnMissionIntroStopped;
+        GameplaySfx.Play(GameplaySfx.Cue.Encounter, 0.42f);
         playingMissionIntro.Play();
     }
 

@@ -135,7 +135,7 @@ internal static class GunDamage
         return hitCollider.GetComponentInParent<MonsterHealth>();
     }
 
-    public static void ApplyToEnemy(Collider2D hitCollider, float damage)
+    public static void ApplyToEnemy(Collider2D hitCollider, float damage, bool awardHit = true)
     {
         if (damage <= 0f)
         {
@@ -145,7 +145,7 @@ internal static class GunDamage
         MonsterHealth health = GetEnemyHealth(hitCollider);
         if (health != null)
         {
-            health.TakeGunDamage(damage);
+            health.TakeGunDamage(damage, awardHit);
         }
     }
 }

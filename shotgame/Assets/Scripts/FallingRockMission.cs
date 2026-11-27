@@ -43,6 +43,7 @@ public sealed class FallingRockMission : MonoBehaviour
             Random.Range(-halfSize.y, halfSize.y));
         Vector3 position = spawnArea.transform.TransformPoint(localPoint);
         Rigidbody2D rock = Instantiate(rockPrefab, position, Quaternion.Euler(0f, 0f, Random.Range(0f, 360f)));
+        GameplaySfx.Play(GameplaySfx.Cue.Wind, 0.22f);
         rock.gravityScale = 0f;
         rock.linearVelocity = Vector2.down * Mathf.Max(0.1f, fallSpeed);
         rock.angularVelocity = Random.Range(-110f, 110f);

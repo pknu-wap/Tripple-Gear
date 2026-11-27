@@ -43,6 +43,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     [Header("배경음악")]
     [SerializeField, KoreanLabel("페이드아웃할 음악")] private BackgroundMusicFader musicToFadeOut;
     [SerializeField, KoreanLabel("페이드인할 음악")] private BackgroundMusicFader musicToFadeIn;
+    [SerializeField] private ChapterMusic chapterMusic;
+    [SerializeField, KoreanLabel("도착 시 시작할 챕터 음악")] private int chapterMusicOnArrival;
 
     [SerializeField, KoreanLabel("도착 연출 완료 시")] private UnityEvent onTeleportCompleted = new UnityEvent();
 
@@ -130,6 +132,7 @@ public sealed partial class TeleportTrigger : MonoBehaviour
     private IEnumerator TeleportRoutine(Transform subject, bool restorePlayerFollow = false, System.Action onArrival = null)
     {
         isTeleporting = true;
+        GameplaySfx.Play(GameplaySfx.Cue.Teleport, .32f);
 
         TeleportDirectionalFade fadeToUse = GetFade();
         if (musicToFadeOut != null)
@@ -157,12 +160,12 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         onTeleportCompleted?.Invoke();
     }
 
-    internal void PlacePlayerAtDestination()
+    internal void PlacePlayerAtDestination(bool invokeArrivalEvent = true)
     {
         if (teleportSubject == null) return;
 
         PlaceAtDestination(teleportSubject, restorePlayerFollow: false);
-        onTeleportCompleted?.Invoke();
+        if (invokeArrivalEvent) onTeleportCompleted?.Invoke();
     }
 
     private void PlaceAtDestination(Transform subject, bool restorePlayerFollow)
@@ -170,6 +173,8 @@ public sealed partial class TeleportTrigger : MonoBehaviour
         TeleportSubject(subject);
         ApplyCameraArea();
         ApplyCameraFollowMode();
+        if (chapterMusic != null && chapterMusicOnArrival > 0)
+            chapterMusic.PlayChapter(chapterMusicOnArrival);
 
         if (destinationCameraTarget != null || followTeleportedPlayer || restorePlayerFollow)
         {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(MonsterHealth), typeof(SpriteRenderer), typeof(BoxCollider2D))]
-public sealed class GongOilBoss : MonoBehaviour
+public sealed partial class GongOilBoss : MonoBehaviour
 {
     private enum Pattern
     {
@@ -36,11 +36,13 @@ public sealed class GongOilBoss : MonoBehaviour
 
     [SerializeField] private DialogueManager dialogueManager;
     [SerializeField] private DialogueData introduction;
+    [SerializeField] private ChapterMusic chapterMusic;
     [SerializeField] private ArisaHealth player;
     [SerializeField] private BoxCollider2D arenaFloor;
     [SerializeField] private SpriteRenderer arenaBackground;
     [SerializeField] private Vector2 electricTeleportPosition;
     [SerializeField] private UIBarController bossBar;
+    [SerializeField] private FinalSkyBattle finalSkyBattle;
     [SerializeField] private SwingFrame[] chargeFrames;
     [SerializeField] private HandFrame[] throwFrames;
     [SerializeField] private Sprite[] electricFrames;
@@ -135,6 +137,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
         // The key that advances the last line also controls the player.
         yield return null;
+        if (chapterMusic != null) chapterMusic.PlayBoss(3);
         if (bossBar != null) bossBar.ShowEncounter(health);
         var remaining = new List<Pattern>();
         Pattern? previous = null;
@@ -202,6 +205,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator SmokeCharge()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Dash, .55f);
         float direction = Random.value < 0.5f ? 1f : -1f;
         float entry = direction > 0f ? arena.xMin : arena.xMax;
         float exit = direction > 0f ? arena.xMax : arena.xMin;
@@ -337,6 +341,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator ThrowScythe()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Throw, .55f);
         Vector2 playerPosition = player.transform.position;
         float orbitY = PlayerCenter.y;
         const float minDistance = 5f;
@@ -411,6 +416,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator RotateElectricCross()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Electric, .55f);
         Vector2 feet = transform.parent.TransformPoint(electricTeleportPosition);
         yield return Warp(feet);
         Vector2 center = BossCenter;
@@ -520,6 +526,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator OpenSummonRift(float x)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Energy, .45f);
         SpriteRenderer abyss = MakeSprite("블랙홀 중심", smokeSprite, 14, effects);
         SpriteRenderer halo = MakeSprite("블랙홀 후광", smokeSprite, 13, effects);
         LineRenderer rim = MakeLine("블랙홀 가장자리", 15, 0.12f, 41);
@@ -656,6 +663,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator FlySlash(Vector2 start, Vector2 end, float direction, float lifetime, float travelFraction)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Throw, .39f);
         LineRenderer glow = MakeLine("공오일 참격 외곽", 14, 0.48f, 13);
         LineRenderer edge = MakeLine("공오일 참격", 15, 0.17f, 13);
         AnimationCurve taper = AnimationCurve.EaseInOut(0f, 0.05f, 0.5f, 1f);
@@ -687,6 +695,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator FloorLightning()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Electric, .52f);
         float targetX = Mathf.Clamp(player.transform.position.x, arena.xMin, arena.xMax);
         yield return Warp(AtFloor(targetX), faceRight: targetX > transform.position.x);
         int downSwingFrames = chargeFrames.Length / 2;
@@ -862,6 +871,7 @@ public sealed class GongOilBoss : MonoBehaviour
         Vector2 end = new Vector2(direction > 0f ? arena.xMax : arena.xMin, start.y);
         if (fromSmokeZone)
         {
+            GameplaySfx.Play(GameplaySfx.Cue.Warning, 0.4f);
             LineRenderer warning = MakeLine("미사일 진입 경고", 14, 0.13f, 2);
             warning.startColor = warning.endColor = new Color(1f, 0.37f, 0.16f, 0.72f);
             warning.SetPosition(0, start);
@@ -873,6 +883,7 @@ public sealed class GongOilBoss : MonoBehaviour
         Camera view = fromSmokeZone ? Camera.main : null;
         // A launch at the far wall can be outside the camera that follows Arisa.
         bool needsEntrySmoke = view != null && !IsInMissileView(view, MissileSmokeOrigin(start));
+        GameplaySfx.Play(GameplaySfx.Cue.Missile, 0.37f);
         SpriteRenderer missile = MakeSprite("파괴 불가 미사일", missileSprite, 14, effects);
         missile.transform.localScale = Vector3.one * (1.65f / missileSprite.bounds.size.x);
         missile.flipX = direction < 0f;
@@ -933,6 +944,7 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private IEnumerator AnimateTeleport(float duration, bool arriving)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Teleport, .31f);
         Vector3 feet = transform.position;
         Vector2 center = BossCenter;
         SpriteRenderer silhouette = MakeSprite("순간이동 실루엣", body.sprite, body.sortingOrder, effects);
@@ -1017,8 +1029,27 @@ public sealed class GongOilBoss : MonoBehaviour
 
     private void OnDefeated()
     {
+        Vector3 defeatPosition = body.bounds.center;
         defeated = true;
         StopEncounter();
+        if (dialogueManager != null) dialogueManager.StopDialogue(introduction);
+        if (finalSkyBattle != null && player != null && !player.IsDead)
+        {
+            GameplayInput.Block(this);
+            defeatSequence = StartCoroutine(PlayDefeatSequence(defeatPosition));
+        }
+    }
+
+    internal bool CanStartSkyBattleForTest =>
+        finalSkyBattle != null && finalSkyBattle.isActiveAndEnabled && player != null && !player.IsDead;
+
+    internal void StartSkyBattleForTest()
+    {
+        if (!CanStartSkyBattleForTest) return;
+        CancelDefeatSequence();
+        StopEncounter();
+        if (dialogueManager != null) dialogueManager.StopDialogue(introduction);
+        finalSkyBattle.BeginFromTestMenu(player, bossBar, missileSprite);
     }
 
     private void OnPlayerDefeated() => StopEncounter();
@@ -1045,7 +1076,11 @@ public sealed class GongOilBoss : MonoBehaviour
         if (!defeated) health.ResetForMission();
     }
 
-    private void OnDisable() => StopEncounter();
+    private void OnDisable()
+    {
+        CancelDefeatSequence();
+        StopEncounter();
+    }
 
     private void OnDestroy()
     {

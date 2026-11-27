@@ -9,6 +9,9 @@ internal sealed class RobotStun : MonoBehaviour
     private Rigidbody2D body;
     private RigidbodyConstraints2D originalConstraints;
     private float endsAt;
+    private SpriteRenderer stunSprite;
+    private Material arcMaterial;
+    private readonly LineRenderer[] arcs = new LineRenderer[3];
 
     internal static void Apply(MonsterHealth target, float duration)
     {
@@ -56,6 +59,7 @@ internal sealed class RobotStun : MonoBehaviour
             animatorSpeeds[animator] = animator.speed;
             animator.speed = 0f;
         }
+        CreateElectricArcs();
     }
 
     internal static float GetAnimationSpeed(Animator animator)
@@ -80,6 +84,58 @@ internal sealed class RobotStun : MonoBehaviour
     private void Update()
     {
         if (Time.time >= endsAt) End();
+    }
+
+    private void CreateElectricArcs()
+    {
+        float largest = 0f;
+        foreach (SpriteRenderer sprite in GetComponentsInChildren<SpriteRenderer>())
+        {
+            Vector3 size = sprite.bounds.size;
+            float area = size.x * size.y;
+            if (!sprite.enabled || sprite.sprite == null || area <= largest) continue;
+            stunSprite = sprite;
+            largest = area;
+        }
+        if (stunSprite == null) return;
+
+        arcMaterial = new Material(Shader.Find("Sprites/Default"));
+        for (int i = 0; i < arcs.Length; i++)
+        {
+            var arc = new GameObject("EMP 감전 스파크").AddComponent<LineRenderer>();
+            arc.transform.SetParent(transform, false);
+            arc.sharedMaterial = arcMaterial;
+            arc.sortingLayerID = stunSprite.sortingLayerID;
+            arc.sortingOrder = stunSprite.sortingOrder + 6;
+            arc.positionCount = 6;
+            arc.numCapVertices = 2;
+            arc.startColor = new Color(0.68f, 0.98f, 1f, 0.96f);
+            arc.endColor = new Color(0.19f, 0.52f, 1f, 0.76f);
+            arcs[i] = arc;
+        }
+        LateUpdate();
+    }
+
+    private void LateUpdate()
+    {
+        if (stunSprite == null) return;
+        Bounds bounds = stunSprite.bounds;
+        float frame = Mathf.Floor(Time.time * 24f);
+        for (int i = 0; i < arcs.Length; i++)
+        {
+            LineRenderer arc = arcs[i];
+            arc.widthMultiplier = Mathf.Clamp(bounds.size.y * 0.055f, 0.042f, 0.13f);
+            float angle = (i * 2.094f) + frame * 0.18f;
+            for (int point = 0; point < arc.positionCount; point++)
+            {
+                float t = (float)point / (arc.positionCount - 1);
+                float bend = angle + t * 1.65f;
+                float radius = 0.73f + Mathf.Sin(frame * 2.63f + i + point * 11.7f) * 0.38f;
+                Vector3 offset = new Vector3(Mathf.Cos(bend) * bounds.extents.x,
+                    Mathf.Sin(bend) * bounds.extents.y, 0f);
+                arc.SetPosition(point, bounds.center + offset * radius);
+            }
+        }
     }
 
     internal void End()
@@ -107,5 +163,14 @@ internal sealed class RobotStun : MonoBehaviour
             if (animation.Key != null) animation.Key.speed = animation.Value;
         }
         animatorSpeeds.Clear();
+        stunSprite = null;
+        foreach (LineRenderer arc in arcs)
+        {
+            if (arc == null) continue;
+            arc.enabled = false;
+            Destroy(arc.gameObject);
+        }
+        if (arcMaterial != null) Destroy(arcMaterial);
+        arcMaterial = null;
     }
 }

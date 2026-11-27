@@ -47,11 +47,12 @@ public sealed class HitscanLineFireLogic : GunFireLogic
 
             if (damaged.Add(target))
             {
+                if (!target.IsDead) GameplaySfx.Play(GameplaySfx.Cue.MetalHit, 0.36f);
                 target.TakeGunDamage(context.GetDamage(gunData));
                 if (!context.DamageOverride.HasValue)
                 {
                     // The normal shot also applies base damage to Enemy-layer targets.
-                    GunDamage.ApplyToEnemy(hit.collider, gunData.Damage);
+                    GunDamage.ApplyToEnemy(hit.collider, gunData.Damage, awardHit: false);
                 }
             }
         }

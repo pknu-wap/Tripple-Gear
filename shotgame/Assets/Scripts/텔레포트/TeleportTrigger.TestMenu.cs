@@ -18,6 +18,8 @@ public sealed partial class TeleportTrigger
         [SerializeField, InspectorName("보트 항해")] internal BoatVoyage voyage;
         [SerializeField, InspectorName("아테일 등장 연출")] internal AtailEntrance atailEntrance;
         [SerializeField, InspectorName("이동 시 다시 시작할 보스")] internal BossTrigger resetBoss;
+        [SerializeField, InspectorName("최종 공중전")] internal GongOilBoss skyEncounter;
+        [SerializeField, InspectorName("테스트 입장 시 챕터 음악")] internal int musicChapter;
     }
 
     [Header("테스트 이동")]
@@ -45,11 +47,13 @@ public sealed partial class TeleportTrigger
 #else
         bool togglePressed = false;
 #endif
-        if (togglePressed) SetTestMenuOpen(!testMenuOpen);
+        if (togglePressed && (GameManager.Instance == null || !GameManager.Instance.IsPauseMenuOpen))
+            SetTestMenuOpen(!testMenuOpen);
         if (testMenuOpen)
         {
             testMenuPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
                 Mathf.Max(0f, Mathf.Min(360f, Screen.width - 32f)));
+            testMenuPanel.localScale = Vector3.one * Mathf.Min(1f, Screen.height / (testMenuPanel.rect.height + 16f));
         }
     }
 
@@ -84,7 +88,7 @@ public sealed partial class TeleportTrigger
     private void CreateTestMenu()
     {
         const float rowHeight = 36f;
-        float height = 108f + rowHeight * (temporaryDestinations.Length + 1);
+        float height = 108f + rowHeight * (temporaryDestinations.Length + 2);
         testMenuCanvas = new GameObject("F1 Test Menu", typeof(Canvas), typeof(GraphicRaycaster), typeof(Image));
         var canvas = testMenuCanvas.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -113,7 +117,7 @@ public sealed partial class TeleportTrigger
         {
             TestDestination destination = temporaryDestinations[i];
             if (destination != null && (destination.route != null || destination.voyage != null
-                || destination.atailEntrance != null))
+                || destination.atailEntrance != null || destination.skyEncounter != null))
             {
                 int index = i;
                 CreateTestMenuButton(32f + i * rowHeight, $"{i + 1}. {destination.label}",
@@ -125,11 +129,22 @@ public sealed partial class TeleportTrigger
         {
             string DamageLabel() => playerGun.TestDamageEnabled
                 ? "총 데미지 100 해제 (적용 중)" : "총 데미지 100 적용";
-            CreateTestMenuButton(height - 43f - rowHeight, DamageLabel(), label =>
+            CreateTestMenuButton(height - 43f - rowHeight * 2f, DamageLabel(), label =>
             {
                 if (playerGun == null) return;
                 playerGun.TestDamageEnabled = !playerGun.TestDamageEnabled;
                 label.text = DamageLabel();
+            });
+        }
+
+        if (teleportSubject != null && teleportSubject.TryGetComponent(out ArisaHealth playerHealth))
+        {
+            string InvincibilityLabel() => playerHealth.TestInvincibilityEnabled ? "무적 끄기 (적용 중)" : "무적 켜기";
+            CreateTestMenuButton(height - 43f - rowHeight, InvincibilityLabel(), label =>
+            {
+                if (playerHealth == null) return;
+                playerHealth.TestInvincibilityEnabled = !playerHealth.TestInvincibilityEnabled;
+                label.text = InvincibilityLabel();
             });
         }
 
@@ -180,7 +195,9 @@ public sealed partial class TeleportTrigger
         TeleportTrigger route = destination?.route;
         BoatVoyage voyage = destination?.voyage;
         AtailEntrance atailEntrance = destination?.atailEntrance;
-        bool canTravel = atailEntrance != null ? atailEntrance.CanPlayFromTestMenu
+        GongOilBoss skyEncounter = destination?.skyEncounter;
+        bool canTravel = skyEncounter != null ? skyEncounter.CanStartSkyBattleForTest
+            : atailEntrance != null ? atailEntrance.CanPlayFromTestMenu
             : voyage != null ? voyage.isActiveAndEnabled
             : route != null && route.isActiveAndEnabled && route.teleportSubject != null && !route.isTeleporting;
         if (!canTravel || GetFade().IsFading)
@@ -189,7 +206,9 @@ public sealed partial class TeleportTrigger
         }
 
         SetTestMenuOpen(false);
-        var targetScene = atailEntrance != null ? atailEntrance.gameObject.scene
+        if (GameManager.Instance != null) GameManager.Instance.ResetFinishedScoreForTest();
+        var targetScene = skyEncounter != null ? skyEncounter.gameObject.scene
+            : atailEntrance != null ? atailEntrance.gameObject.scene
             : voyage != null ? voyage.gameObject.scene : route.gameObject.scene;
         foreach (Trigger trigger in FindObjectsByType<Trigger>(FindObjectsSortMode.None))
         {
@@ -223,19 +242,43 @@ public sealed partial class TeleportTrigger
             if (boss.gameObject.scene == targetScene) boss.CancelBoardingSequence();
         }
 
-        if (destination.resetBoss != null) destination.resetBoss.ResetEncounter();
-
-        if (atailEntrance != null)
+        foreach (GongOilBoss boss in FindObjectsByType<GongOilBoss>(FindObjectsSortMode.None))
         {
+            if (boss.gameObject.scene == targetScene) boss.CancelDefeatSequence();
+        }
+
+        foreach (FinalSkyBattle battle in FindObjectsByType<FinalSkyBattle>(FindObjectsSortMode.None))
+        {
+            if (battle.gameObject.scene == targetScene) battle.CancelForTest();
+        }
+
+        if (destination.resetBoss != null) destination.resetBoss.ResetEncounter();
+        if (destination.musicChapter == 0 && chapterMusic != null) chapterMusic.Stop();
+
+        void PlayDestinationMusic()
+        {
+            if (destination.musicChapter > 0 && chapterMusic != null)
+                chapterMusic.PlayChapter(destination.musicChapter);
+        }
+
+        if (skyEncounter != null)
+        {
+            skyEncounter.StartSkyBattleForTest();
+        }
+        else if (atailEntrance != null)
+        {
+            PlayDestinationMusic();
             atailEntrance.PlayFromTestMenu();
         }
         else if (voyage != null)
         {
+            PlayDestinationMusic();
             voyage.RestartForTest();
         }
         else
         {
-            route.StartCoroutine(route.TeleportRoutine(route.teleportSubject, restorePlayerFollow: true));
+            route.StartCoroutine(route.TeleportRoutine(route.teleportSubject, restorePlayerFollow: true,
+                onArrival: PlayDestinationMusic));
         }
     }
 

@@ -49,6 +49,7 @@ internal sealed class MonsterDeathBurst : MonoBehaviour
         float size = primary != null ? Mathf.Max(primary.bounds.size.x, primary.bounds.size.y) : 1f;
 
         var effect = new GameObject("Monster Death Burst");
+        GameplaySfx.Play(GameplaySfx.Cue.Explosion, .42f);
         SceneManager.MoveGameObjectToScene(effect, source.scene);
         effect.transform.position = center;
         var animation = effect.AddComponent<MonsterDeathBurst>();

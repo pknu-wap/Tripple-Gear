@@ -51,6 +51,8 @@ public sealed class SkillPickup : MonoBehaviour
         }
 
         collected = true;
+        GameplaySfx.Play(skillData.Logic is HealSkillLogic ? GameplaySfx.Cue.Heal : GameplaySfx.Cue.Pickup);
+        GameManager.Instance?.AddScore(25);
         GetComponent<BoxCollider2D>().enabled = false;
         Destroy(gameObject);
     }

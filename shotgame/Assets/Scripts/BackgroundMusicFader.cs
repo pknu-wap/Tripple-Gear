@@ -8,11 +8,20 @@ public sealed class BackgroundMusicFader : MonoBehaviour
     private AudioSource musicSource;
     private Coroutine fadeRoutine;
     private float normalVolume;
+    private float currentVolume;
 
     private void Awake()
     {
         EnsureSource();
     }
+
+    private void OnEnable()
+    {
+        ApplyMusicLevel(GameAudioSettings.Music);
+        GameAudioSettings.MusicChanged += ApplyMusicLevel;
+    }
+
+    private void OnDisable() => GameAudioSettings.MusicChanged -= ApplyMusicLevel;
 
     public void FadeOut(float duration)
     {
@@ -41,19 +50,19 @@ public sealed class BackgroundMusicFader : MonoBehaviour
 
         if (targetVolume > 0f && !gameObject.activeSelf)
         {
-            musicSource.volume = 0f;
+            SetVolume(0f);
             gameObject.SetActive(true);
         }
 
         if (targetVolume > 0f && !musicSource.isPlaying && isActiveAndEnabled)
         {
-            musicSource.volume = 0f;
+            SetVolume(0f);
             musicSource.Play();
         }
 
-        if (!isActiveAndEnabled || duration <= 0f || Mathf.Approximately(musicSource.volume, targetVolume))
+        if (!isActiveAndEnabled || duration <= 0f || Mathf.Approximately(currentVolume, targetVolume))
         {
-            musicSource.volume = targetVolume;
+            SetVolume(targetVolume);
             if (targetVolume <= 0f)
             {
                 musicSource.Stop();
@@ -73,21 +82,30 @@ public sealed class BackgroundMusicFader : MonoBehaviour
 
         musicSource = GetComponent<AudioSource>();
         normalVolume = musicSource.volume;
+        SetVolume(normalVolume);
     }
+
+    private void SetVolume(float volume)
+    {
+        currentVolume = volume;
+        ApplyMusicLevel(GameAudioSettings.Music);
+    }
+
+    private void ApplyMusicLevel(float level) => musicSource.volume = currentVolume * level;
 
     private IEnumerator AnimateVolume(float targetVolume, float duration)
     {
-        float startVolume = musicSource.volume;
+        float startVolume = currentVolume;
         float elapsed = 0f;
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-            musicSource.volume = Mathf.Lerp(startVolume, targetVolume, Mathf.Clamp01(elapsed / duration));
+            SetVolume(Mathf.Lerp(startVolume, targetVolume, Mathf.Clamp01(elapsed / duration)));
             yield return null;
         }
 
-        musicSource.volume = targetVolume;
+        SetVolume(targetVolume);
         if (targetVolume <= 0f)
         {
             musicSource.Stop();

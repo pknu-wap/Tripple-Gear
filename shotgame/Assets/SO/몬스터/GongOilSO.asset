@@ -12,8 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b8ad46f4326475ca70a01e32995ae42, type: 3}
   m_Name: GongOilSO
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSO
-  maxHp: 350
+  maxHp: 560
   moveSpeed: 0
   attackDamage: 1
   attackInterval: 1
   useWallHitFlash: 0
+  dropSlots: []
+  dropPrefab: {fileID: 0}
+  dropChance: 0

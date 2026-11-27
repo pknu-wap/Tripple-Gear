@@ -143,6 +143,7 @@ public sealed class NormalMonsterAttack : MonoBehaviour
             return;
         }
 
+        GameplaySfx.Play(GameplaySfx.Cue.Throw, 0.25f);
         playerHealth.TakeDamage(MonsterData.AttackDamage, transform.position);
         Debug.Log(playerHitLogMessage, playerHealth);
     }

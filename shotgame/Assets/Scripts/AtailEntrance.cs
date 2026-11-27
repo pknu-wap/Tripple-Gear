@@ -73,6 +73,7 @@ public sealed class AtailEntrance : MonoBehaviour
         }
 
         running = true;
+        GameplaySfx.Play(GameplaySfx.Cue.Splash, .58f);
         var camera = cameraManager.ManagedCamera;
         previousCameraPosition = camera.transform.position;
         previousCameraSize = camera.orthographicSize;
@@ -110,6 +111,7 @@ public sealed class AtailEntrance : MonoBehaviour
     // Timeline signal at the cut from the launch shot to the arena.
     public void ShowArena()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Wind, .43f);
         if (!running) return;
         atailAnchor.position = arenaOrigin.position;
         var camera = cameraManager.ManagedCamera;

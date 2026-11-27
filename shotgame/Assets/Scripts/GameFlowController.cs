@@ -121,6 +121,7 @@ public sealed class GameFlowController : MonoBehaviour
         isTimelinePlaying = true;
         SetStartButtonVisible(false);
         SuspendGameplayInput();
+        GameplaySfx.Play(GameplaySfx.Cue.Encounter, .42f);
 
         introTimeline.time = 0d;
         introTimeline.Evaluate();
@@ -150,7 +151,15 @@ public sealed class GameFlowController : MonoBehaviour
         CompleteTimeline();
     }
 
-    private void CompleteTimeline()
+    internal void SkipIntroForRetry()
+    {
+        CacheAnimatorsToFreeze();
+        SetStartButtonVisible(false);
+        CompleteTimeline(notifyCompletion: false);
+        if (gameplayPlayer != null) gameplayPlayer.gameObject.SetActive(true);
+    }
+
+    private void CompleteTimeline(bool notifyCompletion = true)
     {
         ForceTimelineToCompletionFrame();
 
@@ -162,12 +171,15 @@ public sealed class GameFlowController : MonoBehaviour
         isTimelinePlaying = false;
         isTimelineCompleted = true;
 
-        if (stopTimelineOnComplete && introTimeline != null && introTimeline.state == PlayState.Playing)
+        if (introTimeline != null && (notifyCompletion
+            ? stopTimelineOnComplete && introTimeline.state == PlayState.Playing
+            : introTimeline.playableGraph.IsValid()))
         {
             introTimeline.Stop();
         }
 
         ResumeGameplayInput();
+        if (!notifyCompletion) return;
         DebugTimelineCompleted();
         onTimelineCompleted?.Invoke();
     }

@@ -65,6 +65,14 @@ public sealed class ArisaStanceCollider : MonoBehaviour
             return;
         }
 
+        if (movement != null && movement.TryGetFlightCollider(out Vector2 flightSize, out Vector2 flightOffset))
+        {
+            CapsuleDirection2D direction = flightSize.x >= flightSize.y
+                ? CapsuleDirection2D.Horizontal : CapsuleDirection2D.Vertical;
+            ApplyCollider(flightSize, flightOffset, direction);
+            return;
+        }
+
         if (movement == null || !movement.IsCrouching)
         {
             ApplyCollider(standingSize, standingOffset, CapsuleDirection2D.Vertical);

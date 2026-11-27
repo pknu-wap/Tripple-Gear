@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 591610315009347891}
   - component: {fileID: 7475256475542050326}
   - component: {fileID: 6900000000000000001}
+  - component: {fileID: 6900000000000000002}
   m_Layer: 0
   m_Name: "\uD0C4\uD658\uC801\uC911_9"
   m_TagString: Untagged
@@ -126,7 +127,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: f0c9fd8a3cbc5244b93efcfe51e01036, type: 3}
-  m_PlayOnAwake: 1
+  m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
   Loop: 0
@@ -211,3 +212,15 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6900000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7690319464749911681}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89aa5224d7e9497a82c27667e7219cb3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ImpactAudio

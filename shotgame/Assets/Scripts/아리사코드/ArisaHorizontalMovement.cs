@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
-public sealed class ArisaHorizontalMovement : MonoBehaviour
+public sealed partial class ArisaHorizontalMovement : MonoBehaviour
 {
     private static readonly int IsMovingParameter = Animator.StringToHash("IsMoving");
     private const string WaveBoundaryLayerName = "WaveBoundary";
@@ -394,6 +394,12 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
             ClearSampledInput();
         }
 
+        if (flightCamera != null)
+        {
+            MoveInFlight();
+            return;
+        }
+
         verticalSpeed = movementBody.linearVelocity.y;
         bool isHitReacting = Time.time < hitReactionEndTime;
         if (isHitReacting)
@@ -459,6 +465,7 @@ public sealed class ArisaHorizontalMovement : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (flightCamera != null) return;
         ApplyCrouchAnimationFrame();
         ApplyBodyPose(GetAirPoseSprite());
     }

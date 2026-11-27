@@ -4,12 +4,15 @@ using UnityEngine.Events;
 [DisallowMultipleComponent]
 public sealed class MonsterHealth : MonoBehaviour
 {
+    private enum DamageSource { Other, GunShot, AdditionalGunDamage, Skill }
+
     [System.Serializable]
     private sealed class HealthChangedEvent : UnityEvent<int, int>
     {
     }
 
     [SerializeField, KoreanLabel("몬스터 데이터")] private MonsterSO monsterData;
+    [SerializeField, KoreanLabel("보스 처치 점수")] private bool awardsBossDefeatScore;
     [SerializeField, KoreanLabel("HP 변경 시 호출")] private HealthChangedEvent hpChanged = new HealthChangedEvent();
     [SerializeField, KoreanLabel("HP 0 도달 시 호출")] private UnityEvent defeated = new UnityEvent();
 
@@ -94,22 +97,24 @@ public sealed class MonsterHealth : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        ApplyDamage(amount, false);
+        ApplyDamage(amount, DamageSource.Other);
     }
 
-    internal void TakeGunDamage(float amount)
+    internal void TakeGunDamage(float amount, bool awardHit = true)
     {
-        ApplyDamage(Mathf.CeilToInt(amount), true);
+        ApplyDamage(Mathf.CeilToInt(amount), awardHit ? DamageSource.GunShot : DamageSource.AdditionalGunDamage);
     }
 
-    private void ApplyDamage(int amount, bool fromGun)
+    internal void TakeSkillDamage(float amount) => ApplyDamage(Mathf.CeilToInt(amount), DamageSource.Skill);
+
+    private void ApplyDamage(int amount, DamageSource source)
     {
         if (amount <= 0 || IsDead || (RequiredDamageObjective != null && !RequiredDamageObjective.IsRunning))
         {
             return;
         }
 
-        SetHp(currentHp - amount, fromGun);
+        SetHp(currentHp - amount, source);
     }
 
     internal void ResetForMission()
@@ -137,7 +142,7 @@ public sealed class MonsterHealth : MonoBehaviour
         SetHp(amount >= MaxHp - currentHp ? MaxHp : currentHp + amount);
     }
 
-    private void SetHp(int hp, bool fromGun = false)
+    private void SetHp(int hp, DamageSource source = DamageSource.Other)
     {
         int previousHp = currentHp;
         currentHp = Mathf.Clamp(hp, 0, MaxHp);
@@ -146,25 +151,33 @@ public sealed class MonsterHealth : MonoBehaviour
             return;
         }
 
+        bool fromGun = source == DamageSource.GunShot || source == DamageSource.AdditionalGunDamage;
         if (fromGun)
         {
             MonsterHitFlash.Play(gameObject, monsterData.UseWallHitFlash);
         }
 
-        if (IsDead
-            && !TryGetComponent<BossMonsterController>(out _)
-            && !TryGetComponent<AtailSerpent>(out _)
-            && !TryGetComponent<SummitAirshipBoss>(out _)
-            && !TryGetComponent<GongOilBoss>(out _))
+        int points = source == DamageSource.GunShot ? 10 : 0;
+        if (IsDead)
         {
-            TryGetComponent(out MonsterDeathEffect deathEffect);
-            GameObject burst = deathEffect != null ? deathEffect.Prefab : null;
-            if (burst == null && explosive != null)
+            bool isClassicBoss = TryGetComponent<BossMonsterController>(out _) || TryGetComponent<AtailSerpent>(out _);
+            bool continuesIntoSky = TryGetComponent<SummitAirshipBoss>(out _) || TryGetComponent<GongOilBoss>(out _);
+            if (source != DamageSource.Other && !continuesIntoSky)
+                points += isClassicBoss || awardsBossDefeatScore ? 50 : 40;
+
+            if (!isClassicBoss && !continuesIntoSky)
             {
-                burst = explosive.ExplosionEffectPrefab;
+                TryGetComponent(out MonsterDeathEffect deathEffect);
+                GameObject burst = deathEffect != null ? deathEffect.Prefab : null;
+                if (burst == null && explosive != null)
+                {
+                    burst = explosive.ExplosionEffectPrefab;
+                }
+                MonsterDeathBurst.Play(gameObject, burst, fromGun, monsterData.UseWallHitFlash);
             }
-            MonsterDeathBurst.Play(gameObject, burst, fromGun, monsterData.UseWallHitFlash);
         }
+
+        if (points > 0) GameManager.Instance?.AddScore(points);
 
         hpChanged?.Invoke(currentHp, MaxHp);
         if (IsDead && previousHp > 0)

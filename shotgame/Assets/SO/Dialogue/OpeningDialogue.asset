@@ -17,18 +17,22 @@ MonoBehaviour:
   - speaker: 1
     characterName: 아리사
     dialogueText: "요원 아리사 부산 로봇 공장에 도착했다"
+    voiceClip: {fileID: 8300000, guid: a3bfef5528415944980281ea69560597, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "조심해 입구에 감시카메라가 있어"
+    voiceClip: {fileID: 8300000, guid: d220fa9b403c70543aca77c0fd463c66, type: 3}
     characterImage: {fileID: 0}
   - speaker: 1
     characterName: 아리사
     dialogueText: "너가 해킹으로 무력화 못시키나?"
+    voiceClip: {fileID: 8300000, guid: bb0020ff362d2d6448c0b1a7266e851e, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "그게 가능했다면 너를 안보냈겠지"
+    voiceClip: {fileID: 8300000, guid: a281c92ce38220e46938fd04ea4261ed, type: 3}
     characterImage: {fileID: 0}
   - speaker: 1
     characterName: 아리사
@@ -37,12 +41,15 @@ MonoBehaviour:
   - speaker: 2
     characterName: 카이
     dialogueText: "암튼 가진총의 마우스 좌클릭 버튼을 누르면 총이 발사되는 우수한 병기야"
+    voiceClip: {fileID: 8300000, guid: baf18da1c4b8d744ca4b95bfdcdcf762, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "그리고 우클릭을하면 너가 가진 능력을 쓸 수 있고 E로 능력을 바꿀수있어"
+    voiceClip: {fileID: 8300000, guid: 60380b8fddf61f1419aa69e847e7a2de, type: 3}
     characterImage: {fileID: 0}
   - speaker: 1
     characterName: 아리사
     dialogueText: "나도 알거든"
+    voiceClip: {fileID: 8300000, guid: a7640b65372cb3c499ef1d3bd223942f, type: 3}
     characterImage: {fileID: 0}

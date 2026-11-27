@@ -1,10 +1,11 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour
+public partial class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TeleportTrigger nextChapterTeleport;
 
     [Header("챕터 재시작")]
+    [SerializeField, KoreanLabel("재시작 시 건너뛸 인트로")] private GameFlowController retryIntro;
     [SerializeField, KoreanLabel("카메라 매니저")] private CameraManager retryCamera;
     [SerializeField, KoreanLabel("카메라 영역별 챕터 시작 이동")] private TeleportTrigger[] retryRoutesByCameraArea;
     [SerializeField, KoreanLabel("항해 중 재시작 이동")] private TeleportTrigger voyageRetryRoute;
@@ -36,6 +38,41 @@ public class GameManager : MonoBehaviour
     private bool retryInProgress;
     private int defeatedCameraArea = -1;
     private bool defeatedDuringVoyage;
+    private bool scoreSaved;
+    private TextMeshProUGUI gameOverScore;
+
+    internal int Score { get; private set; }
+    internal event System.Action<int> ScoreChanged;
+
+    internal void AddScore(int points)
+    {
+        if (scoreSaved) return;
+        Score += points;
+        ScoreChanged?.Invoke(Score);
+    }
+
+    internal int SaveFinalScore()
+    {
+        if (!scoreSaved)
+        {
+            ScoreHistory.Save(Score);
+            scoreSaved = true;
+        }
+        return Score;
+    }
+
+    internal void ResetFinishedScoreForTest()
+    {
+        if (!scoreSaved || isGameOver) return;
+        scoreSaved = false;
+        Score = 0;
+        ScoreChanged?.Invoke(Score);
+    }
+
+    internal void SetEndingCursor(bool show)
+    {
+        if (mouseReticle != null) mouseReticle.ShowMenuCursor = show;
+    }
 
     private void Awake()
     {
@@ -49,6 +86,8 @@ public class GameManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        ClosePauseMenu();
+        if (pauseOverlay != null) Destroy(pauseOverlay);
         RestoreGameplay();
         GameplayPause.Release(gameOverPause);
         if (Instance == this)
@@ -82,6 +121,7 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
+        ClosePauseMenu();
         selectedChapterTeleport = chapterTeleport;
         ownsChapterPause = true;
         GameplayPause.Acquire(this);
@@ -155,10 +195,26 @@ public class GameManager : MonoBehaviour
         defeatedDuringVoyage = playerGun != null && playerGun.TryGetComponent(out ArisaHorizontalMovement player)
             && player.IsInBoatSection;
         isGameOver = true;
+        ClosePauseMenu();
+        GameplaySfx.Play(GameplaySfx.Cue.Failure);
 
+        ShowGameOverScore(SaveFinalScore());
         gameOverUI.SetActive(true);
         GameplayPause.Acquire(gameOverPause);
         return true;
+    }
+
+    private void ShowGameOverScore(int score)
+    {
+        if (gameOverScore == null)
+        {
+            gameOverScore = ScoreText.Create(gameOverUI.transform, "최종 점수", 30f);
+            RectTransform rect = gameOverScore.rectTransform;
+            rect.anchorMin = rect.anchorMax = Vector2.one * 0.5f;
+            rect.anchoredPosition = new Vector2(0f, -82f);
+            rect.sizeDelta = new Vector2(420f, 46f);
+        }
+        gameOverScore.text = $"최종 점수 : {score:N0}";
     }
 
     public void Retry()
@@ -184,12 +240,13 @@ public class GameManager : MonoBehaviour
             GameManager manager = Instance;
             if (scene.path != scenePath || manager == null || manager.gameObject.scene != scene) return;
 
+            if (manager.retryIntro != null) manager.retryIntro.SkipIntroForRetry();
             if (equipped != null && manager.playerGun != null)
             {
                 manager.playerGun.EquipChapterReward(equipped, damageBonuses);
             }
             TeleportTrigger route = manager.GetRetryRoute(cameraArea, wasVoyaging);
-            if (route != null) route.PlacePlayerAtDestination();
+            if (route != null) route.PlacePlayerAtDestination(invokeArrivalEvent: false);
         }
     }
 

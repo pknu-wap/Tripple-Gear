@@ -291,7 +291,7 @@ public sealed class ArisaMouseAim : MonoBehaviour
         return Mathf.Max(0f, crouchBodyScaleMultipliers[frameIndex]);
     }
 
-    private float GetFireShakeAngleOffset()
+    internal float GetFireShakeAngleOffset()
     {
         if (fireShakeDuration <= 0f || fireShakeAngle <= 0f)
         {

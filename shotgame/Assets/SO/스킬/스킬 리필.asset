@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a14ab80fb5784be58dcf2b2c756df253, type: 3}
   m_Name: "\uC2A4\uD0AC \uB9AC\uD544"
   m_EditorClassIdentifier: Assembly-CSharp::SkillSO
+  description: "획득하면 활성 스킬의 사용 횟수가 늘어납니다."
   "\uC0AC\uC6A9\uAC00\uB2A5\uD69F\uC218": 1
   "\uCFE8\uD0C0\uC784": 0
   "\uC2A4\uD0AC\uC911\uBB34\uC801": 0

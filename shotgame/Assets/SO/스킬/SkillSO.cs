@@ -35,6 +35,7 @@ public readonly struct SkillContext
 public sealed class SkillSO : ScriptableObject
 {
     [SerializeField, KoreanLabel("표시 이름")] private string displayName;
+    [SerializeField, TextArea(2, 3), KoreanLabel("스킬 설명")] private string description;
     [SerializeField, KoreanLabel("HUD 아이콘")] private Sprite hudIcon;
     [SerializeField, KoreanLabel("사용 가능 횟수"), Min(1)] private int 사용가능횟수 = 1;
     [SerializeField, KoreanLabel("쿨타임"), Min(0f)] private float 쿨타임 = 1f;
@@ -43,6 +44,7 @@ public sealed class SkillSO : ScriptableObject
 
     public int MaxUseCount => Mathf.Max(1, 사용가능횟수);
     public string DisplayName => string.IsNullOrWhiteSpace(displayName) ? name : displayName;
+    public string Description => description;
     public Sprite HudIcon => hudIcon;
     public float Cooldown => Mathf.Max(0f, 쿨타임);
     public bool IsInvincibleWhileActive => 스킬중무적;

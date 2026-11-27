@@ -17,6 +17,7 @@ public sealed class FlyingMonsterProjectile : MonsterProjectile
 
     public override void Launch(Vector2 launchDirection, float launchSpeed, float lifetime, int attackDamage, ArisaHealth player)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Energy, 0.24f);
         direction = launchDirection.sqrMagnitude > 0.0001f ? launchDirection.normalized : Vector2.down;
         speed = Mathf.Max(0f, launchSpeed);
         expiresAt = Time.time + Mathf.Max(0.1f, lifetime);

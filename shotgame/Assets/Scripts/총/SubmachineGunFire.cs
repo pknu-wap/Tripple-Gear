@@ -51,12 +51,14 @@ public sealed class SubmachineGunFire : MonoBehaviour
     private float reloadStartedTime;
     private float reloadCompleteTime;
     private GameObject reloadAnimationObject;
+    private Vector3 reloadAnimationBaseScale;
     private Sprite spriteBeforeArisaReload;
     private Vector3 arisaReloadBaseLocalPosition;
     private Vector3 appliedArisaReloadLocalOffset;
     private bool hasSpriteBeforeArisaReload;
     private bool hasAppliedArisaReloadPositionOffset;
     private ArisaMouseAim arisaAim;
+    private ArisaHorizontalMovement movement;
     private AudioSource fireAudioSource;
 #if ENABLE_INPUT_SYSTEM
     private InputAction fireAction;
@@ -65,6 +67,15 @@ public sealed class SubmachineGunFire : MonoBehaviour
 #endif
 
     public bool IsReloading => isReloading;
+    internal Sprite ArisaArmSprite
+    {
+        get
+        {
+            if (isReloading && !isWaitingBetweenSequentialReloads && CanPlayArisaReloadAnimation())
+                return GetArisaReloadSprite(GetArisaReloadFrameIndex());
+            return arisaReloadSpriteRenderer != null ? arisaReloadSpriteRenderer.sprite : null;
+        }
+    }
     internal GunSO CurrentGun => gunData;
     internal bool InputSuppressed { get; set; }
     internal bool TestDamageEnabled { get; set; }
@@ -211,7 +222,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
         Vector3 mouseWorldPosition = GetMouseWorldPosition(cameraToUse, mouseScreenPosition, transform.position.z);
         bool firingLeft = mouseWorldPosition.x < transform.position.x - leftFireDeadZone;
-        Vector3 spawnPosition = GetMuzzleWorldPosition(firingLeft);
+        Vector3 spawnPosition = GetMuzzleWorldPosition(firingLeft, mouseWorldPosition);
         mouseWorldPosition = GetMouseWorldPosition(cameraToUse, mouseScreenPosition, spawnPosition.z);
         Vector2 direction = mouseWorldPosition - spawnPosition;
         if (direction.sqrMagnitude < MinDirectionSqrMagnitude)
@@ -232,6 +243,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
     private void FindReferences()
     {
+        if (movement == null) TryGetComponent(out movement);
         if (gunData == null)
         {
             gunData = LoadDefaultGunData();
@@ -301,8 +313,11 @@ public sealed class SubmachineGunFire : MonoBehaviour
         return cameras.Length > 0 ? cameras[0] : null;
     }
 
-    private Vector3 GetMuzzleWorldPosition(bool firingLeft)
+    private Vector3 GetMuzzleWorldPosition(bool firingLeft, Vector3 aimTarget)
     {
+        if (movement != null && movement.TryGetFlightMuzzle(firingLeft, aimTarget, out Vector3 flightMuzzle))
+            return flightMuzzle;
+
         if (firingLeft && aimGraphic != null)
         {
             return aimGraphic.TransformPoint(leftMuzzleLocalOffset);
@@ -353,7 +368,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
             fireAudioSource.spatialBlend = 0f;
         }
 
-        fireAudioSource.PlayOneShot(gunData.FireSound, gunData.FireSoundVolume);
+        fireAudioSource.PlayOneShot(gunData.FireSound, gunData.FireSoundVolume * GameAudioSettings.EffectsGain);
     }
 
     private float GetShotInterval()
@@ -502,6 +517,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
         isWaitingBetweenSequentialReloads = false;
         ScheduleReloadTimer(reloadSpeed);
         StartArisaReloadAnimation();
+        GameplaySfx.Play(GameplaySfx.Cue.Reload, 0.42f);
         ShowReloadAnimation();
     }
 
@@ -546,11 +562,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
             return;
         }
 
-        float elapsed = Mathf.Max(0f, Time.time - reloadStartedTime);
-        int frameIndex = arisaReloadFrameRate <= 0f
-            ? 0
-            : Mathf.FloorToInt(elapsed * arisaReloadFrameRate);
-        SetArisaReloadAnimationFrame(frameIndex);
+        SetArisaReloadAnimationFrame(GetArisaReloadFrameIndex());
         ApplyArisaReloadPositionOffset();
     }
 
@@ -580,12 +592,20 @@ public sealed class SubmachineGunFire : MonoBehaviour
             return;
         }
 
-        Sprite reloadSprite = arisaReloadSprites[Mathf.Abs(frameIndex) % arisaReloadSprites.Length];
+        Sprite reloadSprite = GetArisaReloadSprite(frameIndex);
         if (reloadSprite != null)
         {
             arisaReloadSpriteRenderer.sprite = reloadSprite;
         }
     }
+
+    private int GetArisaReloadFrameIndex()
+    {
+        float elapsed = Mathf.Max(0f, Time.time - reloadStartedTime);
+        return arisaReloadFrameRate <= 0f ? 0 : Mathf.FloorToInt(elapsed * arisaReloadFrameRate);
+    }
+
+    private Sprite GetArisaReloadSprite(int frameIndex) => arisaReloadSprites[frameIndex % arisaReloadSprites.Length];
 
     private void ApplyArisaReloadPositionOffset()
     {
@@ -661,6 +681,7 @@ public sealed class SubmachineGunFire : MonoBehaviour
 
         reloadAnimationObject.SetActive(true);
         reloadAnimationObject.transform.localRotation = Quaternion.identity;
+        reloadAnimationBaseScale = reloadAnimationObject.transform.localScale;
         SetReloadAnimationPosition(0f);
     }
 
@@ -695,8 +716,18 @@ public sealed class SubmachineGunFire : MonoBehaviour
             yOffset = Mathf.Lerp(reloadAnimationRiseHeight, 0f, descendProgress);
         }
 
-        reloadAnimationObject.transform.localPosition = GetMagazineReloadAnimationLocalPosition(yOffset);
-        ApplyMagazineReloadAnimationFacing();
+        ArisaFlightArms flightArms = movement != null ? movement.FlightArms : null;
+        Transform magazine = reloadAnimationObject.transform;
+        if (flightArms != null)
+            magazine.position = flightArms.MagazinePosition(yOffset);
+        else
+            magazine.localPosition = GetMagazineReloadAnimationLocalPosition(yOffset);
+
+        Vector3 scale = reloadAnimationBaseScale;
+        if (flightArms != null)
+            scale *= flightArms.MagazineScale / Mathf.Max(0.01f, Mathf.Abs(magazine.parent.lossyScale.y));
+        scale.x = Mathf.Abs(scale.x) * (IsFacingLeft() ? -1f : 1f);
+        magazine.localScale = scale;
     }
 
     private Vector3 GetMagazineReloadAnimationLocalPosition(float yOffset)
@@ -708,18 +739,6 @@ public sealed class SubmachineGunFire : MonoBehaviour
         }
 
         return new Vector3(localX, reloadAnimationLocalOffset.y + yOffset, 0f);
-    }
-
-    private void ApplyMagazineReloadAnimationFacing()
-    {
-        if (reloadAnimationObject == null)
-        {
-            return;
-        }
-
-        Vector3 localScale = reloadAnimationObject.transform.localScale;
-        localScale.x = Mathf.Abs(localScale.x) * (IsFacingLeft() ? -1f : 1f);
-        reloadAnimationObject.transform.localScale = localScale;
     }
 
     private bool IsFacingLeft()

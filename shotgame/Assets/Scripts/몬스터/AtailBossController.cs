@@ -53,8 +53,6 @@ public sealed class AtailBossController : MonoBehaviour
     [SerializeField] private AtailSerpent serpent;
     [SerializeField] private ArisaHealth player;
     [SerializeField] private BoatVoyage voyage;
-    [SerializeField] private TeleportTrigger defeatExit;
-    [SerializeField, KoreanLabel("침몰 연출 후 총 선택")] private GameManager gunSelectionManager;
     [SerializeField] private Platform[] platforms;
     [SerializeField] private Transform waterline;
 
@@ -139,7 +137,6 @@ public sealed class AtailBossController : MonoBehaviour
         if (!running && !playingDefeat) return;
         StopBattleActivity();
         playingDefeat = false;
-        GameplayInput.Unblock(this);
         if (serpent.isActiveAndEnabled) serpent.Hide();
     }
 
@@ -157,14 +154,15 @@ public sealed class AtailBossController : MonoBehaviour
         summons.Clear();
     }
 
-    public void PlayDefeatSequence()
+    internal bool IsPlayingDefeat => playingDefeat;
+
+    internal void BeginDefeatSequence()
     {
         if (!running) return;
         StopBattleActivity();
         serpent.CloseHatch();
         serpent.SetAttackHitboxes(false);
         playingDefeat = true;
-        GameplayInput.Block(this);
         spawnedObjects = new GameObject("아테일 침몰 연출");
         spawnedObjects.transform.SetParent(transform, false);
         StartCoroutine(DefeatSequence());
@@ -225,16 +223,9 @@ public sealed class AtailBossController : MonoBehaviour
         GameObject effects = spawnedObjects;
         spawnedObjects = null;
         StopCoroutine(bursts);
+        effects.SetActive(false);
         Destroy(effects);
-        if (!player.IsDead && defeatExit != null
-            && (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatExit)))
-        {
-            Coroutine teleport = defeatExit.StartPlayerTeleport();
-            if (teleport != null) yield return teleport;
-        }
-
         playingDefeat = false;
-        GameplayInput.Unblock(this);
     }
 
     private IEnumerator PlayDefeatBursts()
@@ -382,6 +373,7 @@ public sealed class AtailBossController : MonoBehaviour
 
     private IEnumerator WarnAndBreak(Platform target, Action<float> move)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Warning, .47f);
         SpriteRenderer glow = CreateWarningGlow(target);
         yield return MoveAlong(PlatformWarningSeconds, progress =>
         {
@@ -451,6 +443,19 @@ public sealed class AtailBossController : MonoBehaviour
 
     public void PlayerFellIntoWater()
     {
+        if (player.TestInvincibilityEnabled)
+        {
+            Platform landing = FindPlayerPlatform();
+            if (landing == null && platforms.Length > 0)
+            {
+                landing = platforms[0];
+                landing.SetIntact(true);
+            }
+            if (landing != null && player.TryGetComponent(out ArisaHorizontalMovement movement))
+                movement.LandOnPlatform(landing.surface);
+            return;
+        }
+
         GameManager.Instance.GameOver();
         player.Defeat();
         EndBattle();
@@ -646,6 +651,7 @@ public sealed class AtailBossController : MonoBehaviour
 
     private void BreakPlatform(Platform target)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Explosion, .61f);
         if (!target.IsIntact) return;
         Vector2 center = target.Landing;
         SpriteRenderer source = target.surface.GetComponent<SpriteRenderer>();
@@ -722,6 +728,7 @@ public sealed class AtailBossController : MonoBehaviour
 
     private void FireMissile(Vector2 origin)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Missile, .42f);
         Vector2 aim = (PlayerCenter - origin).normalized;
         if (aim == Vector2.zero) aim = Vector2.down;
         float angle = UnityEngine.Random.Range(-MissileSpreadDegrees, MissileSpreadDegrees);
@@ -739,6 +746,7 @@ public sealed class AtailBossController : MonoBehaviour
 
     private void PlaySplash(Vector2 position, float scale)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Splash, .43f);
         if (splashEffect == null) return;
         ParticleSystem effect = Instantiate(splashEffect, position, Quaternion.identity, spawnedObjects.transform);
         effect.transform.localScale *= scale;

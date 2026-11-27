@@ -120,6 +120,8 @@ MonoBehaviour:
   attackVisual: {fileID: 9100000000000000012}
   lineMaterial: {fileID: 2100000, guid: 501f768d18ddde2439e884f9fc3eb68d, type: 2}
   autoStart: 1
+  defeatExplosion: {fileID: 6814746253198027461, guid: 4640f701f7b546fb94802e7ce67b87b2, type: 3}
+  wreckSprite: {fileID: 7194687236713974501, guid: 326b871fba634c62a105e74d4678033a, type: 3}
   arenaMin: {x: -17, y: 0}
   arenaMax: {x: -2, y: 7}
 --- !u!1 &6147956999535051175

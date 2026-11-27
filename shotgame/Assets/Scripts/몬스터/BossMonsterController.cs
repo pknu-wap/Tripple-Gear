@@ -8,6 +8,8 @@ public enum BossAttackPattern { MissileRain, HorizontalMissiles, SweepingLaser, 
 [RequireComponent(typeof(MonsterHealth))]
 public sealed class BossMonsterController : MonoBehaviour
 {
+    private const float DefeatExplosionDuration = 4f;
+
     [Header("연결")]
     [SerializeField, KoreanLabel("패턴 데이터")] private BossAttackSO attackData;
     [SerializeField, KoreanLabel("플레이어")] private ArisaHealth player;
@@ -16,6 +18,10 @@ public sealed class BossMonsterController : MonoBehaviour
     [SerializeField, KoreanLabel("선 머티리얼")] private Material lineMaterial;
     [SerializeField, KoreanLabel("자동 전투 시작")] private bool autoStart = true;
     [SerializeField, KoreanLabel("처치 후 텔레포트")] private TeleportTrigger defeatTeleport;
+
+    [Header("처치 연출")]
+    [SerializeField, KoreanLabel("처치 폭발 효과")] private GameObject defeatExplosion;
+    [SerializeField, KoreanLabel("부서진 보스 스프라이트")] private Sprite wreckSprite;
 
     [Header("보스 발밑 기준 전투 영역")]
     [SerializeField, KoreanLabel("영역 최소 좌표")] private Vector2 arenaMin = new Vector2(-17f, 0f);
@@ -27,10 +33,12 @@ public sealed class BossMonsterController : MonoBehaviour
     private GameObject combatObjects;
     private bool battleRunning;
     private bool encounterEnded;
+    private bool defeatSequenceStarted;
     private int lastPattern = -1;
 
     public BossAttackSO AttackData => attackData;
     public bool IsAttacking { get; private set; }
+    internal bool IsPlayingDefeat { get; private set; }
     public BossAttackPattern CurrentPattern { get; private set; }
     public string Status { get; private set; } = "대기";
     public int LastMissileCount { get; private set; }
@@ -274,6 +282,7 @@ public sealed class BossMonsterController : MonoBehaviour
 
     private void ArmMissile(GameObject missile, Vector2 direction, float speed)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Missile, .46f);
         if (!missile.TryGetComponent(out EnemyProjectile2D projectile))
             projectile = missile.AddComponent<EnemyProjectile2D>();
         LayerMask missileGroundLayers = attackData.GroundLayers.value & ~LayerMask.GetMask("Stair");
@@ -306,6 +315,7 @@ public sealed class BossMonsterController : MonoBehaviour
             attackData.LaserWidth * 0.45f);
         core.sortingOrder = 32;
         Status = "레이저 발사";
+        GameplaySfx.Play(GameplaySfx.Cue.Laser, 0.60f);
         float elapsed = 0f;
         float nextHitAt = 0f;
         float startAngle = Mathf.Atan2(start.y - origin.y, start.x - origin.x) * Mathf.Rad2Deg;
@@ -340,6 +350,7 @@ public sealed class BossMonsterController : MonoBehaviour
 
     private IEnumerator AnimateLaserCharge(float start, float end, float duration)
     {
+        if (end > start) GameplaySfx.Play(GameplaySfx.Cue.Warning, 0.45f);
         if (attackVisual == null)
         {
             yield return new WaitForSeconds(duration);
@@ -370,6 +381,7 @@ public sealed class BossMonsterController : MonoBehaviour
 
     private IEnumerator Summon()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Energy, .49f);
         if (!CanSummon) yield break;
         Rect area = ArenaBounds;
         Status = "원거리 몹 소환 예고";
@@ -456,11 +468,46 @@ public sealed class BossMonsterController : MonoBehaviour
         return line;
     }
 
-    private void HandleDefeated()
+    private void HandleDefeated() => BeginDefeatSequence();
+
+    internal void BeginDefeatSequence()
     {
+        if (defeatSequenceStarted || !isActiveAndEnabled) return;
+        defeatSequenceStarted = true;
         EndEncounter("보스 처치");
         foreach (Collider2D collider in GetComponentsInChildren<Collider2D>()) collider.enabled = false;
-        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>()) renderer.color = new Color(0.35f, 0.35f, 0.35f);
+        IsPlayingDefeat = true;
+        StartCoroutine(PlayDefeatSequence());
+    }
+
+    private IEnumerator PlayDefeatSequence()
+    {
+        SpriteRenderer body = attackVisual != null ? attackVisual.Body : null;
+        GameObject lastBurst = null;
+        float nextBurst = 0f;
+        for (float elapsed = 0f; elapsed < DefeatExplosionDuration; elapsed += Time.deltaTime)
+        {
+            if (elapsed >= nextBurst && defeatExplosion != null && body != null)
+            {
+                Bounds bounds = body.bounds;
+                Vector3 position = bounds.center + new Vector3(
+                    Random.Range(-0.55f, 0.55f) * bounds.size.x,
+                    Random.Range(-0.46f, 0.46f) * bounds.size.y);
+                GameObject burst = Instantiate(defeatExplosion, position, Quaternion.identity, transform);
+                burst.name = "크로코 처치 폭발";
+                burst.transform.localScale *= Random.Range(0.70f, 1.25f)
+                    * Mathf.Lerp(1f, 1.35f, elapsed / DefeatExplosionDuration);
+                attackVisual.ShowInFrontOfBody(burst.GetComponentInChildren<SpriteRenderer>());
+                Destroy(burst, 1.2f);
+                lastBurst = burst;
+                nextBurst = elapsed + Random.Range(0.14f, 0.25f);
+            }
+            yield return null;
+        }
+
+        if (attackVisual != null) attackVisual.ShowWreck(wreckSprite);
+        while (lastBurst != null) yield return null;
+        IsPlayingDefeat = false;
         if (defeatTeleport != null) defeatTeleport.TeleportPlayer();
     }
 
@@ -482,6 +529,7 @@ public sealed class BossMonsterController : MonoBehaviour
 
     private void OnDisable()
     {
+        IsPlayingDefeat = false;
         EndEncounter(health != null && health.IsDead ? "보스 처치" : "전투 종료");
     }
 

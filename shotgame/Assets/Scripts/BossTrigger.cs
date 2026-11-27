@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
@@ -5,10 +6,11 @@ using UnityEngine.Playables;
 [DefaultExecutionOrder(1000)]
 public sealed class BossTrigger : TriggerBase
 {
-    private enum EncounterState { Ready, Intro, Battle, Finished }
+    private enum EncounterState { Ready, Intro, Battle, Completing, Finished }
 
     [Header("보스 등장")]
     [SerializeField, KoreanLabel("보스")] private MonsterHealth boss;
+    [SerializeField, KoreanLabel("아테일 처치 연출")] private AtailBossController atailDefeat;
     [SerializeField, KoreanLabel("등장 연출 타임라인")] private PlayableDirector introTimeline;
     [SerializeField, KoreanLabel("처치 후 텔레포트")] private TeleportTrigger defeatTeleport;
     [SerializeField, KoreanLabel("처치 후 총 선택")] private GameManager gunSelectionManager;
@@ -27,6 +29,7 @@ public sealed class BossTrigger : TriggerBase
     private ArisaHealth playerHealth;
     private ArisaSkillController playerSkills;
     private PlayableDirector playingIntro;
+    private MissionCompleteBanner completionBanner;
     private DirectorWrapMode previousWrapMode;
     private bool reportedInvalidSetup;
 
@@ -98,7 +101,7 @@ public sealed class BossTrigger : TriggerBase
 
     private void LateUpdate()
     {
-        if ((state == EncounterState.Intro || state == EncounterState.Battle)
+        if ((state == EncounterState.Intro || state == EncounterState.Battle || state == EncounterState.Completing)
             && playerHealth != null && playerHealth.IsDead)
         {
             CancelEncounter();
@@ -119,6 +122,10 @@ public sealed class BossTrigger : TriggerBase
             {
                 cameraLock.Update();
             }
+        }
+        else if (state == EncounterState.Completing && cameraLock.IsLocked)
+        {
+            cameraLock.Update();
         }
     }
 
@@ -153,6 +160,7 @@ public sealed class BossTrigger : TriggerBase
     private void BeginBattle()
     {
         state = EncounterState.Battle;
+        GameplaySfx.Play(GameplaySfx.Cue.Encounter, .48f);
         if (lockCameraDuringBattle && !cameraLock.IsLocked)
         {
             cameraLock.Lock(cameraManager);
@@ -194,12 +202,48 @@ public sealed class BossTrigger : TriggerBase
             return;
         }
 
-        state = EncounterState.Finished;
+        state = EncounterState.Completing;
         boss.Defeated.RemoveListener(CompleteEncounter);
-        cameraLock.Release();
         if (playerSkills != null) playerSkills.ClearSkills();
+        GameplayInput.Block(this);
+        StartCoroutine(FinishEncounter());
+    }
+
+    private IEnumerator FinishEncounter()
+    {
+        bool showCompletion = true;
+        if (boss.TryGetComponent(out BossMonsterController croco))
+        {
+            // The encounter can receive the health event before the boss controller.
+            croco.BeginDefeatSequence();
+            while (croco != null && croco.IsPlayingDefeat) yield return null;
+        }
+        else if (atailDefeat != null)
+        {
+            atailDefeat.BeginDefeatSequence();
+            while (atailDefeat != null && atailDefeat.IsPlayingDefeat) yield return null;
+        }
+        else if (boss.TryGetComponent(out SummitAirshipBoss airship))
+        {
+            showCompletion = false;
+            airship.FinishBattle();
+            while (airship != null && airship.IsPlayingDefeat) yield return null;
+        }
+
         bossDefeated.Invoke();
-        if (defeatTeleport == null || (playerHealth != null && playerHealth.IsDead)) return;
+        if (state != EncounterState.Completing) yield break;
+        if (defeatTeleport == null) GameplayInput.Unblock(this);
+        if (showCompletion)
+        {
+            if (playerHealth != null) playerHealth.HealToFull();
+            completionBanner = MissionCompleteBanner.Show(gameObject.scene);
+            while (completionBanner != null) yield return null;
+        }
+
+        state = EncounterState.Finished;
+        cameraLock.Release();
+        GameplayInput.Unblock(this);
+        if (defeatTeleport == null || (playerHealth != null && playerHealth.IsDead)) yield break;
 
         if (gunSelectionManager == null || !gunSelectionManager.TryShowGunSelection(defeatTeleport))
         {
@@ -209,6 +253,17 @@ public sealed class BossTrigger : TriggerBase
 
     public void CancelEncounter()
     {
+        if (state == EncounterState.Completing)
+        {
+            StopAllCoroutines();
+            if (completionBanner != null) completionBanner.Hide();
+            completionBanner = null;
+            cameraLock.Release();
+            GameplayInput.Unblock(this);
+            state = EncounterState.Finished;
+            return;
+        }
+
         if (state != EncounterState.Intro && state != EncounterState.Battle)
         {
             return;

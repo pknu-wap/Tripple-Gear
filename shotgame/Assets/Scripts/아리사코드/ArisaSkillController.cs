@@ -202,6 +202,15 @@ public sealed class ArisaSkillController : MonoBehaviour
         }
 
         ConsumeSkillUse(skillToUse);
+        var sound = skillToUse.Logic switch
+        {
+            DashSkillLogic => GameplaySfx.Cue.Dash,
+            InvincibleSkillLogic => GameplaySfx.Cue.Shield,
+            TeleportSkillLogic => GameplaySfx.Cue.Teleport,
+            GrenadeSkillLogic => GameplaySfx.Cue.Throw,
+            _ => GameplaySfx.Cue.Energy
+        };
+        GameplaySfx.Play(sound);
         bool shouldMakeInvincible = skillToUse.IsInvincibleWhileActive && invincibility != null;
         if (shouldMakeInvincible)
         {

@@ -24,6 +24,9 @@ public class DialogueData : ScriptableObject
         [TextArea(2, 5)]
         public string dialogueText;
 
+        [InspectorName("더빙")]
+        public AudioClip voiceClip;
+
         [Tooltip("상대 캐릭터 대사에서 지정하면 오른쪽 초상화를 교체합니다. 비워 두면 이전 초상화를 유지합니다.")]
         public Sprite characterImage;
     }

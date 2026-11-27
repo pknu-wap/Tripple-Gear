@@ -330,12 +330,16 @@ public sealed class SummitAirshipBoss : MonoBehaviour
         float height = top - FloorY;
         glow.sortingOrder = hull.sortingOrder + 1;
         if (warningSeconds > 0f)
-            yield return Animate(warningSeconds, progress =>
         {
-            float pulse = WarningPulse(progress * warningSeconds, 4f);
-            Place(glow, center, new Vector2(beamWidth, height), WithAlpha(WarningColor, Mathf.Lerp(0.07f, 0.45f, pulse)));
-            Place(emitter, nozzle, Vector2.one * 1.45f, WithAlpha(WarningColor, Mathf.Lerp(0.18f, 1f, pulse)));
-        });
+            GameplaySfx.Play(GameplaySfx.Cue.Warning, 0.4f);
+            yield return Animate(warningSeconds, progress =>
+            {
+                float pulse = WarningPulse(progress * warningSeconds, 4f);
+                Place(glow, center, new Vector2(beamWidth, height), WithAlpha(WarningColor, Mathf.Lerp(0.07f, 0.45f, pulse)));
+                Place(emitter, nozzle, Vector2.one * 1.45f, WithAlpha(WarningColor, Mathf.Lerp(0.18f, 1f, pulse)));
+            });
+        }
+        GameplaySfx.Play(GameplaySfx.Cue.Laser, 0.57f);
         glow.name = "순차 레이저";
         Bounds beam = new Bounds(center, new Vector2(beamWidth, height));
         bool hit = false;
@@ -357,6 +361,7 @@ public sealed class SummitAirshipBoss : MonoBehaviour
 
     private IEnumerator WindLaser()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Wind, .55f);
         Vector2 nozzle = Lens(1);
         float center = nozzle.x;
         const float width = 8.5f;
@@ -443,6 +448,7 @@ public sealed class SummitAirshipBoss : MonoBehaviour
 
     private IEnumerator EnergyShot()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Energy, .55f);
         var charges = new SpriteRenderer[Lenses.Length];
         var sparks = new SpriteRenderer[Lenses.Length * 4];
         for (int i = 0; i < charges.Length; i++) charges[i] = NewLight("발사구 에너지 충전", orbFrames[0]);
@@ -524,6 +530,7 @@ public sealed class SummitAirshipBoss : MonoBehaviour
 
     private IEnumerator BreakGround(Vector2 target)
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Explosion, .59f);
         var impact = new GameObject("에너지볼 지면 파괴").transform;
         impact.SetParent(effects, false);
         SpriteRenderer pit = NewLight("착탄 자국", softLight);
@@ -639,10 +646,13 @@ public sealed class SummitAirshipBoss : MonoBehaviour
         }
     }
 
-    public void FinishBattle()
+    internal bool IsPlayingDefeat { get; private set; }
+
+    internal void FinishBattle()
     {
-        if (boarding) return;
+        if (IsPlayingDefeat) return;
         ClearCombat();
+        IsPlayingDefeat = true;
         if (boardingTeleport == null || !boardingTeleport.isActiveAndEnabled || player.IsDead
             || playerMovement == null || !player.TryGetComponent(out boardingBody))
         {
@@ -660,6 +670,7 @@ public sealed class SummitAirshipBoss : MonoBehaviour
 
     private IEnumerator BoardingSequence()
     {
+        GameplaySfx.Play(GameplaySfx.Cue.Gate, .59f);
         Vector2 centerOffset = PlayerCenter - (Vector2)player.transform.position;
         Vector3 floorPosition = player.transform.position;
         Vector2 hatch = Lens(1);
@@ -697,6 +708,7 @@ public sealed class SummitAirshipBoss : MonoBehaviour
         Vector3 liftPosition = new Vector3(hatchPosition.x,
             Mathf.Min(hatchPosition.y - 1f, floorPosition.y + 0.65f), floorPosition.z);
         boardingHitPresentation = true;
+        GameplaySfx.Play(GameplaySfx.Cue.Wind, .56f);
         player.PlayHitPresentation(float.PositiveInfinity);
         yield return Animate(BoardingPullSeconds, progress =>
         {
@@ -759,7 +771,11 @@ public sealed class SummitAirshipBoss : MonoBehaviour
         gameObject.SetActive(false);
     }
 
-    private void OnDisable() => ClearCombat();
+    private void OnDisable()
+    {
+        IsPlayingDefeat = false;
+        ClearCombat();
+    }
 
     private void ClearCombat()
     {

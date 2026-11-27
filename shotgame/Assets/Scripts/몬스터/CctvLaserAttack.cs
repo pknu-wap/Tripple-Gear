@@ -87,6 +87,7 @@ public sealed class CctvLaserAttack : MonoBehaviour
 
         if (detected && Time.time >= nextDamageTime)
         {
+            GameplaySfx.Play(GameplaySfx.Cue.Laser, 0.28f);
             nextDamageTime = Time.time + damageInterval;
             player.TakeDamage(damage, origin);
         }

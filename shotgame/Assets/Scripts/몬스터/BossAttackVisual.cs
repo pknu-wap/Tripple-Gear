@@ -16,6 +16,7 @@ public sealed class BossAttackVisual : MonoBehaviour
     public Vector3 RainMuzzle => BodyPoint(new Vector2(0.18f, 0.90f));
     public Vector3 ChestMuzzle => BodyPoint(new Vector2(0.56f, -0.50f));
     public Vector3 HangarExit => BodyPoint(new Vector2(0.31f, 0.12f));
+    internal SpriteRenderer Body => body;
 
     public void ShowInFrontOfBody(SpriteRenderer renderer)
     {
@@ -66,6 +67,30 @@ public sealed class BossAttackVisual : MonoBehaviour
             showingPose = false;
         }
         SetLaserCharge(0f);
+    }
+
+    internal void ShowWreck(Sprite wreck)
+    {
+        if (body == null) return;
+        if (idleAnimator != null) idleAnimator.enabled = false;
+        if (wreck == null)
+        {
+            body.color = new Color(0.35f, 0.35f, 0.35f);
+            return;
+        }
+
+        Bounds intactBounds = body.bounds;
+        body.sprite = wreck;
+        Bounds wreckBounds = body.bounds;
+        float scale = Mathf.Min(
+            intactBounds.size.x * 1.35f / wreckBounds.size.x,
+            intactBounds.size.y * 0.74f / wreckBounds.size.y);
+        Transform bodyTransform = body.transform;
+        Vector3 localScale = bodyTransform.localScale;
+        bodyTransform.localScale = new Vector3(localScale.x * scale, localScale.y * scale, localScale.z);
+        wreckBounds = body.bounds;
+        bodyTransform.position += new Vector3(
+            intactBounds.center.x - wreckBounds.center.x, intactBounds.min.y - wreckBounds.min.y);
     }
 
     private Vector3 BodyPoint(Vector2 point)

@@ -100,6 +100,7 @@ internal sealed class SkillGrenade : MonoBehaviour
             Destroy(effect, 1.5f);
         }
 
+        GameplaySfx.Play(electric ? GameplaySfx.Cue.Electric : GameplaySfx.Cue.Explosion);
         ApplyBurst(electric, radius, damage, stunSeconds);
         yield return DrawBurst(burstSprite, electric, radius, burstScale);
         Destroy(gameObject);
@@ -127,7 +128,7 @@ internal sealed class SkillGrenade : MonoBehaviour
             }
             else
             {
-                target.TakeDamage(damage);
+                target.TakeSkillDamage(damage);
             }
         }
     }

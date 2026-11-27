@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public static class LobbySceneBuilder
 {
@@ -50,7 +51,7 @@ public static class LobbySceneBuilder
 
         Camera camera = CreateCamera();
         Canvas canvas = CreateCanvas(out EventSystem eventSystem);
-        CreateBlackBackground(canvas.transform);
+        CreateVideoBackground(camera, canvas);
 
         LobbyMenuController controller = CreateLobbyController();
         CreateTransitionSignalReceiver();
@@ -133,19 +134,19 @@ public static class LobbySceneBuilder
         return menu;
     }
 
-    private static void CreateBlackBackground(Transform parent)
+    private static void CreateVideoBackground(Camera camera, Canvas canvas)
     {
-        GameObject backgroundObject = new GameObject("Black Background");
-        backgroundObject.transform.SetParent(parent, false);
-
-        Image background = backgroundObject.AddComponent<Image>();
-        background.color = Color.black;
-
-        RectTransform rectTransform = background.rectTransform;
-        rectTransform.anchorMin = Vector2.zero;
-        rectTransform.anchorMax = Vector2.one;
-        rectTransform.offsetMin = Vector2.zero;
-        rectTransform.offsetMax = Vector2.zero;
+        VideoPlayer videoPlayer = camera.gameObject.AddComponent<VideoPlayer>();
+        videoPlayer.source = VideoSource.Url;
+        videoPlayer.renderMode = VideoRenderMode.APIOnly;
+        videoPlayer.playOnAwake = false;
+        videoPlayer.waitForFirstFrame = true;
+        videoPlayer.isLooping = true;
+        videoPlayer.audioOutputMode = VideoAudioOutputMode.None;
+        var background = camera.gameObject.AddComponent<LobbyVideoBackground>();
+        var serialized = new SerializedObject(background);
+        serialized.FindProperty("lobbyCanvas").objectReferenceValue = canvas;
+        serialized.ApplyModifiedPropertiesWithoutUndo();
     }
 
     private static LobbyMenuController CreateLobbyController()

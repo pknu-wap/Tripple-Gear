@@ -17,28 +17,35 @@ MonoBehaviour:
   - speaker: 2
     characterName: 카이
     dialogueText: "광안리에 로봇들이 수상한 움직임을 하고있어"
+    voiceClip: {fileID: 8300000, guid: 9507d87f161f46748a87c6ec94c3020a, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "공장 밖으로 나가면 보트가 있을거다"
+    voiceClip: {fileID: 8300000, guid: 68aa5db830d06e843b2ecb05ed3ea1b3, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "보트를 타고 가면 되지만 조금만 가면 광안리로 가는 길이 막혀있어"
+    voiceClip: {fileID: 8300000, guid: acc1a7fbc044df1478a0abe2883d176d, type: 3}
     characterImage: {fileID: 0}
   - speaker: 1
     characterName: 아리사
     dialogueText: "거기에 혹시 뭐가 있는거지?"
+    voiceClip: {fileID: 8300000, guid: 5a6473be5271bac4e8b4d262b9bc1a7b, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "미확인 로봇이 바다를 점령한거 같에"
+    voiceClip: {fileID: 8300000, guid: 39677a3f1d850ea4ebefac36c54be655, type: 3}
     characterImage: {fileID: 0}
   - speaker: 2
     characterName: 카이
     dialogueText: "이 로봇을 처치하고 광안리로 갈 수 있도록"
+    voiceClip: {fileID: 8300000, guid: cc9437c04e092a74685028cb069efdff, type: 3}
     characterImage: {fileID: 0}
   - speaker: 1
     characterName: 아리사
     dialogueText: "하... 살아갈수있겠지"
+    voiceClip: {fileID: 8300000, guid: 8967fae1ef5d02b40aa1a52213a2935a, type: 3}
     characterImage: {fileID: 0}

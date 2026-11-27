@@ -30,6 +30,7 @@ public sealed class MissionItemPickup : MonoBehaviour
         }
 
         collected = true;
+        GameplaySfx.Play(GameplaySfx.Cue.Pickup, 0.4f);
         destination.Collect(Mathf.Max(1, amount));
         gameObject.SetActive(false);
         Destroy(gameObject);
